@@ -1,0 +1,256 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                    📸 PERIODIC SCREENSHOT FEATURE                        ║
+║              Auto-Screenshot Every 10 Seconds + Red Box Detection        ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🎯 WHAT'S NEW                                                             │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   TWO SCREENSHOT FEATURES WORKING TOGETHER:
+
+   1️⃣ PERIODIC SCREENSHOTS
+      ├─ Every 10 seconds (automatically)
+      ├─ Continuous while fencing enabled
+      └─ Automatic download
+
+   2️⃣ OBJECT HIGHLIGHT SCREENSHOTS
+      ├─ When object shows 5.5+ seconds
+      ├─ RED BOX appears
+      └─ Automatic download
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ ⚡ QUICK START                                                            │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   1. Open detection.html
+   2. Load a video
+   3. Click ZONE button
+   4. Wait 10 seconds
+   5. 📸 Screenshot downloads!
+   6. Wait another 10 seconds
+   7. 📸 Another screenshot downloads!
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📊 TIMELINE: WHAT HAPPENS                                                 │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   0s:    Click ZONE button → Enable
+          └─ System starts
+
+   10s:   ⏱️ PERIODIC SCREENSHOT
+          └─ 📸 Auto-downloads
+          └─ File 1
+
+   15s:   Object appears in frame
+
+   20s:   ⏱️ PERIODIC SCREENSHOT
+          └─ 📸 Auto-downloads
+          └─ File 2
+
+   25s:   ⏱️ PERIODIC SCREENSHOT
+          └─ 📸 Auto-downloads
+          └─ File 3
+
+   30s:   ⏱️ PERIODIC SCREENSHOT
+          └─ 📸 Auto-downloads
+          └─ File 4
+
+   35s:   🔴 OBJECT THRESHOLD REACHED (5.5s+)
+          ├─ RED BOX appears
+          ├─ Time label: "PERSON - 5.5s"
+          └─ 📸 Auto-downloads (separate file)
+
+   40s:   ⏱️ PERIODIC SCREENSHOT
+          └─ 📸 Auto-downloads
+          └─ File 5
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📸 SCREENSHOT TYPES & FREQUENCIES                                         │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Type 1: PERIODIC (Every 10 Seconds)
+   ├─ Triggered: Automatically every 10 seconds
+   ├─ Download: Automatic to Downloads folder
+   ├─ Filename: object_detection_YYYY-MM-DD_HH-MM-SS.png
+   ├─ Contents: Entire video frame
+   └─ Purpose: Continuous monitoring record
+
+   Type 2: OBJECT HIGHLIGHT (At 5.5 Seconds)
+   ├─ Triggered: When object reaches 5.5 second mark
+   ├─ Download: Automatic to Downloads folder
+   ├─ Filename: object_detection_YYYY-MM-DD_HH-MM-SS.png
+   ├─ Contents: Video + RED BOX + time label
+   └─ Purpose: Capture important detections
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📁 DOWNLOADS FOLDER EXAMPLE                                               │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Downloads/
+   ├── object_detection_2024-09-08_14-30-10.png  (10s periodic)
+   ├── object_detection_2024-09-08_14-30-20.png  (20s periodic)
+   ├── object_detection_2024-09-08_14-30-30.png  (30s periodic)
+   ├── object_detection_2024-09-08_14-30-45.png  (RED BOX - 5.5s)
+   ├── object_detection_2024-09-08_14-30-40.png  (40s periodic)
+   ├── object_detection_2024-09-08_14-30-50.png  (50s periodic)
+   └── ... (continues every 10 seconds)
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🔴 RED BOX vs PERIODIC SCREENSHOTS                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   PERIODIC SCREENSHOT (Every 10s):
+   ┌─────────────────────────────┐
+   │ Normal video frame          │
+   │ Standard detection boxes    │
+   │ NO RED BOX                  │
+   └─────────────────────────────┘
+
+   RED BOX SCREENSHOT (5.5s+ object):
+   ┌─────────────────────────────┐
+   │ PERSON - 5.5s               │  ← Time label
+   │ Video frame                 │
+   │  ┌─────────────────────┐    │
+   │  │ OBJECT (RED BOX)    │    │ ← RED box (thick)
+   │  │   (highlighted)     │    │ ← Glowing effect
+   │  └─────────────────────┘    │
+   └─────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ ⚙️ TIMING CONFIGURATION                                                   │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Current Settings (detection.html, line ~1758):
+
+   Periodic Interval: 10,000 milliseconds (10 seconds)
+   Object Threshold:   5,500 milliseconds (5.5 seconds)
+
+   To change periodic interval:
+   const PERIODIC_SCREENSHOT_INTERVAL = 10000;
+
+   Options:
+   5000  = Every 5 seconds
+   10000 = Every 10 seconds (default)
+   15000 = Every 15 seconds
+   20000 = Every 20 seconds
+   30000 = Every 30 seconds
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📊 CONSOLE LOGS (Press F12)                                               │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   When enabled:
+   🔒 FENCING ZONE: ENABLED - Tracking objects for 5-6 seconds
+
+   Every 10 seconds:
+   ⏱️ Periodic screenshot taken (10s interval)
+   📸 Screenshot downloaded: object_detection_2024-09-08_14-30-10.png
+
+   When object reaches 5.5s:
+   🎯 Object detected for 5.5s: person
+   📸 Screenshot downloaded: object_detection_2024-09-08_14-30-45.png
+
+   Every 10 seconds (continuous):
+   ⏱️ Periodic screenshot taken (10s interval)
+   📸 Screenshot downloaded: object_detection_2024-09-08_14-30-20.png
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🎯 USE CASES                                                              │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Border Surveillance:
+   ├─ 10-second snapshots for continuous record
+   ├─ RED BOX when suspicious activity (5.5s+)
+   └─ Complete timeline documentation
+
+   Facility Monitoring:
+   ├─ Regular periodic snapshots every 10s
+   ├─ Highlight shots when loitering detected
+   └─ Comprehensive security log
+
+   Event Security:
+   ├─ Background monitoring every 10s
+   ├─ Red boxes when threat stays 5.5s+
+   └─ Complete incident record
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ ✨ FEATURES                                                               │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   ✅ Periodic screenshots every 10 seconds
+   ✅ Object highlight screenshots at 5.5 seconds
+   ✅ Both automatic
+   ✅ Both download to Downloads folder
+   ✅ Console logging
+   ✅ No manual action needed
+   ✅ Works with any video
+   ✅ Works at any resolution
+   ✅ Continuous monitoring
+   ✅ Complete documentation
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📞 TROUBLESHOOTING                                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Problem                      Solution
+   ──────────────────────────────────────────────
+   Screenshots not downloading  Check browser download settings
+   No periodic screenshots      Ensure Zone button is ON (orange)
+   No RED BOX screenshots       Wait 5.5+ seconds with object in frame
+   Not seeing console logs      Press F12 → Console tab
+   Downloads folder not found   Check system default Downloads location
+   Multiple files same name     Filenames include seconds for uniqueness
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🎬 REAL EXAMPLE                                                           │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Scenario: Border Checkpoint Monitoring
+
+   Timeline:
+   ─────────────────────────────────────────────
+   0s:    Enable Zone button
+   10s:   📸 Snapshot 1 (empty area)
+   15s:   Person approaches border
+   20s:   📸 Snapshot 2 (person visible)
+   30s:   🔴 Person at 5.5s mark!
+          RED BOX appears
+          📸 Snapshot 3 (RED BOX - alert!)
+   40s:   📸 Snapshot 4 (person still there)
+   50s:   Person crosses border
+          👀 Still tracking...
+   50s:   📸 Snapshot 5 (continuing)
+
+   Downloads folder now has:
+   ✓ Snapshot 1 (10s)
+   ✓ Snapshot 2 (20s)
+   ✓ Snapshot 3 (RED BOX at 5.5s+)
+   ✓ Snapshot 4 (40s)
+   ✓ Snapshot 5 (50s)
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🚀 GET STARTED NOW!                                                       │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   1. Open detection.html
+   2. Load a video with people/vehicles
+   3. Click ZONE button
+   4. Wait 10 seconds
+   5. Check Downloads folder → Screenshot!
+   6. Wait another 10 seconds
+   7. Check Downloads → Another screenshot!
+   8. Keep an object in frame for 5.5 seconds
+   9. See RED BOX + screenshot!
+
+   That's it! ✓
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                       READY TO USE! ✅                                    ║
+║                                                                           ║
+║  Two screenshot features working together:                               ║
+║  ✓ Every 10 seconds (periodic)                                           ║
+║  ✓ When object shows 5.5+ seconds (RED BOX)                              ║
+║                                                                           ║
+║  All automatic - nothing to do but click Zone button! 📸                  ║
+╚═══════════════════════════════════════════════════════════════════════════╝

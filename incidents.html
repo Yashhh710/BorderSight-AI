@@ -1,0 +1,1920 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Incidents – BorderSight AI</title>
+    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=rZXbB3dTC5xe&format=png&color=000000">
+    <!-- Google Fonts for professional technical dashboard styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Global Theme System -->
+    <link rel="stylesheet" href="theme.css">
+    <style>
+        /* Updated Color Palette Variables */
+        :root {
+            --bg-main: #030303;
+            --sidebar-bg: rgba(7, 7, 7, 0.9);
+            --card-bg: #0D0D0D;
+            --card-hover: #141414;
+            --border-color: #242424;
+            
+            --primary: #FFFFFF;
+            --primary-glow: rgba(255, 255, 255, 0.08);
+            
+            --secondary-text: #A1A1A1;
+            --muted-text: #666666;
+            
+            --accent: #FFB000;
+            --accent-hover: #FFC533;
+            --accent-glow: rgba(255, 176, 0, 0.12);
+            
+            --success: #22C55E;
+            --warning: #FFB000;
+            --critical: #FF3B30;
+            --info: #3B82F6;
+            
+            --transition-speed: 280ms;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 80px;
+        }
+
+        /* Reset & Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--primary);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Layout Container */
+        .app-container {
+            display: flex;
+            width: 100%;
+            position: relative;
+        }
+
+        /* --- SIDEBAR STYLES --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--sidebar-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 100;
+            transition: width var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        /* Logo Area */
+        .sidebar-header {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            min-height: 80px;
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            font-size: 24px;
+            color: var(--accent);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
+        }
+
+        .logo-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+        }
+
+        .logo-subtitle {
+            font-size: 11px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+            text-transform: uppercase;
+        }
+
+        .collapse-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--muted-text);
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .collapse-btn:hover {
+            background: var(--card-bg);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .sidebar.collapsed .collapse-btn svg {
+            transform: rotate(180deg);
+        }
+
+        /* Navigation Menu Sections */
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+
+        .nav-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-category {
+            font-size: 10px;
+            font-weight: 700;
+            font-family: var(--font-family-mono);
+            color: var(--muted-text);
+            padding: 0 12px 8px 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: opacity var(--transition-speed) ease;
+            white-space: nowrap;
+        }
+
+        .sidebar.collapsed .nav-category {
+            opacity: 0;
+            visibility: hidden;
+            height: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Nav Items */
+        .nav-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--secondary-text);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            background: transparent;
+            cursor: pointer;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            transition: transform var(--transition-speed) ease, color var(--transition-speed) ease;
+        }
+
+        .nav-item span.nav-text {
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .nav-item span.nav-text {
+            opacity: 0;
+            visibility: hidden;
+            position: absolute;
+        }
+
+        /* Active Left Glowing Indicator */
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20%;
+            height: 60%;
+            width: 3px;
+            background-color: var(--accent);
+            border-radius: 0 3px 3px 0;
+            opacity: 0;
+            transform: scaleY(0);
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        /* Hover Interactions */
+        .nav-item:hover {
+            color: var(--primary);
+            background: linear-gradient(90deg, var(--accent-glow) 0%, rgba(0,0,0,0) 100%);
+            border-color: rgba(255, 176, 0, 0.15);
+            padding-left: 16px;
+        }
+
+        .nav-item:hover svg {
+            transform: scale(1.1) rotate(4deg);
+            color: var(--accent);
+        }
+
+        .nav-item:hover::before {
+            opacity: 1;
+            transform: scaleY(1);
+        }
+
+        /* Active Navigation Item */
+        .nav-item.active {
+            color: var(--accent);
+            background: var(--accent-glow);
+            border-color: rgba(255, 176, 0, 0.3);
+            font-weight: 600;
+        }
+
+        .nav-item.active::before {
+            opacity: 1;
+            transform: scaleY(1);
+        }
+
+        .nav-item.active svg {
+            color: var(--accent);
+        }
+
+        /* Badges & Dots */
+        .badge {
+            margin-left: auto;
+            background-color: var(--critical);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-family: var(--font-family-mono);
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .badge {
+            position: absolute;
+            top: 6px;
+            right: 10px;
+            padding: 1px 4px;
+            font-size: 9px;
+        }
+
+        /* Tooltip for collapsed state */
+        .nav-item .tooltip {
+            position: absolute;
+            left: calc(100% + 12px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--card-bg);
+            color: var(--primary);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed .nav-item:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(-50%) translateX(2px);
+        }
+
+        /* Bottom Section: System Status & User Profile */
+        .sidebar-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: rgba(7, 7, 7, 0.6);
+        }
+
+        .system-status {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-family: var(--font-family-mono);
+            font-size: 11px;
+            color: var(--secondary-text);
+            background: var(--card-bg);
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .system-status {
+            opacity: 0;
+            visibility: hidden;
+            height: 0;
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Pulse live status indicator */
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px;
+            border-radius: 8px;
+            background: transparent;
+            overflow: hidden;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: var(--border-color);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 176, 0, 0.3);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            transition: opacity var(--transition-speed) ease;
+            white-space: nowrap;
+        }
+
+        .sidebar.collapsed .user-info {
+            opacity: 0;
+            visibility: hidden;
+            width: 0;
+        }
+
+        .user-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .user-role {
+            font-size: 10px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+        }
+
+        /* --- MAIN CONTENT & DASHBOARD LAYOUT --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 30px 40px;
+            transition: margin-left var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: var(--bg-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .sidebar.collapsed ~ .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        /* Live Date/Time Badge */
+        .live-datetime { display:flex; align-items:center; gap:8px; font-family: var(--font-family-mono); font-size:12px; color:var(--secondary-text); background:var(--card-bg); border:1px solid var(--border-color); padding:6px 14px; border-radius:6px; margin-top:8px; width:fit-content; }
+        .live-datetime .live-dot-sm { width:7px; height:7px; background:var(--success); border-radius:50%; flex-shrink:0; animation:pulse-green 2s infinite; }
+        .live-datetime .dt-value { color:var(--accent); font-weight:600; }
+
+        /* Top Bar */
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .command-title {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .command-title span {
+            color: var(--accent);
+        }
+
+        .command-subtitle {
+            font-size: 13px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+        }
+
+        .top-bar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 260px;
+        }
+
+        .search-box input {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 8px 12px 8px 34px;
+            color: var(--primary);
+            font-size: 13px;
+            font-family: var(--font-family);
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .search-box input:focus {
+            border-color: var(--accent);
+        }
+
+        .search-box svg {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--muted-text);
+            width: 15px;
+            height: 15px;
+        }
+
+        .date-range-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text);
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: var(--font-family-mono);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .date-range-btn:hover {
+            border-color: var(--accent);
+            color: var(--primary);
+        }
+
+        .icon-btn-top {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text);
+            width: 35px;
+            height: 35px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: border-color 0.2s, color 0.2s;
+        }
+
+        .icon-btn-top:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .live-badge {
+            background: rgba(34, 197, 94, 0.15);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+            color: var(--success);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* --- METRICS GRID --- */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+
+        .metric-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+            transition: border-color 0.2s;
+        }
+
+        .metric-card:hover {
+            border-color: rgba(255, 176, 0, 0.4);
+        }
+
+        .metric-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .metric-icon-box {
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .metric-icon-box.amber { background: rgba(255, 176, 0, 0.15); color: var(--warning); border: 1px solid rgba(255, 176, 0, 0.3); }
+        .metric-icon-box.red { background: rgba(255, 59, 48, 0.15); color: var(--critical); border: 1px solid rgba(255, 59, 48, 0.3); }
+        .metric-icon-box.green { background: rgba(34, 197, 94, 0.15); color: var(--success); border: 1px solid rgba(34, 197, 94, 0.3); }
+        .metric-icon-box.blue { background: rgba(59, 130, 246, 0.15); color: var(--info); border: 1px solid rgba(59, 130, 246, 0.3); }
+
+        .metric-value {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: var(--font-family-mono);
+        }
+
+        .metric-label {
+            font-size: 11px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+            text-transform: uppercase;
+        }
+
+        /* --- MAIN WORKSPACE SPLIT (Left Table & Filters, Right Detail Panel) --- */
+        .workspace-layout {
+            display: grid;
+            grid-template-columns: 1fr 420px; /* Expanded right inspector width to fix cramped text/buttons */
+            gap: 20px;
+            align-items: start;
+        }
+
+        .left-pane {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            min-width: 0; /* Prevents flex items from overflowing grid layout */
+        }
+
+        /* Filter Controls & Secondary Bars */
+        .filter-row-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .filter-tabs {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text);
+            padding: 7px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-btn:hover, .filter-btn.active {
+            background-color: var(--card-hover);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .filter-dropdowns {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .dropdown-select {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text);
+            padding: 7px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .dropdown-select:hover {
+            border-color: var(--accent);
+            color: var(--primary);
+        }
+
+        /* Incident Data Table Container */
+        .incidents-table-container {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        .incidents-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 12px;
+        }
+
+        .incidents-table th {
+            background-color: rgba(13, 13, 13, 0.95);
+            padding: 14px 16px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid var(--border-color);
+            text-transform: uppercase;
+        }
+
+        .incidents-table td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--secondary-text);
+        }
+
+        .incidents-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .incidents-table tr {
+            cursor: pointer;
+            transition: background-color 0.15s;
+        }
+
+        .incidents-table tr:hover td, .incidents-table tr.selected td {
+            background-color: var(--card-hover);
+            color: var(--primary);
+        }
+
+        .incidents-table tr.selected {
+            border-left: 3px solid var(--accent);
+        }
+
+        .incident-id {
+            font-family: var(--font-family-mono);
+            color: var(--accent);
+            font-weight: 600;
+        }
+
+        .incident-name {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .severity-badge {
+            display: inline-block;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-family: var(--font-family-mono);
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+
+        .severity-badge.critical { background: rgba(255, 59, 48, 0.2); color: var(--critical); border: 1px solid rgba(255, 59, 48, 0.4); }
+        .severity-badge.high { background: rgba(255, 176, 0, 0.2); color: var(--warning); border: 1px solid rgba(255, 176, 0, 0.4); }
+        .severity-badge.medium { background: rgba(59, 130, 246, 0.2); color: var(--info); border: 1px solid rgba(59, 130, 246, 0.4); }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 3px 8px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-family: var(--font-family-mono);
+            font-weight: 600;
+        }
+
+        .status-pill.investigating {
+            background: rgba(255, 176, 0, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(255, 176, 0, 0.3);
+        }
+
+        .status-pill.resolved {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .status-pill.escalated {
+            background: rgba(255, 59, 48, 0.15);
+            color: var(--critical);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+        }
+
+        .table-action-icons {
+            display: flex;
+            gap: 8px;
+            align-items: center;
+        }
+
+        .action-icon-btn {
+            background: transparent;
+            border: none;
+            color: var(--muted-text);
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .action-icon-btn:hover {
+            color: var(--accent);
+        }
+
+        .table-footer-pagination {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 16px;
+            font-size: 12px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+            background: var(--card-bg);
+            border-top: 1px solid var(--border-color);
+            border-radius: 0 0 10px 10px;
+        }
+
+        .pagination-btns {
+            display: flex;
+            gap: 6px;
+        }
+
+        .page-btn {
+            background: var(--card-hover);
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text);
+            width: 26px;
+            height: 26px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-family: var(--font-family-mono);
+            font-size: 11px;
+        }
+
+        .page-btn.active {
+            background: var(--accent);
+            color: #000;
+            border-color: var(--accent);
+            font-weight: 700;
+        }
+
+        /* --- INCIDENT ACTIVITY TIMELINE SECTION --- */
+        .timeline-section {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .timeline-section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .timeline-section-title {
+            font-size: 14px;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: var(--font-family);
+        }
+
+        .horizontal-timeline {
+            display: flex;
+            justify-content: space-between;
+            position: relative;
+            padding: 10px 0;
+            gap: 12px; /* Added gap to prevent nodes from sticking or overlapping on shrink */
+            overflow-x: auto; /* Added horizontal scrolling safeguard for smaller screens */
+        }
+
+        /* Connecting line behind timeline nodes */
+        .horizontal-timeline::before {
+            content: '';
+            position: absolute;
+            top: 24px;
+            left: 20px;
+            right: 20px;
+            height: 2px;
+            background: var(--border-color);
+            z-index: 1;
+        }
+
+        .timeline-node {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            position: relative;
+            z-index: 2;
+            min-width: 130px; /* Fixed sizing issue preventing text collapse */
+            flex: 1;
+        }
+
+        .timeline-dot-wrapper {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: var(--card-bg);
+            border: 2px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: border-color 0.2s;
+        }
+
+        .timeline-node.active .timeline-dot-wrapper {
+            border-color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .timeline-inner-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--muted-text);
+        }
+
+        .timeline-node.active .timeline-inner-dot {
+            background: var(--accent);
+            box-shadow: 0 0 8px var(--accent);
+        }
+
+        .timeline-time {
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+            color: var(--accent);
+            font-weight: 600;
+            white-space: nowrap; /* Prevent timestamp wrapping */
+        }
+
+        .timeline-desc {
+            font-size: 11px;
+            color: var(--secondary-text);
+            line-height: 1.3;
+        }
+
+        .timeline-sub {
+            font-size: 10px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+        }
+
+
+        /* --- RIGHT PANE: INCIDENT INSPECTOR PANEL --- */
+        .right-pane {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            width: 100%; /* Sizing fix for right-pane consistency */
+        }
+
+        .inspector-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(13, 13, 13, 0.95);
+        }
+
+        .inspector-title {
+            font-size: 14px;
+            font-weight: 700;
+            font-family: var(--font-family-mono);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .inspector-actions-top {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .inspector-body {
+            padding: 16px 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            max-height: calc(100vh - 180px);
+            overflow-y: auto;
+        }
+
+        .inspector-section-title {
+            font-size: 11px;
+            font-weight: 700;
+            font-family: var(--font-family-mono);
+            color: var(--muted-text);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+
+        .meta-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .meta-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start; /* Sizing fix to support clean multi-line wrapping */
+            gap: 12px;
+            font-size: 12px;
+        }
+
+        .meta-label {
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+            flex-shrink: 0;
+        }
+
+        .meta-val {
+            color: var(--primary);
+            font-family: var(--font-family-mono);
+            font-weight: 500;
+            text-align: right;
+            word-break: break-word; /* Sizing fix for long text strings */
+        }
+
+        .meta-val.highlight {
+            color: var(--accent);
+        }
+
+        .meta-val.threat {
+            color: var(--critical);
+            font-weight: 700;
+        }
+
+        /* Evidence Snapshot Box */
+        .evidence-box {
+            position: relative;
+            background: #000;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .evidence-img-container {
+            position: relative;
+            width: 100%;
+            height: 180px;
+            background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><rect width="100" height="100" fill="%23050505"/><path d="M0 50h100M50 0v100" stroke="%23111" stroke-width="1"/></svg>');
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .simulated-bounding-box {
+            position: absolute;
+            top: 30%;
+            left: 42%;
+            width: 60px;
+            height: 90px;
+            border: 1px dashed var(--critical);
+            background: rgba(255, 59, 48, 0.15);
+        }
+
+        .bounding-tag {
+            position: absolute;
+            top: -16px;
+            left: 0;
+            background: var(--critical);
+            color: #fff;
+            font-size: 9px;
+            font-family: var(--font-family-mono);
+            padding: 1px 4px;
+        }
+
+        .evidence-overlay-bar {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            right: 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 10px;
+            font-family: var(--font-family-mono);
+            color: #fff;
+            pointer-events: none;
+        }
+
+        .rec-dot {
+            width: 6px;
+            height: 6px;
+            background: var(--critical);
+            border-radius: 50%;
+            display: inline-block;
+            animation: pulse-green 1.5s infinite;
+        }
+
+        .evidence-footer-bar {
+            padding: 8px 12px;
+            background: rgba(13, 13, 13, 0.95);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .live-feed-link {
+            color: var(--accent);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            white-space: nowrap;
+        }
+
+        .live-feed-link:hover {
+            text-decoration: underline;
+        }
+
+        /* Related Alerts Box */
+        .related-alert-card {
+            background: var(--card-hover);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 10px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .related-alert-info {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        .related-alert-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .related-alert-time {
+            font-size: 10px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+        }
+
+        .btn-small-outline {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text);
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-family: var(--font-family-mono);
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .btn-small-outline:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Inspector Vertical Timeline */
+        .inspector-timeline {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            padding-left: 16px;
+            border-left: 2px solid var(--border-color);
+            margin-left: 4px;
+        }
+
+        .it-item {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .it-item::before {
+            content: '';
+            position: absolute;
+            left: -21px;
+            top: 4px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--muted-text);
+            border: 2px solid var(--card-bg);
+        }
+
+        .it-item.active::before {
+            background: var(--accent);
+            box-shadow: 0 0 6px var(--accent);
+        }
+
+        .it-time {
+            font-size: 10px;
+            font-family: var(--font-family-mono);
+            color: var(--muted-text);
+        }
+
+        .it-text {
+            font-size: 12px;
+            color: var(--secondary-text);
+        }
+
+        .it-item.active .it-text {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        /* Inspector Action Buttons Footer */
+        .inspector-footer-actions {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            padding-top: 8px;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .action-btn {
+            background: var(--card-hover);
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text);
+            padding: 8px 4px; /* Sizing adjustment to prevent text clipping */
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+            font-weight: 600;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+            white-space: nowrap; /* Prevent button title wrapping */
+        }
+
+        .action-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+            background: var(--accent-glow);
+        }
+
+        .action-btn.resolve {
+            grid-column: span 3;
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+            border-color: rgba(34, 197, 94, 0.3);
+        }
+
+        .action-btn.resolve:hover {
+            background: rgba(34, 197, 94, 0.25);
+            border-color: var(--success);
+        }
+
+
+        /* Responsive Breakpoints */
+        @media (max-width: 1400px) {
+            .metrics-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            .workspace-layout {
+                grid-template-columns: 1fr;
+            }
+            .right-pane {
+                width: 100%;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: var(--sidebar-collapsed-width);
+            }
+            .sidebar .nav-text,
+            .sidebar .nav-category,
+            .sidebar .logo-text,
+            .sidebar .system-status,
+            .sidebar .user-info {
+                opacity: 0;
+                visibility: hidden;
+                display: none;
+            }
+            .main-content {
+                margin-left: var(--sidebar-collapsed-width);
+                padding: 20px;
+            }
+            .metrics-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar" id="sidebar">
+            
+            <!-- Logo Section -->
+            <div class="sidebar-header">
+                <a href="index.html" class="logo-box">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-title">BORDER SIGHT AI</span>
+                        <span class="logo-subtitle">Border Surveillance AI</span>
+                    </div>
+                </a>
+                <button class="collapse-btn" id="collapseBtn" title="Toggle Sidebar">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="sidebar-nav">
+                
+                <!-- MONITORING -->
+                <div class="nav-section">
+                    <span class="nav-category">Monitoring</span>
+                    <a href="dashboard.html" class="nav-item" data-page="dashboard.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <span class="nav-text">Dashboard</span>
+                        <span class="tooltip">Dashboard</span>
+                    </a>
+                    <a href="cameras.html" class="nav-item" data-page="cameras.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                        <span class="nav-text">Live Cameras</span>
+                        <span class="tooltip">Live Cameras</span>
+                    </a>
+                    <a href="alerts.html" class="nav-item" data-page="alerts.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <span class="nav-text">Alerts</span>
+                        <span class="badge">4</span>
+                        <span class="tooltip">Alerts</span>
+                    </a>
+                    <a href="incidents.html" class="nav-item active" data-page="incidents.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        <span class="nav-text">Incidents</span>
+                        <span class="tooltip">Incidents</span>
+                    </a>
+                </div>
+
+                <!-- AI INTELLIGENCE -->
+                <div class="nav-section">
+                    <span class="nav-category">AI Intelligence</span>
+                    <a href="detection.html" class="nav-item" data-page="detection.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        <span class="nav-text">AI Detection</span>
+                        <span class="tooltip">AI Detection</span>
+                    </a>
+                    <a href="tracking.html" class="nav-item" data-page="tracking.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        <span class="nav-text">Tracking</span>
+                        <span class="tooltip">Tracking</span>
+                    </a>
+                    <a href="zones.html" class="nav-item" data-page="zones.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                        <span class="nav-text">Zones & Fences</span>
+                        <span class="tooltip">Zones & Fences</span>
+                    </a>
+                </div>
+
+                <!-- MAP -->
+                <div class="nav-section">
+                    <span class="nav-category">Map</span>
+                    <a href="map.html" class="nav-item" data-page="map.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                        <span class="nav-text">Map & Heatmap</span>
+                        <span class="tooltip">Map & Heatmap</span>
+                    </a>
+                </div>
+
+                <!-- ANALYTICS -->
+                <div class="nav-section">
+                    <span class="nav-category">Analytics</span>
+                    <a href="analytics.html" class="nav-item" data-page="analytics.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                        <span class="nav-text">Analytics</span>
+                        <span class="tooltip">Analytics</span>
+                    </a>
+                </div>
+
+                <!-- REPORTS -->
+                <div class="nav-section">
+                    <span class="nav-category">Reports</span>
+                    <a href="reports.html" class="nav-item" data-page="reports.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        <span class="nav-text">Reports</span>
+                        <span class="tooltip">Reports</span>
+                    </a>
+                </div>
+
+                <!-- SYSTEM -->
+                <div class="nav-section">
+                    <span class="nav-category">System</span>
+                    <a href="settings.html" class="nav-item" data-page="settings.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        <span class="nav-text">Settings</span>
+                        <span class="tooltip">Settings</span>
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- Bottom Section (System Status & User) -->
+            <div class="sidebar-footer">
+                
+                <!-- System Status Box -->
+                <div class="system-status">
+                    <span style="font-weight: 700; color: var(--primary); margin-bottom: 2px;">SYSTEM STATUS</span>
+                    <div class="status-row">
+                        <span>AI Engine</span>
+                        <span style="display:flex; align-items:center; gap:5px;"><span class="live-dot"></span> ONLINE</span>
+                    </div>
+                    <div class="status-row">
+                        <span>Cameras</span>
+                        <span style="color: var(--accent);">24/26</span>
+                    </div>
+                    <div class="status-row">
+                        <span>Database</span>
+                        <span style="display:flex; align-items:center; gap:5px;"><span class="live-dot"></span> ONLINE</span>
+                    </div>
+                </div>
+
+                <!-- User Profile Box -->
+                <div class="user-profile">
+                    <div class="user-avatar">AD</div>
+                    <div class="user-info">
+                        <span class="user-name">Administrator</span>
+                        <span class="user-role">Security Manager</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </aside>
+
+        <!-- MAIN INCIDENTS PAGE CONTENT -->
+        <main class="main-content">
+            <!-- Top Command Header Bar -->
+            <header class="top-bar">
+                <div>
+                    <h1 class="command-title">Security <span>Incidents</span></h1>
+                    <p class="command-subtitle">Operational breaches, investigations & incident history</p>
+                    <div class="live-datetime"><span class="live-dot-sm"></span><span>LIVE &nbsp;|&nbsp;</span><span class="dt-value" id="liveDatetime">--</span></div>
+                </div>
+                <div class="top-bar-right">
+                    <div class="search-box">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" placeholder="Search incidents...">
+                    </div>
+                    <button class="date-range-btn">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        May 18 - May 19, 2025
+                    </button>
+                    <button class="icon-btn-top" title="Refresh Feed">
+                        <svg viewBox="0 0 24 24" width="15" height="15" stroke="currentColor" stroke-width="2" fill="none"><path d="M23 4v6h-6"></path><path d="M1 20v-6h6"></path><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>
+                    </button>
+                    <button data-theme-toggle title="Toggle theme" style="background: var(--card-bg); border: 1px solid var(--border-color); color: var(--secondary-text); padding: 8px 12px; border-radius: 6px; font-size: 12px; font-family: var(--font-family); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        🌙 Dark
+                    </button>
+                    <div class="live-badge">
+                        <span class="live-dot"></span> LIVE
+                    </div>
+                </div>
+            </header>
+
+            <!-- Metrics Cards Grid -->
+            <section class="metrics-grid">
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-label">Total Active</span>
+                        <div class="metric-icon-box amber">
+                            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        </div>
+                    </div>
+                    <div class="metric-value">04</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-label">Investigating</span>
+                        <div class="metric-icon-box amber">
+                            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        </div>
+                    </div>
+                    <div class="metric-value">02</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-label">Escalated</span>
+                        <div class="metric-icon-box red">
+                            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline><polyline points="17 6 23 6 23 12"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="metric-value">01</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-label">Resolved Today</span>
+                        <div class="metric-icon-box green">
+                            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="metric-value">18</div>
+                </div>
+                <div class="metric-card">
+                    <div class="metric-header">
+                        <span class="metric-label">Response Rate</span>
+                        <div class="metric-icon-box blue">
+                            <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        </div>
+                    </div>
+                    <div class="metric-value">96%</div>
+                </div>
+            </section>
+
+            <!-- Workspace Layout (Left: Table/Filters/Timeline, Right: Inspector Panel) -->
+            <div class="workspace-layout">
+                
+                <!-- Left Column -->
+                <div class="left-pane">
+                    
+                    <!-- Filters & Search Toolbar -->
+                    <div class="filter-row-top">
+                        <div class="filter-tabs">
+                            <button class="filter-btn active">All Incidents</button>
+                            <button class="filter-btn">Investigating</button>
+                            <button class="filter-btn">Escalated</button>
+                            <button class="filter-btn">Resolved</button>
+                            <button class="filter-btn">Critical</button>
+                        </div>
+                        <div class="filter-dropdowns">
+                            <input type="text" class="dropdown-select" placeholder="Search by Incident ID..." style="width: 150px;">
+                            <select class="dropdown-select">
+                                <option>All Sectors</option>
+                                <option>Sector B West</option>
+                                <option>Northern Ridge</option>
+                                <option>Eastern Checkpoint</option>
+                                <option>Southern Sector</option>
+                            </select>
+                            <select class="dropdown-select">
+                                <option>All Severity</option>
+                                <option>Critical</option>
+                                <option>High</option>
+                                <option>Medium</option>
+                            </select>
+                            <select class="dropdown-select">
+                                <option>All Dates</option>
+                                <option>Today</option>
+                                <option>Yesterday</option>
+                            </select>
+                            <select class="dropdown-select">
+                                <option>Sort: Newest</option>
+                                <option>Sort: Oldest</option>
+                                <option>Sort: Severity</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- Incidents Data Table -->
+                    <div class="incidents-table-container">
+                        <table class="incidents-table">
+                            <thead>
+                                <tr>
+                                    <th>Incident</th>
+                                    <th>Description</th>
+                                    <th>Sector</th>
+                                    <th>Detected By</th>
+                                    <th>Severity</th>
+                                    <th>Timestamp</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr class="selected">
+                                    <td class="incident-id">#INC-4092</td>
+                                    <td><span class="incident-name">Perimeter Fence Cross</span></td>
+                                    <td>Sector B West</td>
+                                    <td>CAM-02</td>
+                                    <td><span class="severity-badge critical">Critical</span></td>
+                                    <td>Today, 02:14 AM</td>
+                                    <td><span class="status-pill investigating">Investigating</span></td>
+                                    <td>
+                                        <div class="table-action-icons">
+                                            <button class="action-icon-btn" title="View"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                                            <button class="action-icon-btn" title="Options"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="incident-id">#INC-4091</td>
+                                    <td><span class="incident-name">Thermal Signature Anomaly</span></td>
+                                    <td>Northern Ridge</td>
+                                    <td>CAM-01</td>
+                                    <td><span class="severity-badge critical">Critical</span></td>
+                                    <td>Today, 01:42 AM</td>
+                                    <td><span class="status-pill escalated">Escalated</span></td>
+                                    <td>
+                                        <div class="table-action-icons">
+                                            <button class="action-icon-btn" title="View"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                                            <button class="action-icon-btn" title="Options"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="incident-id">#INC-4090</td>
+                                    <td><span class="incident-name">Unauthorized Vehicle Approaching Gate</span></td>
+                                    <td>Eastern Checkpoint</td>
+                                    <td>CAM-04</td>
+                                    <td><span class="severity-badge high">High</span></td>
+                                    <td>Yesterday, 11:20 PM</td>
+                                    <td><span class="status-pill resolved">Resolved</span></td>
+                                    <td>
+                                        <div class="table-action-icons">
+                                            <button class="action-icon-btn" title="View"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                                            <button class="action-icon-btn" title="Options"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td class="incident-id">#INC-4089</td>
+                                    <td><span class="incident-name">Sensor Power Failure Node 12</span></td>
+                                    <td>Southern Sector</td>
+                                    <td>SENSOR-12</td>
+                                    <td><span class="severity-badge medium">Medium</span></td>
+                                    <td>Yesterday, 09:15 PM</td>
+                                    <td><span class="status-pill resolved">Resolved</span></td>
+                                    <td>
+                                        <div class="table-action-icons">
+                                            <button class="action-icon-btn" title="View"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg></button>
+                                            <button class="action-icon-btn" title="Options"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="1"></circle><circle cx="12" cy="5" r="1"></circle><circle cx="12" cy="19" r="1"></circle></svg></button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="table-footer-pagination">
+                            <span>Showing 1 to 4 of 4 incidents</span>
+                            <div class="pagination-btns">
+                                <button class="page-btn active">1</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Incident Activity Timeline Section -->
+                    <div class="timeline-section">
+                        <div class="timeline-section-header">
+                            <span class="timeline-section-title">Incident Activity Timeline</span>
+                            <div class="live-badge" style="font-size:9px; padding:3px 8px;">
+                                <span class="live-dot" style="width:6px; height:6px;"></span> LIVE FEED
+                            </div>
+                        </div>
+                        <div class="horizontal-timeline">
+                            <div class="timeline-node active">
+                                <div class="timeline-dot-wrapper"><div class="timeline-inner-dot"></div></div>
+                                <span class="timeline-time">02:14:10 AM</span>
+                                <span class="timeline-desc">Perimeter Fence Cross Detected</span>
+                                <span class="timeline-sub">INC-4092 · Sector B West</span>
+                            </div>
+                            <div class="timeline-node">
+                                <div class="timeline-dot-wrapper"><div class="timeline-inner-dot"></div></div>
+                                <span class="timeline-time">02:12:03 AM</span>
+                                <span class="timeline-desc">Thermal Signature Anomaly</span>
+                                <span class="timeline-sub">INC-4091 · Northern Ridge</span>
+                            </div>
+                            <div class="timeline-node">
+                                <div class="timeline-dot-wrapper"><div class="timeline-inner-dot"></div></div>
+                                <span class="timeline-time">01:58:47 AM</span>
+                                <span class="timeline-desc">AI Engine Health Check System</span>
+                                <span class="timeline-sub">System Event</span>
+                            </div>
+                            <div class="timeline-node">
+                                <div class="timeline-dot-wrapper"><div class="timeline-inner-dot"></div></div>
+                                <span class="timeline-time">01:45:22 AM</span>
+                                <span class="timeline-desc">Camera CAM-04 Motion Detected</span>
+                                <span class="timeline-sub">INC-4090 · Eastern Checkpoint</span>
+                            </div>
+                            <div class="timeline-node">
+                                <div class="timeline-dot-wrapper"><div class="timeline-inner-dot"></div></div>
+                                <span class="timeline-time">01:30:11 AM</span>
+                                <span class="timeline-desc">All Systems Operational</span>
+                                <span class="timeline-sub">System Event</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Incident Inspector Panel (#INC-4092) -->
+                <aside class="right-pane">
+                    <div class="inspector-header">
+                        <div class="inspector-title">INC-4092</div>
+                        <div class="inspector-actions-top">
+                            <span class="status-pill investigating" style="font-size:9px; padding:2px 6px;">Investigating</span>
+                            <button class="action-icon-btn" title="Close"><svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                        </div>
+                    </div>
+
+                    <div class="inspector-body">
+                        <!-- Details Grid -->
+                        <div>
+                            <div class="inspector-section-title">Incident Details</div>
+                            <div class="meta-grid">
+                                <div class="meta-row">
+                                    <span class="meta-label">Detection Source</span>
+                                    <span class="meta-val">CAM-02 Valley Checkpoint West</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span class="meta-label">Camera</span>
+                                    <span class="meta-val">CAM-02</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span class="meta-label">Sector</span>
+                                    <span class="meta-val">Sector B West</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span class="meta-label">Exact Location</span>
+                                    <span class="meta-val">Fence Line - Grid B7</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span class="meta-label">Date & Time</span>
+                                    <span class="meta-val">May 19, 2025, 02:14:10 AM</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span class="meta-label">AI Confidence</span>
+                                    <span class="meta-val highlight">97%</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span class="meta-label">Threat Score</span>
+                                    <span class="meta-val threat">92/100</span>
+                                </div>
+                                <div class="meta-row">
+                                    <span class="meta-label">Detected Objects</span>
+                                    <span class="meta-val">1 Human</span>
+                                </div>
+                                <div class="meta-row" style="flex-direction: column; gap: 4px; margin-top: 4px;">
+                                    <span class="meta-label">Behaviour Analysis</span>
+                                    <span class="meta-val" style="text-align: left; font-size: 11px; color: var(--secondary-text);">Individual approached fence line and crossed restricted boundary.</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Evidence Snapshot -->
+                        <div>
+                            <div class="inspector-section-title">Evidence Snapshot</div>
+                            <div class="evidence-box">
+                                <div class="evidence-img-container">
+                                    <!-- Simulated Bounding Box for Person -->
+                                    <div class="simulated-bounding-box">
+                                        <div class="bounding-tag">ID: 4521</div>
+                                    </div>
+                                    <div class="evidence-overlay-bar">
+                                        <span style="display:flex; align-items:center; gap:4px;"><span class="rec-dot"></span> REC</span>
+                                        <span>CAM-02</span>
+                                    </div>
+                                    <div style="position: absolute; bottom: 8px; left: 8px; font-size:10px; font-family: var(--font-family-mono); color:#fff;">
+                                        02:14:10 AM<br>19-May-2025
+                                    </div>
+                                    <div style="position: absolute; bottom: 8px; right: 8px; font-size:9px; font-family: var(--font-family-mono); color:var(--critical); border: 1px solid var(--critical); padding: 1px 4px; background: rgba(0,0,0,0.6);">
+                                        VIRTUAL FENCE
+                                    </div>
+                                </div>
+                                <div class="evidence-footer-bar">
+                                    <span>Captured via AI Vision Matrix</span>
+                                    <a href="#" class="live-feed-link">
+                                        <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                                        View Live Feed
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Related Alerts -->
+                        <div>
+                            <div class="inspector-section-title">Related Alerts</div>
+                            <div class="related-alert-card">
+                                <div class="related-alert-info">
+                                    <span class="related-alert-title">Unauthorized Perimeter Breach Detected</span>
+                                    <span class="related-alert-time">02:14:08 AM · CAM-02</span>
+                                </div>
+                                <button class="btn-small-outline">View Alert</button>
+                            </div>
+                        </div>
+
+                        <!-- Incident Timeline (Vertical) -->
+                        <div>
+                            <div class="inspector-section-title">Incident Timeline</div>
+                            <div class="inspector-timeline">
+                                <div class="it-item">
+                                    <span class="it-time">02:14:03 AM</span>
+                                    <span class="it-text">AI detected person</span>
+                                </div>
+                                <div class="it-item">
+                                    <span class="it-time">02:14:06 AM</span>
+                                    <span class="it-text">Virtual fence crossed</span>
+                                </div>
+                                <div class="it-item">
+                                    <span class="it-time">02:14:08 AM</span>
+                                    <span class="it-text">Threat score increased to 92</span>
+                                </div>
+                                <div class="it-item active">
+                                    <span class="it-time">02:14:10 AM</span>
+                                    <span class="it-text">Alert generated</span>
+                                </div>
+                                <div class="it-item">
+                                    <span class="it-time">02:15:02 AM</span>
+                                    <span class="it-text">Operator acknowledged</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Inspector Action Buttons -->
+                        <div class="inspector-footer-actions">
+                            <button class="action-btn">Acknowledge</button>
+                            <button class="action-btn">Escalate</button>
+                            <button class="action-btn">Assign Unit</button>
+                            <button class="action-btn resolve">Resolve Incident</button>
+                        </div>
+
+                    </div>
+                </aside>
+
+            </div>
+        </main>
+
+    </div>
+
+    <!-- JavaScript for Sidebar Collapse & Multi-Page Active Detection -->
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const collapseBtn = document.getElementById('collapseBtn');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        // Toggle Sidebar Collapse
+        collapseBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+
+        // Live Date/Time
+        function updateDatetime() { const now = new Date(); const el = document.getElementById('liveDatetime'); if (el) el.textContent = now.toLocaleString('en-US',{year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true}).replace(',',' ·'); }
+        updateDatetime(); setInterval(updateDatetime, 1000);
+
+        // Automatically highlight the nav item matching the current page filename
+        const currentPath = window.location.pathname.split("/").pop() || 'index.html';
+        navItems.forEach(item => {
+            const pageTarget = item.getAttribute('data-page');
+            if (pageTarget === currentPath) {
+                item.classList.add('active');
+            }
+        });
+    </script>
+    <!-- Global Theme Manager -->
+    <script src="theme.js"></script>
+</body>
+</html>

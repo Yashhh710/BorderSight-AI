@@ -1,0 +1,251 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                  ABNORMAL BEHAVIOR DETECTION - QUICK REFERENCE            ║
+║                        BorderSight AI Detection Core                      ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🎯 BUTTON LOCATION & APPEARANCE                                           │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Video Control Bar:
+   ┌──────────────────────────────────────────────────────────────┐
+   │ [TIMER] [Pause] [Snapshot] [Fullscreen] [Upload]            │
+   │   ↑                                                           │
+   │   NEW BUTTON (hourglass icon)                                │
+   └──────────────────────────────────────────────────────────────┘
+
+   Button States:
+   • OFF (Default): Gray color, normal opacity
+   • ON (Active):   Orange color (var(--accent)), brighter
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ ⚡ 3-STEP ACTIVATION                                                       │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   1. Open detection.html
+   2. Load video (upload or demo)
+   3. Click timer button → IT TURNS ORANGE ✓
+
+   That's it! Detection is now ACTIVE.
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🔴 WHAT HAPPENS WHEN ABNORMAL BEHAVIOR DETECTED                           │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Person Stays in One Spot for 5+ Seconds:
+   ┌──────────────────────────────┐
+   │  RED BOX                     │  ← Thick 4px border, #FF3B30
+   │  ┌──────────────────┐        │  
+   │  │ ABNORMAL STAY    │        │  ← Label in white text
+   │  │  [Person]        │        │
+   │  │                  │        │
+   │  └──────────────────┘        │  ← Red glow around box
+   │                              │
+   └──────────────────────────────┘
+
+   + Screenshot automatically saved to Downloads folder
+   + Data saved to browser LocalStorage
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📸 SCREENSHOT STORAGE                                                     │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   LOCATION 1: Downloads Folder
+   • File: abnormal_behavior_2024-09-08_14-30-45.png
+   • Format: PNG image
+   • Auto-named with timestamp
+   • Ready to view/share
+
+   LOCATION 2: Browser LocalStorage
+   • Key: borderSightAnomalies
+   • Format: JSON array
+   • Access: DevTools → Application → LocalStorage
+   • Persists across sessions
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ ⚙️ EASY CUSTOMIZATION (Edit detection.html, Line ~1754)                   │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   CHANGE DETECTION TIME:
+   const BEHAVIOR_THRESHOLD_TIME = 5000;  // milliseconds
+   
+   Examples:
+   • 3 seconds:  3000
+   • 10 seconds: 10000
+   • 1 second:   1000
+
+   CHANGE MOVEMENT TOLERANCE:
+   const POSITION_TOLERANCE = 30;  // pixels
+   
+   Examples:
+   • Stricter (harder to detect): 15
+   • Looser (easier to detect):   50
+   • Very strict:                 5
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📊 FEATURE MATRIX                                                         │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Feature                          Status
+   ────────────────────────────────────────
+   Real-time detection              ✅
+   Red box highlighting             ✅
+   Automatic screenshot             ✅
+   Download folder save             ✅
+   LocalStorage persistence         ✅
+   Multiple people tracking         ✅
+   Enable/disable toggle            ✅
+   Customizable thresholds          ✅
+   No extra dependencies            ✅
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🌐 BROWSER SUPPORT                                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Chrome   ✅ Recommended
+   Firefox  ✅ Full support
+   Safari   ✅ Full support
+   Edge     ✅ Full support
+   IE 11    ❌ Not supported
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🔧 TROUBLESHOOTING QUICK FIX                                              │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Problem                      Solution
+   ──────────────────────────────────────────────────
+   Button not working           Refresh page
+   No red boxes appearing       Wait 5+ seconds (person must be still)
+   Screenshots not downloading  Check browser settings
+   Data not saving              Clear browser cache
+   Too sensitive                Increase POSITION_TOLERANCE (30→50)
+   Not sensitive enough         Decrease POSITION_TOLERANCE (30→15)
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📝 DATAFLOW                                                               │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Video Frame
+       ↓
+   AI Model (COCO-SSD)
+       ↓
+   Person Detection
+       ↓
+   Position Tracking
+       ↓
+   Movement Analysis
+       ↓
+   [5+ seconds, no movement?]
+       ├─ YES → RED BOX + SCREENSHOT
+       │        ├─ Download PNG
+       │        └─ Save to LocalStorage
+       └─ NO → Continue monitoring
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 💾 LOCALSTORAGE DATA FORMAT                                               │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Key: borderSightAnomalies
+   Value: JSON Array
+
+   [
+     {
+       "timestamp": 1694123456789,
+       "filename": "abnormal_behavior_2024-09-08_14-30-45.png",
+       "detected": "9/8/2024, 2:30:45 PM",
+       "dataUrl": "[PNG image data...]"
+     },
+     ...
+   ]
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📚 DOCUMENTATION                                                          │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   File Name                           Purpose
+   ─────────────────────────────────────────────────────────
+   QUICK_START_GUIDE.md                For end users (START HERE!)
+   ABNORMAL_BEHAVIOR_DETECTION_GUIDE   Complete reference
+   IMPLEMENTATION_SUMMARY.md           Technical details
+   FEATURE_VERIFICATION.md             Testing & checklist
+   README_ABNORMAL_BEHAVIOR.txt        Full overview
+   IMPLEMENTATION_COMPLETE.md          Summary
+   QUICK_REFERENCE.txt                 This file!
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🚀 QUICK START (COPY-PASTE INSTRUCTIONS)                                  │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   1. Open detection.html
+   2. Upload a test video with someone standing still
+   3. Click the HOURGLASS/TIMER button (left of Pause)
+   4. Watch for RED BOX to appear after 5 seconds
+   5. Check Downloads folder for PNG file
+   6. DONE! ✅
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🎓 EXAMPLE USE CASES                                                      │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   USE CASE                    DETECTED?  REASON
+   ─────────────────────────────────────────────────────
+   Person at border fence      ✅ YES    Standing 5+ sec
+   Person walking across       ❌ NO     Movement detected
+   Multiple people, 1 loitering ✅ YES   Only loiterer detected
+   Vehicle parked              ❌ NO     Not a person
+   Someone in restricted zone  ✅ YES    Stays in place
+   Crowd movement              ❌ NO     Continuous movement
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ ✅ VERIFICATION CHECKLIST                                                 │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Before reporting issues, verify:
+   ☐ Button is visible in video control bar
+   ☐ Browser is up to date
+   ☐ JavaScript is enabled (console not showing errors)
+   ☐ Video plays correctly
+   ☐ Button changes to orange when clicked
+   ☐ AI model shows "AI READY" status
+   ☐ Tested with person staying still 5+ seconds
+   ☐ Downloads folder is accessible
+   ☐ Browser LocalStorage is enabled
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🔐 SECURITY & PRIVACY                                                     │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   ✅ Client-side processing only (no servers involved)
+   ✅ No data sent over internet
+   ✅ Works completely offline
+   ✅ Screenshots stay on your computer
+   ✅ LocalStorage data is browser-specific
+   ✅ Can clear data anytime (browser cache)
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🎯 KEY TERMS                                                              │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Abnormal Behavior = Person stays in same spot for 5+ seconds
+   Red Box = Visual highlight showing detected person
+   Screenshot = PNG image captured when anomaly detected
+   LocalStorage = Browser's built-in data storage (persistent)
+   Tolerance = How much movement allowed (30 pixels default)
+   Threshold = Time required for detection (5000ms default)
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📞 QUICK HELP                                                             │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   SETUP HELP:          See QUICK_START_GUIDE.md
+   FEATURES:            See ABNORMAL_BEHAVIOR_DETECTION_GUIDE.md
+   TECHNICAL:           See IMPLEMENTATION_SUMMARY.md
+   TROUBLESHOOTING:     See README_ABNORMAL_BEHAVIOR.txt
+   TESTING:             See FEATURE_VERIFICATION.md
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                         Ready to Use! ✅                                  ║
+║                                                                           ║
+║  Click the timer button in the video control bar to get started.         ║
+║  Questions? Check the documentation files above.                         ║
+╚═══════════════════════════════════════════════════════════════════════════╝

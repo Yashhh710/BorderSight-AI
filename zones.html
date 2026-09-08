@@ -1,0 +1,1159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zones & Fences – BorderSight AI</title>
+    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=PUlY3cWZ4aNJ&format=png&color=000000">
+    <!-- Google Fonts for professional technical dashboard styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Global Theme System -->
+    <link rel="stylesheet" href="theme.css">
+    <style>
+        /* Reset & Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--primary);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Layout Container */
+        .app-container {
+            display: flex;
+            width: 100%;
+            position: relative;
+        }
+
+        /* --- SIDEBAR STYLES --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--sidebar-bg);
+            backdrop-filter: none;
+            -webkit-backdrop-filter: none;
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 100;
+            transition: width var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        .sidebar-header {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            min-height: 80px;
+            background: transparent;
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            font-size: 24px;
+            color: var(--accent);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+            background: rgba(255, 176, 0, 0.1);
+            border-radius: 6px;
+            border: 1px solid rgba(255, 176, 0, 0.2);
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
+        }
+
+        .logo-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+        }
+
+        .logo-subtitle {
+            font-size: 10px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .collapse-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--muted-text);
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .collapse-btn:hover {
+            background: var(--card-hover);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .sidebar.collapsed .collapse-btn svg {
+            transform: rotate(180deg);
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            background: var(--sidebar-bg);
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 3px;
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+
+        .nav-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-category {
+            font-size: 9px;
+            font-weight: 700;
+            font-family: var(--font-family-mono);
+            color: var(--muted-text);
+            padding: 0 12px 6px 12px;
+            letter-spacing: 1.2px;
+            text-transform: uppercase;
+            transition: opacity var(--transition-speed) ease;
+            white-space: nowrap;
+        }
+
+        .sidebar.collapsed .nav-category {
+            opacity: 0;
+            visibility: hidden;
+            height: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 6px;
+            color: var(--secondary-text);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all var(--transition-speed) ease;
+            background: transparent;
+            cursor: pointer;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            transition: color var(--transition-speed) ease;
+        }
+
+        .nav-item span.nav-text {
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .nav-item span.nav-text {
+            opacity: 0;
+            visibility: hidden;
+            position: absolute;
+        }
+
+        .nav-item:hover {
+            color: var(--primary);
+            background: var(--card-hover);
+            border-color: var(--border-subtle);
+        }
+
+        .nav-item:hover svg {
+            color: var(--accent);
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+            background: rgba(255, 176, 0, 0.08);
+            border-color: rgba(255, 176, 0, 0.25);
+            font-weight: 600;
+        }
+
+        .nav-item.active svg {
+            color: var(--accent);
+        }
+
+        .badge {
+            margin-left: auto;
+            background-color: var(--critical);
+            color: white;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-family: var(--font-family-mono);
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .badge {
+            position: absolute;
+            top: 6px;
+            right: 10px;
+            padding: 1px 4px;
+            font-size: 8px;
+        }
+
+        .nav-item .tooltip {
+            position: absolute;
+            left: calc(100% + 12px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--card-hover);
+            color: var(--primary);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            white-space: nowrap;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.9);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed .nav-item:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            background: transparent;
+        }
+
+        .system-status {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-family: var(--font-family-mono);
+            font-size: 11px;
+            color: var(--secondary-text);
+            background: var(--bg-tertiary);
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .system-status {
+            opacity: 0;
+            visibility: hidden;
+            height: 0;
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .live-dot {
+            width: 7px;
+            height: 7px;
+            background-color: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 5px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 4px;
+            border-radius: 6px;
+            overflow: hidden;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: var(--card-hover);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 12px;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 176, 0, 0.3);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            transition: opacity var(--transition-speed) ease;
+            white-space: nowrap;
+        }
+
+        .sidebar.collapsed .user-info {
+            opacity: 0;
+            visibility: hidden;
+            width: 0;
+        }
+
+        .user-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .user-role {
+            font-size: 10px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+        }
+
+        /* --- MAIN CONTENT STYLES --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 24px;
+            transition: margin-left var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            background-image: url('models/img/red-fance.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+            position: relative;
+        }
+
+        .sidebar.collapsed ~ .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        /* Professional Top Header */
+        .command-header {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px 20px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+            z-index: 10;
+        }
+
+        .command-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.3px;
+        }
+
+        .command-title span {
+            color: var(--accent);
+        }
+
+        .command-subtitle {
+            font-size: 11px;
+            color: var(--secondary-text);
+            font-family: var(--font-family-mono);
+        }
+
+        .live-datetime {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+            font-size: 11px;
+            letter-spacing: 0.05em;
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        .live-datetime .dt-value {
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        /* --- DASHBOARD GRID --- */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 20px;
+            align-items: start;
+            z-index: 10;
+            height: 100%;
+        }
+
+        @media (max-width: 1200px) {
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .left-area {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-end;
+            min-height: 540px;
+            position: relative;
+        }
+
+        /* Right Column Stacked Cards */
+        .right-column {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .dashboard-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 16px;
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        }
+
+        .card-header-title {
+            font-size: 10px;
+            font-weight: 700;
+            font-family: var(--font-family-mono);
+            color: var(--secondary-text);
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Live Feed Camera Box */
+        .live-feed-box {
+            position: relative;
+            width: 100%;
+            height: 175px;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+            background: #000;
+        }
+
+        .live-feed-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .feed-overlay-tag {
+            position: absolute;
+            top: 8px;
+            left: 8px;
+            background: rgba(0, 0, 0, 0.85);
+            border: 1px solid var(--border-color);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-size: 10px;
+            font-family: var(--font-family-mono);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Recent Alerts Box */
+        .alerts-list {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .alert-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid var(--border-subtle);
+            border-left: 3px solid var(--critical);
+            padding: 7px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .alert-item.warning {
+            border-left-color: var(--warning);
+        }
+
+        .alert-text {
+            color: var(--primary);
+            font-weight: 500;
+        }
+
+        .alert-time {
+            font-size: 10px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+        }
+
+        /* Zone Status Activity Chart */
+        .zone-status-box {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chart-container {
+            width: 100%;
+            height: 100px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            gap: 8px;
+            padding: 8px 4px 2px 4px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 6px;
+            border: 1px solid var(--border-subtle);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .chart-bar-wrap {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            height: 100%;
+            justify-content: flex-end;
+        }
+
+        .chart-bar {
+            width: 100%;
+            background: linear-gradient(180deg, var(--accent) 0%, rgba(255, 176, 0, 0.3) 100%);
+            border-radius: 2px 2px 0 0;
+            transition: height 0.5s ease;
+        }
+
+        .chart-label {
+            font-size: 9px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+            margin-top: 4px;
+        }
+
+        /* --- RANDOM POSITIONED INTERACTIVE DOTS (Red Area & Watch Tower) --- */
+        .trigger-dot {
+            position: absolute;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            z-index: 20;
+        }
+
+        .trigger-dot.red {
+            background-color: var(--critical);
+            box-shadow: 0 0 14px rgba(255, 59, 48, 0.9);
+            animation: pulse-red 2s infinite;
+        }
+
+        .trigger-dot.green {
+            background-color: var(--success);
+            box-shadow: 0 0 14px rgba(34, 197, 94, 0.9);
+            animation: pulse-green-dot 2s infinite;
+        }
+
+        .trigger-dot:hover {
+            transform: scale(1.3);
+        }
+
+        @keyframes pulse-red {
+            0% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(255, 59, 48, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(255, 59, 48, 0); }
+        }
+
+        @keyframes pulse-green-dot {
+            0% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { box-shadow: 0 0 0 8px rgba(34, 197, 94, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        /* Positioning the Dots over specific image regions */
+        /* Red Dot placed within the glowing red fence/zone area */
+        #redDotBtn {
+            top: 47%;
+            left: 45%;
+        }
+
+        /* Green Dot placed inside the watchtower structure */
+        #greenDotBtn {
+            top: 49%;
+            left: 20%;
+        }
+
+        /* Video Modal Player */
+        .video-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .video-modal.active {
+            display: flex;
+        }
+
+        .video-modal-content {
+            position: relative;
+            width: 80%;
+            max-width: 900px;
+            background: #000;
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.9);
+        }
+
+        .video-modal-content video {
+            width: 100%;
+            height: auto;
+            display: block;
+            max-height: 80vh;
+        }
+
+        .close-modal-btn {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: rgba(0, 0, 0, 0.7);
+            border: 1px solid var(--border-color);
+            color: #fff;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            font-weight: bold;
+            z-index: 10;
+            transition: background 0.2s;
+        }
+
+        .close-modal-btn:hover {
+            background: var(--critical);
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                width: var(--sidebar-collapsed-width);
+            }
+            .sidebar .nav-text,
+            .sidebar .nav-category,
+            .sidebar .logo-text,
+            .sidebar .system-status,
+            .sidebar .user-info {
+                opacity: 0;
+                visibility: hidden;
+                display: none;
+            }
+            .main-content {
+                margin-left: var(--sidebar-collapsed-width);
+                padding: 16px;
+            }
+        }
+
+        /* SLIDERS */
+        .slider-group { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 14px; 
+            margin-top: 16px; 
+            padding-top: 16px; 
+            border-top: 1px solid var(--border-color); 
+        }
+        
+        .slider-item { 
+            display: flex; 
+            flex-direction: column; 
+            gap: 8px; 
+        }
+        
+        .slider-label { 
+            font-size: 11px; 
+            color: var(--secondary-text); 
+            display: flex; 
+            justify-content: space-between; 
+            font-family: var(--font-family-mono); 
+        }
+        
+        .slider-value { 
+            font-size: 11px; 
+            font-weight: 700; 
+            color: var(--accent); 
+        }
+        
+        input[type="range"] { 
+            width: 100%; 
+            height: 4px; 
+            background: var(--border-color); 
+            border-radius: 2px; 
+            outline: none; 
+            cursor: pointer; 
+            appearance: none; 
+            -webkit-appearance: none; 
+            transition: all var(--transition-speed) ease;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb { 
+            -webkit-appearance: none; 
+            width: 14px; 
+            height: 14px; 
+            border-radius: 50%; 
+            background: var(--accent); 
+            border: 2px solid var(--card-bg); 
+            box-shadow: 0 0 4px rgba(255,176,0,0.4); 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+        }
+        
+        input[type="range"]::-webkit-slider-thumb:hover { 
+            transform: scale(1.2); 
+            box-shadow: 0 0 8px rgba(255,176,0,0.6); 
+        }
+        
+        input[type="range"]::-moz-range-thumb { 
+            width: 14px; 
+            height: 14px; 
+            border-radius: 50%; 
+            background: var(--accent); 
+            border: 2px solid var(--card-bg); 
+            cursor: pointer; 
+            transition: all 0.2s ease;
+        }
+        
+        input[type="range"]::-moz-range-track {
+            background: transparent;
+            border: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo-box">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-title">BORDER SIGHT AI</span>
+                        <span class="logo-subtitle">Surveillance Intelligence</span>
+                    </div>
+                </a>
+                <button class="collapse-btn" id="collapseBtn" title="Toggle Sidebar">
+                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-category">Monitoring</span>
+                    <a href="dashboard.html" class="nav-item" data-page="dashboard.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <span class="nav-text">Dashboard</span>
+                        <span class="tooltip">Dashboard</span>
+                    </a>
+                    <a href="cameras.html" class="nav-item" data-page="cameras.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                        <span class="nav-text">Live Cameras</span>
+                        <span class="tooltip">Live Cameras</span>
+                    </a>
+                    <a href="alerts.html" class="nav-item" data-page="alerts.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <span class="nav-text">Alerts</span>
+                        <span class="badge">4</span>
+                        <span class="tooltip">Alerts</span>
+                    </a>
+                    <a href="incidents.html" class="nav-item" data-page="incidents.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        <span class="nav-text">Incidents</span>
+                        <span class="tooltip">Incidents</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-category">AI Intelligence</span>
+                    <a href="detection.html" class="nav-item" data-page="detection.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        <span class="nav-text">AI Detection</span>
+                        <span class="tooltip">AI Detection</span>
+                    </a>
+                    <a href="tracking.html" class="nav-item" data-page="tracking.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        <span class="nav-text">Tracking</span>
+                        <span class="tooltip">Tracking</span>
+                    </a>
+                    <a href="zones.html" class="nav-item" data-page="zones.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                        <span class="nav-text">Zones & Fences</span>
+                        <span class="tooltip">Zones & Fences</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-category">Map</span>
+                    <a href="map.html" class="nav-item" data-page="map.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                        <span class="nav-text">Map & Heatmap</span>
+                        <span class="tooltip">Map & Heatmap</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-category">Analytics</span>
+                    <a href="analytics.html" class="nav-item" data-page="analytics.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                        <span class="nav-text">Analytics</span>
+                        <span class="tooltip">Analytics</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-category">Reports</span>
+                    <a href="reports.html" class="nav-item" data-page="reports.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        <span class="nav-text">Reports</span>
+                        <span class="tooltip">Reports</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-category">System</span>
+                    <a href="settings.html" class="nav-item" data-page="settings.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        <span class="nav-text">Settings</span>
+                        <span class="tooltip">Settings</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <span style="font-weight: 700; color: var(--primary); margin-bottom: 2px;">SYSTEM STATUS</span>
+                    <div class="status-row">
+                        <span>AI Engine</span>
+                        <span style="display:flex; align-items:center; gap:5px;"><span class="live-dot"></span> ONLINE</span>
+                    </div>
+                    <div class="status-row">
+                        <span>Cameras</span>
+                        <span style="color: var(--accent);">24/26</span>
+                    </div>
+                    <div class="status-row">
+                        <span>Database</span>
+                        <span style="display:flex; align-items:center; gap:5px;"><span class="live-dot"></span> ONLINE</span>
+                    </div>
+                </div>
+
+                <div class="user-profile">
+                    <div class="user-avatar">AD</div>
+                    <div class="user-info">
+                        <span class="user-name">Administrator</span>
+                        <span class="user-role">Security Manager</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN CONTENT -->
+        <main class="main-content">
+            <!-- Randomly Positioned Interactive Dots directly on the background / main area -->
+            <div class="trigger-dot red" id="redDotBtn" title="Play Red Alert Video (Red Fence)"></div>
+            <div class="trigger-dot green" id="greenDotBtn" title="Play Secure Stream Video (Watch Tower)"></div>
+
+            <header class="command-header">
+                <h1 class="command-title">Virtual <span>Zones & Fences</span></h1>
+                <p class="command-subtitle">Perimeter Geofence Configuration & Automated Tripwire Polygons</p>
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                    <div class="live-datetime">
+                        <span class="live-dot"></span>
+                        <span>LIVE</span>
+                        <span>|</span>
+                        <span class="dt-value" id="liveDatetime">SEP 07 · 2026, 09:45:03 PM</span>
+                    </div>
+                    <button data-theme-toggle style="background-color: var(--card-bg); border: 1px solid var(--border-color); color: var(--secondary-text); padding: 8px 14px; border-radius: 7px; font-size: 12px; font-family: var(--font-family); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px;" title="Toggle theme">
+                        🌙 Dark
+                    </button>
+                </div>
+            </header>
+
+            <div class="dashboard-grid">
+                <!-- Left Area (Empty spacer for background visibility) -->
+                <div class="left-area"></div>
+
+                <!-- Right Column Stacked Cards -->
+                <div class="right-column">
+                    <!-- 1st Card: Live Feed Camera -->
+                    <div class="dashboard-card">
+                        <div class="card-header-title">
+                            <span>1. LIVE FEED CAMERA</span>
+                            <span class="live-dot"></span>
+                        </div>
+                        <div class="live-feed-box">
+                            <img src="models/img/border-gate.png" alt="Border Gate Live Feed">
+                            <div class="feed-overlay-tag">
+                                <span class="live-dot"></span> GATE-01 SECURE
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 2nd Card: Recent Alerts -->
+                    <div class="dashboard-card">
+                        <div class="card-header-title">
+                            <span>2. RECENT ALERTS</span>
+                            <span style="color: var(--critical); font-size: 9px; font-family: var(--font-family-mono);">ACTIVE</span>
+                        </div>
+                        <div class="alerts-list">
+                            <div class="alert-item">
+                                <span class="alert-text">Motion detected - Sector 4</span>
+                                <span class="alert-time">09:35</span>
+                            </div>
+                            <div class="alert-item warning">
+                                <span class="alert-text">Tripwire breach attempt</span>
+                                <span class="alert-time">09:31</span>
+                            </div>
+                            <div class="alert-item">
+                                <span class="alert-text">Camera 03 re-calibrated</span>
+                                <span class="alert-time">09:15</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 3rd Card: Zone Status Activity -->
+                    <div class="dashboard-card">
+                        <div class="card-header-title">
+                            <span>ZONE STATUS ACTIVITY</span>
+                            <span style="color: var(--accent); font-size: 9px; font-family: var(--font-family-mono);">REALTIME</span>
+                        </div>
+                        <div class="zone-status-box">
+                            <div class="chart-container">
+                                <div class="chart-bar-wrap">
+                                    <div class="chart-bar" style="height: 45%;"></div>
+                                    <span class="chart-label">Z1</span>
+                                </div>
+                                <div class="chart-bar-wrap">
+                                    <div class="chart-bar" style="height: 75%;"></div>
+                                    <span class="chart-label">Z2</span>
+                                </div>
+                                <div class="chart-bar-wrap">
+                                    <div class="chart-bar" style="height: 30%;"></div>
+                                    <span class="chart-label">Z3</span>
+                                </div>
+                                <div class="chart-bar-wrap">
+                                    <div class="chart-bar" style="height: 90%;"></div>
+                                    <span class="chart-label">Z4</span>
+                                </div>
+                                <div class="chart-bar-wrap">
+                                    <div class="chart-bar" style="height: 60%;"></div>
+                                    <span class="chart-label">Z5</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Video Modal Player -->
+    <div class="video-modal" id="videoModal">
+        <div class="video-modal-content">
+            <button class="close-modal-btn" id="closeModalBtn">&times;</button>
+            <video id="modalVideoPlayer" controls autoplay></video>
+        </div>
+    </div>
+
+    <script>
+        const sidebar = document.getElementById('sidebar');
+        const collapseBtn = document.getElementById('collapseBtn');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        collapseBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+
+        function updateDatetime() {
+            const el = document.getElementById('liveDatetime');
+            if (!el) return;
+            const now = new Date();
+            el.textContent = now.toLocaleString('en-US', {
+                month: 'short',
+                day: '2-digit',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            }).replace(',', ' ·');
+        }
+        updateDatetime();
+        setInterval(updateDatetime, 1000);
+
+        const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+        navItems.forEach(item => {
+            if (item.getAttribute('data-page') === currentPath) {
+                item.classList.add('active');
+            }
+        });
+
+        // Video Modal Functionality for Red and Green dots
+        const redDotBtn = document.getElementById('redDotBtn');
+        const greenDotBtn = document.getElementById('greenDotBtn');
+        const videoModal = document.getElementById('videoModal');
+        const modalVideoPlayer = document.getElementById('modalVideoPlayer');
+        const closeModalBtn = document.getElementById('closeModalBtn');
+
+        redDotBtn.addEventListener('click', () => {
+            modalVideoPlayer.src = 'https://cdn.pixabay.com/video/2024/05/18/212478_large.mp4';
+            videoModal.classList.add('active');
+            modalVideoPlayer.play();
+        });
+
+        greenDotBtn.addEventListener('click', () => {
+            modalVideoPlayer.src = 'https://cdn.pixabay.com/video/2020/12/25/60265-495376563_large.mp4';
+            videoModal.classList.add('active');
+            modalVideoPlayer.play();
+        });
+
+        function closeModal() {
+            modalVideoPlayer.pause();
+            modalVideoPlayer.src = '';
+            videoModal.classList.remove('active');
+        }
+
+        closeModalBtn.addEventListener('click', closeModal);
+        videoModal.addEventListener('click', (e) => {
+            if (e.target === videoModal) {
+                closeModal();
+            }
+        });
+
+        // ZONE SLIDERS
+        const confSlider = document.getElementById('zone-sld-conf');
+        const sensSlider = document.getElementById('zone-sld-sens');
+        const alertSlider = document.getElementById('zone-sld-alert');
+
+        if (confSlider) confSlider.addEventListener('input', (e) => { 
+            document.getElementById('z-conf').textContent = e.target.value + '%'; 
+        });
+        if (sensSlider) sensSlider.addEventListener('input', (e) => { 
+            document.getElementById('z-sens').textContent = e.target.value + '%'; 
+        });
+        if (alertSlider) alertSlider.addEventListener('input', (e) => { 
+            document.getElementById('z-alert').textContent = e.target.value + '%'; 
+        });
+    </script>
+    <!-- Global Theme Manager -->
+    <script src="theme.js"></script>
+</body>
+</html>

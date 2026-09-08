@@ -1,0 +1,1201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Border Surveillance AI — Command Center & Communications</title>
+    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=aIYDmrSk6X13&format=png&color=000000">
+    <!-- Global Theme System -->
+    <link rel="stylesheet" href="theme.css">
+    <script src="theme.js"></script>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts: Inter & JetBrains Mono -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        surveillance: {
+                            bg: '#030303',
+                            card: '#080808',
+                            border: '#161616',
+                            borderHover: '#262626',
+                            accent: '#3b82f6',
+                            accentHover: '#2563eb',
+                            success: '#10b981',
+                            warning: '#f59e0b',
+                            danger: '#ef4444',
+                            textMuted: '#737373',
+                            textLight: '#f5f5f5'
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['JetBrains Mono', 'monospace'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        ::-webkit-scrollbar { width: 5px; height: 5px; }
+        ::-webkit-scrollbar-track { background: #030303; }
+        ::-webkit-scrollbar-thumb { background: #1a1a1a; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #333333; }
+        
+        /* Dark mode (default) */
+        :root,
+        :root[data-theme="dark"] {
+            --chat-bg: #030303;
+            --chat-card: #080808;
+            --chat-border: #161616;
+            --chat-border-hover: #262626;
+            --chat-text: #f5f5f5;
+            --chat-text-muted: #737373;
+        }
+        
+        /* Light mode */
+        :root[data-theme="light"] {
+            --chat-bg: #F8F8FA;
+            --chat-card: #FFFFFF;
+            --chat-border: #E5E5E7;
+            --chat-border-hover: #D5D5D7;
+            --chat-text: #1D1D1F;
+            --chat-text-muted: #5E5E62;
+        }
+        
+        body {
+            background-color: var(--chat-bg);
+            color: var(--chat-text);
+            transition: background-color 300ms ease, color 300ms ease;
+        }
+        
+        .bg-surveillance-bg { background-color: var(--chat-bg); transition: background-color 300ms ease; }
+        .bg-surveillance-card { background-color: var(--chat-card); transition: background-color 300ms ease; }
+        .border-surveillance-border { border-color: var(--chat-border); transition: border-color 300ms ease; }
+        .border-surveillance-borderHover { border-color: var(--chat-border-hover); transition: border-color 300ms ease; }
+        .text-surveillance-textLight { color: var(--chat-text); transition: color 300ms ease; }
+        .text-surveillance-textMuted { color: var(--chat-text-muted); transition: color 300ms ease; }
+        
+        /* Scrollbar for light mode */
+        :root[data-theme="light"] ::-webkit-scrollbar-track { background: #F8F8FA; }
+        :root[data-theme="light"] ::-webkit-scrollbar-thumb { background: #D5D5D7; }
+        :root[data-theme="light"] ::-webkit-scrollbar-thumb:hover { background: #A1A1A6; }
+        
+        .pulse-subtle { animation: pulseGlow 2s infinite; }
+        @keyframes pulseGlow {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.95); }
+        }
+        .hud-grid {
+            background-size: 30px 30px;
+            background-image: linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+        }
+        
+        :root[data-theme="light"] .hud-grid {
+            background-image: linear-gradient(to right, rgba(0, 0, 0, 0.03) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(0, 0, 0, 0.03) 1px, transparent 1px);
+        }
+
+        .glow-hover {
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glow-hover:hover {
+            border-color: rgba(59, 130, 246, 0.4);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.08), inset 0 0 10px rgba(59, 130, 246, 0.03);
+            transform: translateY(-1px);
+        }
+
+        .action-icon-hover {
+            transition: all 0.2s ease;
+        }
+        .action-icon-hover:hover {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.06);
+            transform: scale(1.08);
+        }
+        
+        :root[data-theme="light"] .action-icon-hover:hover {
+            color: #1D1D1F;
+            background-color: rgba(0, 0, 0, 0.06);
+        }
+
+        .chat-bubble-hover {
+            transition: all 0.2s ease;
+        }
+        .chat-bubble-hover:hover {
+            border-color: rgba(59, 130, 246, 0.35);
+            box-shadow: 0 4px 20px -2px rgba(0, 0, 0, 0.6), 0 0 10px rgba(59, 130, 246, 0.05);
+        }
+
+        .channel-item-hover {
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .channel-item-hover:hover {
+            background-color: rgba(38, 38, 38, 0.4);
+            border-left: 2px solid rgba(59, 130, 246, 0.6);
+            padding-left: calc(0.875rem - 2px);
+        }
+        
+        :root[data-theme="light"] .channel-item-hover:hover {
+            background-color: rgba(0, 0, 0, 0.05);
+        }
+
+        .nav-link-hover {
+            transition: all 0.2s ease;
+        }
+        .nav-link-hover:hover {
+            color: #ffffff;
+            background-color: rgba(255, 255, 255, 0.05);
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.08);
+        }
+        
+        :root[data-theme="light"] .nav-link-hover:hover {
+            color: #1D1D1F;
+            background-color: rgba(0, 0, 0, 0.05);
+            box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.08);
+        }
+    </style>
+</head>
+<body class="bg-surveillance-bg text-surveillance-textLight font-sans h-screen flex flex-col overflow-hidden hud-grid">
+
+    <!-- ================= TOP HEADER ================= -->
+    <header class="h-16 bg-surveillance-card border-b border-surveillance-border flex items-center justify-between px-6 shrink-0 z-20 shadow-lg">
+        <div class="flex items-center space-x-6">
+            <a href="dashboard.html" title="Back to Dashboard" class="w-9 h-9 flex items-center justify-center text-surveillance-textMuted hover:text-white rounded transition border border-transparent hover:border-surveillance-border hover:bg-surveillance-border/40 action-icon-hover">
+                <i class="fa-solid fa-arrow-left"></i>
+            </a>
+            <div class="flex items-center space-x-2.5 group cursor-pointer">
+                <div class="w-2.5 h-2.5 rounded-full bg-surveillance-success pulse-subtle group-hover:shadow-[0_0_8px_#10b981] transition-all"></div>
+                <span class="font-mono font-bold tracking-wider text-xs uppercase text-white group-hover:text-blue-400 transition-colors">SEC-OPS // COMMAND V4.2</span>
+            </div>
+            <nav class="hidden md:flex items-center space-x-1 pl-6 border-l border-surveillance-border text-xs font-medium">
+                <a href="#" class="px-3 py-1.5 rounded text-surveillance-textMuted nav-link-hover">Dashboard</a>
+                <a href="#" class="px-3 py-1.5 rounded text-surveillance-textMuted nav-link-hover">Sector Map</a>
+                <a href="#" class="px-3 py-1.5 rounded text-surveillance-textMuted nav-link-hover">AI Feeds</a>
+                <a href="#" class="px-3.5 py-1.5 rounded bg-surveillance-border border border-surveillance-borderHover text-white font-medium flex items-center space-x-2 shadow-inner glow-hover">
+                    <i class="fa-solid fa-comments text-surveillance-accent"></i>
+                    <span>Real-Time Chat</span>
+                    <span class="bg-surveillance-accent text-white px-1.5 py-0.2 rounded-full text-[10px] font-mono shadow-sm" id="headerUnreadBadge">0</span>
+                </a>
+            </nav>
+        </div>
+
+        <div class="flex items-center space-x-4 text-xs font-mono">
+            <div class="hidden sm:flex items-center space-x-2 bg-surveillance-bg px-3 py-1.5 rounded border border-surveillance-border glow-hover cursor-default">
+                <span id="socketStatusDot" class="w-2 h-2 rounded-full bg-surveillance-success pulse-subtle"></span>
+                <span id="socketStatusText" class="text-surveillance-textMuted hover:text-surveillance-textLight transition-colors">🟢 LOCAL REAL-TIME CHANNEL</span>
+            </div>
+            <button onclick="openEmergencyModal()" class="bg-surveillance-danger/10 hover:bg-surveillance-danger/25 text-surveillance-danger border border-surveillance-danger/30 hover:border-surveillance-danger/60 px-3.5 py-1.5 rounded font-bold transition-all duration-200 flex items-center space-x-2 shadow-sm hover:shadow-[0_0_15px_rgba(239,68,68,0.2)] hover:-translate-y-0.5">
+                <i class="fa-solid fa-triangle-exclamation animate-bounce"></i>
+                <span>EMERGENCY BROADCAST</span>
+            </button>
+            <button data-theme-toggle title="Toggle Dark/Light Mode" class="w-9 h-9 flex items-center justify-center text-surveillance-textMuted hover:text-white rounded transition border border-transparent hover:border-surveillance-border hover:bg-surveillance-border/40 action-icon-hover">
+                <i class="fa-solid fa-moon text-sm"></i>
+            </button>
+            <div class="h-5 w-[1px] bg-surveillance-border"></div>
+            <!-- Switch User Dropdown Trigger -->
+            <div class="relative">
+                <button onclick="toggleUserDropdown()" class="flex items-center space-x-2.5 cursor-pointer group py-1 px-2 rounded hover:bg-surveillance-border/40 transition border border-transparent hover:border-surveillance-border">
+                    <div id="headerUserInitials" class="w-8 h-8 rounded bg-surveillance-border border border-surveillance-borderHover flex items-center font-bold justify-center text-surveillance-accent font-mono text-xs group-hover:border-surveillance-accent transition">CO</div>
+                    <span id="headerUserName" class="font-sans font-semibold hidden sm:inline text-white group-hover:text-blue-400 transition-colors">Cmdr. Vance</span>
+                    <i class="fa-solid fa-chevron-down text-[10px] text-surveillance-textMuted"></i>
+                </button>
+                <!-- Switch User Menu -->
+                <div id="userDropdownMenu" class="hidden absolute right-0 mt-2 w-64 bg-surveillance-card border border-surveillance-border rounded-xl shadow-2xl py-2 z-50">
+                    <div class="px-3 py-1.5 text-[10px] font-mono text-surveillance-textMuted uppercase border-b border-surveillance-border mb-1">Switch Active Persona</div>
+                    <div id="userSelectList" class="space-y-0.5 px-1 max-h-60 overflow-y-auto"></div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- ================= MAIN LAYOUT ================= -->
+    <div class="flex-1 flex overflow-hidden">
+
+        <!-- 1. LEFT PANEL — CONVERSATIONS & CHANNELS -->
+        <aside class="w-80 lg:w-96 bg-surveillance-card border-r border-surveillance-border flex flex-col shrink-0 select-none">
+            <!-- Search & Filter Bar -->
+            <div class="p-4 border-b border-surveillance-border space-y-3 bg-surveillance-card">
+                <div class="flex items-center justify-between">
+                    <h2 class="text-xs font-bold uppercase tracking-wider text-surveillance-textMuted font-mono">Communications</h2>
+                    <div class="flex items-center space-x-2 text-xs text-surveillance-textMuted">
+                        <button onclick="toggleNotificationSound()" id="soundToggleBtn" title="Toggle Sound" class="w-7 h-7 rounded flex items-center justify-center action-icon-hover"><i class="fa-solid fa-volume-high"></i></button>
+                        <button onclick="toggleNotificationDesktop()" id="desktopNotifBtn" title="Desktop Notifications" class="w-7 h-7 rounded flex items-center justify-center action-icon-hover"><i class="fa-solid fa-bell"></i></button>
+                    </div>
+                </div>
+                <div class="relative">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-surveillance-textMuted text-xs"></i>
+                    <input type="text" id="conversationSearch" oninput="filterConversations(this.value)" placeholder="Search secure channels or personnel..." 
+                           class="w-full bg-surveillance-bg border border-surveillance-border rounded text-xs pl-9 pr-3 py-2 text-surveillance-textLight placeholder-surveillance-textMuted focus:outline-none focus:border-surveillance-accent transition font-mono shadow-inner">
+                </div>
+                <!-- Filter Tabs -->
+                <div class="flex space-x-1 text-xs font-medium">
+                    <button onclick="switchTab('all')" id="tab-all" class="flex-1 py-1.5 rounded bg-surveillance-border border border-surveillance-borderHover text-white transition shadow-sm glow-hover">All</button>
+                    <button onclick="switchTab('channels')" id="tab-channels" class="flex-1 py-1.5 rounded text-surveillance-textMuted hover:text-white hover:bg-surveillance-border/50 transition">Channels</button>
+                    <button onclick="switchTab('direct')" id="tab-direct" class="flex-1 py-1.5 rounded text-surveillance-textMuted hover:text-white hover:bg-surveillance-border/50 transition">Direct</button>
+                </div>
+            </div>
+
+            <!-- List Container -->
+            <div id="conversationsList" class="flex-1 overflow-y-auto divide-y divide-surveillance-border/50">
+                <!-- Populated via JS -->
+            </div>
+        </aside>
+
+        <!-- 2. MAIN CHAT AREA -->
+        <main class="flex-1 flex flex-col bg-surveillance-bg min-w-0 relative">
+            
+            <!-- Chat Header -->
+            <div class="h-16 bg-surveillance-card border-b border-surveillance-border px-6 flex items-center justify-between shrink-0 shadow-sm">
+                <div class="flex items-center space-x-3.5 min-w-0">
+                    <div class="relative shrink-0 group cursor-pointer">
+                        <div id="activeAvatar" class="w-10 h-10 rounded bg-surveillance-border border border-surveillance-borderHover flex items-center justify-center font-bold text-sm text-surveillance-accent font-mono transition">HQ</div>
+                        <div id="activeStatusDot" class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-surveillance-success border-2 border-surveillance-card transition"></div>
+                    </div>
+                    <div class="min-w-0">
+                        <div class="flex items-center space-x-2">
+                            <h3 id="activeName" class="font-semibold text-sm truncate text-white">Command HQ</h3>
+                            <span id="activePriorityBadge" class="hidden text-[10px] font-mono bg-surveillance-danger/10 text-surveillance-danger border border-surveillance-danger/30 px-1.5 rounded font-bold animate-pulse">HIGH PRIORITY</span>
+                        </div>
+                        <p id="activeSubText" class="text-xs text-surveillance-textMuted truncate font-mono">Secure Satellite Uplink</p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <button onclick="toggleDetailsPanel()" id="infoPanelToggleBtn" title="Toggle Info Panel" class="w-9 h-9 flex items-center justify-center text-surveillance-textMuted hover:text-white rounded transition border border-transparent hover:border-surveillance-border hover:bg-surveillance-border/40 action-icon-hover">
+                        <i class="fa-solid fa-circle-info"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Message History Container -->
+            <div id="messageHistory" class="flex-1 overflow-y-auto p-6 space-y-5">
+                <!-- Populated via JS -->
+            </div>
+
+            <!-- Typing Indicator Row -->
+            <div id="typingIndicatorRow" class="px-6 py-1 text-xs text-surveillance-textMuted italic font-mono h-6 flex items-center opacity-0 transition-opacity">
+                <span id="typingUserText">AI Operator is analyzing feed...</span>
+            </div>
+
+            <!-- 3. MESSAGE COMPOSER -->
+            <div class="p-4 bg-surveillance-card border-t border-surveillance-border shrink-0 shadow-lg">
+                <!-- Attachment preview box -->
+                <div id="attachmentPreviewContainer" class="hidden mb-2.5 p-2.5 bg-surveillance-bg border border-surveillance-border rounded text-xs flex items-center justify-between glow-hover">
+                    <div class="flex items-center space-x-2 truncate">
+                        <i class="fa-solid fa-file-shield text-surveillance-accent animate-pulse"></i>
+                        <span id="attachedFileName" class="truncate font-mono text-white">surveillance_capture_sector4.png</span>
+                    </div>
+                    <button onclick="clearAttachment()" class="text-surveillance-danger hover:text-red-400 p-1 w-6 h-6 rounded flex items-center justify-center hover:bg-surveillance-danger/10 transition"><i class="fa-solid fa-xmark"></i></button>
+                </div>
+
+                <div class="flex items-end space-x-2.5">
+                    <div class="flex items-center space-x-1 pb-2">
+                        <label title="Attach File/Image" class="w-10 h-10 flex items-center justify-center text-surveillance-textMuted hover:text-white cursor-pointer rounded-lg hover:bg-surveillance-border border border-transparent hover:border-surveillance-border action-icon-hover">
+                            <i class="fa-solid fa-paperclip text-sm"></i>
+                            <input type="file" id="fileInput" class="hidden" onchange="handleFileSelect(event)">
+                        </label>
+                        <button onclick="toggleEmojiPicker()" title="Insert Tactical Tag" class="w-10 h-10 flex items-center justify-center text-surveillance-textMuted hover:text-white rounded-lg hover:bg-surveillance-border border border-transparent hover:border-surveillance-border action-icon-hover">
+                            <i class="fa-regular fa-face-smile text-sm"></i>
+                        </button>
+                        <button onclick="recordVoiceMessage()" title="Transmit Voice Note" class="w-10 h-10 flex items-center justify-center text-surveillance-textMuted hover:text-white rounded-lg hover:bg-surveillance-border border border-transparent hover:border-surveillance-border action-icon-hover">
+                            <i class="fa-solid fa-microphone text-sm"></i>
+                        </button>
+                    </div>
+
+                    <div class="flex-1 relative">
+                        <textarea id="messageInput" rows="1" oninput="handleTypingInput()" onkeydown="handleKeyInput(event)" placeholder="Type encrypted transmission (Enter to send, Shift+Enter for newline)..." 
+                                  class="w-full bg-surveillance-bg border border-surveillance-border rounded-lg px-4 py-2.5 text-xs text-surveillance-textLight placeholder-surveillance-textMuted focus:outline-none focus:border-surveillance-accent hover:border-surveillance-borderHover transition resize-none max-h-32 font-mono shadow-inner"></textarea>
+                    </div>
+
+                    <button onclick="sendMessage()" class="bg-surveillance-accent hover:bg-surveillance-accentHover text-white px-5 py-2.5 rounded-lg font-medium transition-all duration-200 flex items-center space-x-2 shrink-0 pb-2.5 shadow-md shadow-blue-900/20 hover:shadow-[0_0_15px_rgba(59,130,246,0.4)] hover:-translate-y-0.5 active:translate-y-0">
+                        <i class="fa-solid fa-paper-plane text-xs"></i>
+                        <span class="hidden sm:inline font-mono tracking-wide text-xs">Transmit</span>
+                    </button>
+                </div>
+            </div>
+        </main>
+
+        <!-- 8. CHAT DETAILS PANEL (Right Sidebar) -->
+        <aside id="detailsPanel" class="w-80 bg-surveillance-card border-l border-surveillance-border flex flex-col shrink-0 transition-all duration-300">
+            <div class="h-16 border-b border-surveillance-border px-4 flex items-center justify-between shrink-0">
+                <h4 class="text-xs font-bold uppercase tracking-wider text-surveillance-textMuted font-mono">Operational Intel</h4>
+                <button onclick="toggleDetailsPanel()" class="w-7 h-7 rounded flex items-center justify-center text-surveillance-textMuted hover:text-white action-icon-hover"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto p-4 space-y-6 text-xs">
+                <div class="space-y-2">
+                    <span class="text-surveillance-textMuted uppercase tracking-wider text-[10px] font-bold font-mono">Channel Profile</span>
+                    <div class="bg-surveillance-bg p-3 rounded-lg border border-surveillance-border space-y-2 font-mono glow-hover">
+                        <div class="flex justify-between"><span class="text-surveillance-textMuted">Protocol:</span> <span class="text-surveillance-success font-bold">AES-256 Secure</span></div>
+                        <div class="flex justify-between"><span class="text-surveillance-textMuted">Uplink Node:</span> <span>US-EAST-SEC-01</span></div>
+                        <div class="flex justify-between"><span class="text-surveillance-textMuted">Session ID:</span> <span id="panelSessionId">#CH-9942-X</span></div>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <span class="text-surveillance-textMuted uppercase tracking-wider text-[10px] font-bold font-mono">Authorized Personnel</span>
+                    <div id="panelParticipantsList" class="space-y-1.5">
+                        <!-- Populated via JS -->
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-surveillance-textMuted uppercase tracking-wider text-[10px] font-bold font-mono">Pinned Transmissions</span>
+                        <span id="pinnedCountBadge" class="bg-surveillance-border text-white px-1.5 rounded text-[10px] font-mono">0</span>
+                    </div>
+                    <div id="panelPinnedList" class="space-y-2">
+                        <p class="text-surveillance-textMuted italic text-[11px]">No transmissions pinned to this channel.</p>
+                    </div>
+                </div>
+
+                <div class="space-y-2">
+                    <span class="text-surveillance-textMuted uppercase tracking-wider text-[10px] font-bold font-mono">Shared Evidence / Logs</span>
+                    <div id="panelFilesList" class="space-y-1.5">
+                        <p class="text-surveillance-textMuted italic text-[11px]">No files transferred in session.</p>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- ================= EMERGENCY MODAL ================= -->
+    <div id="emergencyModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-surveillance-card border border-surveillance-danger/40 w-full max-w-lg rounded-xl shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            <div class="bg-surveillance-danger/10 px-6 py-4 border-b border-surveillance-danger/30 flex items-center justify-between">
+                <div class="flex items-center space-x-2 text-surveillance-danger font-bold text-sm font-mono">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>EMERGENCY BROADCAST PROTOCOL</span>
+                </div>
+                <button onclick="closeEmergencyModal()" class="w-7 h-7 rounded flex items-center justify-center text-surveillance-textMuted hover:text-white action-icon-hover"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="p-6 space-y-4 text-xs font-mono">
+                <p class="text-surveillance-textMuted font-sans">This will immediately flag a high-priority alert across all active units, sector patrols, and automated surveillance command stations.</p>
+                <div>
+                    <label class="block font-medium mb-1.5 text-surveillance-textLight">Target Sector / Channel</label>
+                    <select id="emergencyChannelSelect" class="w-full bg-surveillance-bg border border-surveillance-border rounded-lg p-2.5 text-surveillance-textLight focus:outline-none focus:border-surveillance-danger hover:border-surveillance-borderHover transition">
+                        <option value="ch-emergency">🚨 Emergency Operations (Global)</option>
+                        <option value="ch-patrol">🛡️ Border Patrol Sector 4</option>
+                        <option value="ch-hq">🎖️ Command HQ Direct</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block font-medium mb-1.5 text-surveillance-textLight">Emergency Description / Directive</label>
+                    <textarea id="emergencyMessageInput" rows="3" placeholder="Describe threat signature, perimeter breach point, or required tactical deployment..." class="w-full bg-surveillance-bg border border-surveillance-border rounded-lg p-2.5 text-surveillance-textLight focus:outline-none focus:border-surveillance-danger hover:border-surveillance-borderHover transition resize-none"></textarea>
+                </div>
+                <div class="flex justify-end space-x-3 pt-2">
+                    <button onclick="closeEmergencyModal()" class="px-4 py-2 rounded-lg bg-surveillance-border hover:bg-surveillance-borderHover text-surveillance-textLight transition font-medium">Cancel</button>
+                    <button onclick="submitEmergencyBroadcast()" class="px-4 py-2 rounded-lg bg-surveillance-danger hover:bg-red-600 text-white font-bold transition flex items-center space-x-2 shadow-lg shadow-surveillance-danger/20 hover:shadow-[0_0_20px_rgba(239,68,68,0.4)] hover:-translate-y-0.5">
+                        <i class="fa-solid fa-bullhorn"></i>
+                        <span>Transmit Priority Alert</span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ================= JAVASCRIPT ENGINE ================= -->
+    <script>
+        const AVAILABLE_USERS = [
+            { id: "usr-cmd", name: "Cmdr. Vance", role: "Commander", subRole: "Command HQ" },
+            { id: "usr-officer", name: "Lt. Arjun", role: "Border Officer", subRole: "Sector Patrol" },
+            { id: "usr-ai", name: "AI Operator", role: "Surveillance Center", subRole: "Surveillance Team" },
+            { id: "usr-monitoring", name: "Surveillance Officer", role: "Monitoring Station", subRole: "Surveillance Team" }
+        ];
+
+        const STORAGE_NAMESPACE = "borderSurveillanceChat_";
+        const chatChannel = new BroadcastChannel("border-surveillance-chat");
+
+        let currentUser = loadSavedUser();
+
+        let state = {
+            currentTab: 'all',
+            searchQuery: '',
+            activeConversationId: 'ch-emergency',
+            soundEnabled: true,
+            desktopNotifEnabled: true,
+            isDetailsPanelOpen: true,
+            pendingAttachment: null,
+            conversations: []
+        };
+
+        let typingTimeout = null;
+        let isCurrentlyTyping = false;
+
+        function loadSavedUser() {
+            const saved = localStorage.getItem(STORAGE_NAMESPACE + "currentUser");
+            if (saved) {
+                try { return JSON.parse(saved); } catch(e) {}
+            }
+            return AVAILABLE_USERS[0];
+        }
+
+        function saveCurrentUser(user) {
+            currentUser = user;
+            localStorage.setItem(STORAGE_NAMESPACE + "currentUser", JSON.stringify(user));
+            updateHeaderUserInfo();
+            broadcastEvent("user_online", { userId: currentUser.id, name: currentUser.name });
+        }
+
+        function updateHeaderUserInfo() {
+            document.getElementById("headerUserName").textContent = currentUser.name;
+            const initials = currentUser.name.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+            document.getElementById("headerUserInitials").textContent = initials;
+        }
+
+        function toggleUserDropdown() {
+            const menu = document.getElementById("userDropdownMenu");
+            menu.classList.toggle("hidden");
+            if (!menu.classList.contains("hidden")) {
+                renderUserSelectList();
+            }
+        }
+
+        function renderUserSelectList() {
+            const listEl = document.getElementById("userSelectList");
+            listEl.innerHTML = "";
+            AVAILABLE_USERS.forEach(u => {
+                const isSelected = u.id === currentUser.id;
+                listEl.insertAdjacentHTML('beforeend', `
+                    <div onclick="switchActiveUser('${u.id}')" class="p-2 rounded-lg cursor-pointer flex items-center justify-between text-xs font-mono transition ${isSelected ? 'bg-surveillance-border text-white font-bold' : 'text-surveillance-textMuted hover:text-white hover:bg-surveillance-border/50'}">
+                        <div>
+                            <div>${u.name}</div>
+                            <div class="text-[10px] text-surveillance-textMuted">${u.role}</div>
+                        </div>
+                        ${isSelected ? '<i class="fa-solid fa-check text-surveillance-accent"></i>' : ''}
+                    </div>
+                `);
+            });
+        }
+
+        function switchActiveUser(userId) {
+            const found = AVAILABLE_USERS.find(u => u.id === userId);
+            if (found) {
+                saveCurrentUser(found);
+                toggleUserDropdown();
+                loadChatData();
+                renderConversations();
+                loadActiveConversation();
+            }
+        }
+
+        const INITIAL_CONVERSATIONS = [
+            {
+                id: 'ch-emergency',
+                name: 'Emergency Operations',
+                role: 'Global Security Channel',
+                type: 'channel',
+                avatar: '🚨',
+                isOnline: true,
+                isHighPriority: true,
+                lastSeen: 'Live Uplink',
+                participants: [
+                    { id: 'usr-cmd', name: 'Cmdr. Vance', role: 'Commander', status: 'online' },
+                    { id: 'usr-officer', name: 'Lt. Arjun', role: 'Border Officer', status: 'online' },
+                    { id: 'usr-ai', name: 'AI Operator', role: 'Surveillance Center', status: 'online' }
+                ],
+                messages: [
+                    { messageId: 'm101', senderId: 'usr-ai', senderName: 'AI Operator', senderRole: 'Surveillance Team', receiverId: 'ch-emergency', message: 'Movement detected by Thermal Grid Alpha-4. Analyzing heat signatures.', timestamp: '10:42 AM', status: 'read', priority: 'high', isPinned: true, reactions: { '⚠️': 2 }, attachments: null },
+                    { messageId: 'm102', senderId: 'usr-officer', senderName: 'Lt. Arjun', senderRole: 'Sector Patrol', receiverId: 'ch-emergency', message: 'Patrol Unit 2 is en route to Grid Alpha-4 for visual confirmation.', timestamp: '10:44 AM', status: 'read', priority: 'high', isPinned: false, reactions: {}, attachments: null }
+                ]
+            },
+            {
+                id: 'ch-hq',
+                name: 'Command HQ',
+                role: 'Strategic Command Post',
+                type: 'channel',
+                avatar: '🎖️',
+                isOnline: true,
+                isHighPriority: false,
+                lastSeen: 'Active Now',
+                participants: [
+                    { id: 'usr-cmd', name: 'Cmdr. Vance', role: 'Commander', status: 'online' },
+                    { id: 'usr-hq', name: 'Gen. Sterling', role: 'Chief of Defense', status: 'online' }
+                ],
+                messages: [
+                    { messageId: 'm201', senderId: 'usr-hq', senderName: 'Gen. Sterling', senderRole: 'Chief of Defense', receiverId: 'ch-hq', message: 'Daily perimeter audit report looks stable. Keep drones active over Sector 3.', timestamp: '08:15 AM', status: 'read', priority: 'normal', isPinned: true, reactions: { '👍': 1 }, attachments: null }
+                ]
+            },
+            {
+                id: 'ch-patrol',
+                name: 'Border Patrol',
+                role: 'Sector 1-6 Field Units',
+                type: 'channel',
+                avatar: '🛡️',
+                isOnline: true,
+                isHighPriority: false,
+                lastSeen: 'Active Now',
+                participants: [
+                    { id: 'usr-officer', name: 'Lt. Arjun', role: 'Border Officer', status: 'online' },
+                    { id: 'usr-patrol2', name: 'Officer Martinez', role: 'K9 Unit', status: 'away' }
+                ],
+                messages: [
+                    { messageId: 'm301', senderId: 'usr-officer', senderName: 'Lt. Arjun', senderRole: 'Sector Patrol', receiverId: 'ch-patrol', message: 'Gate 3 security sensor battery low. Requesting maintenance drone dispatch.', timestamp: '09:20 AM', status: 'read', priority: 'normal', isPinned: false, reactions: {}, attachments: [{ name: 'sensor_diag_3.log', size: '245 KB' }] }
+                ]
+            },
+            {
+                id: 'ch-surveillance',
+                name: 'Surveillance Team',
+                role: 'AI & Optical Sensor Grid',
+                type: 'channel',
+                avatar: '📡',
+                isOnline: true,
+                isHighPriority: false,
+                lastSeen: 'Active Now',
+                participants: [
+                    { id: 'usr-ai', name: 'AI Operator', role: 'Surveillance Center', status: 'online' },
+                    { id: 'usr-analyst', name: 'Tech. Brooks', role: 'Optical Analyst', status: 'online' }
+                ],
+                messages: [
+                    { messageId: 'm401', senderId: 'usr-ai', senderName: 'AI Operator', senderRole: 'Surveillance Team', receiverId: 'ch-surveillance', message: 'Facial recognition model updated to version 4.1. False positive rate reduced by 4.2%.', timestamp: 'Yesterday', status: 'read', priority: 'normal', isPinned: false, reactions: {}, attachments: null }
+                ]
+            }
+        ];
+
+        function loadChatData() {
+            const savedConvs = localStorage.getItem(STORAGE_NAMESPACE + "conversations");
+            const savedUnreads = localStorage.getItem(STORAGE_NAMESPACE + "unreads");
+            
+            let unreadMap = {};
+            if (savedUnreads) {
+                try { unreadMap = JSON.parse(savedUnreads); } catch(e) {}
+            }
+
+            if (savedConvs) {
+                try {
+                    state.conversations = JSON.parse(savedConvs);
+                    // Apply unread counts
+                    state.conversations.forEach(c => {
+                        if (unreadMap[c.id] !== undefined) {
+                            c.unreadCount = unreadMap[c.id];
+                        } else {
+                            if (c.unreadCount === undefined) c.unreadCount = 0;
+                        }
+                    });
+                } catch(e) {
+                    state.conversations = INITIAL_CONVERSATIONS.map(c => ({ ...c, unreadCount: 0 }));
+                }
+            } else {
+                state.conversations = INITIAL_CONVERSATIONS.map(c => ({ ...c, unreadCount: 0 }));
+                saveChatData();
+            }
+        }
+
+        function saveChatData() {
+            localStorage.setItem(STORAGE_NAMESPACE + "conversations", JSON.stringify(state.conversations));
+            let unreadMap = {};
+            state.conversations.forEach(c => { unreadMap[c.id] = c.unreadCount || 0; });
+            localStorage.setItem(STORAGE_NAMESPACE + "unreads", JSON.stringify(unreadMap));
+        }
+
+        function broadcastEvent(type, payload) {
+            chatChannel.postMessage({ type, payload, senderTabId: currentUser.id });
+        }
+
+        chatChannel.onmessage = (event) => {
+            const { type, payload } = event.data;
+            handleIncomingEvent(type, payload);
+        };
+
+        function handleIncomingEvent(type, payload) {
+            if (type === "new_message") {
+                const conv = state.conversations.find(c => c.id === payload.conversationId);
+                if (conv) {
+                    conv.messages.push(payload);
+                    if (payload.conversationId === state.activeConversationId) {
+                        loadActiveConversation();
+                        markAsRead(state.activeConversationId);
+                    } else {
+                        conv.unreadCount = (conv.unreadCount || 0) + 1;
+                        playNotificationSound();
+                        showNotificationBanner(payload);
+                    }
+                    saveChatData();
+                    renderConversations();
+                }
+            } else if (type === "message_read") {
+                const conv = state.conversations.find(c => c.id === payload.conversationId);
+                if (conv) {
+                    conv.messages.forEach(m => { if (m.status !== 'read') m.status = 'read'; });
+                    saveChatData();
+                    if (state.activeConversationId === payload.conversationId) loadActiveConversation();
+                }
+            } else if (type === "message_deleted") {
+                const conv = state.conversations.find(c => c.id === payload.conversationId);
+                if (conv) {
+                    conv.messages = conv.messages.filter(m => m.messageId !== payload.messageId);
+                    saveChatData();
+                    if (state.activeConversationId === payload.conversationId) loadActiveConversation();
+                    renderConversations();
+                }
+            } else if (type === "message_reaction") {
+                const conv = state.conversations.find(c => c.id === payload.conversationId);
+                if (conv) {
+                    const msg = conv.messages.find(m => m.messageId === payload.messageId);
+                    if (msg) {
+                        msg.reactions = payload.reactions;
+                        saveChatData();
+                        if (state.activeConversationId === payload.conversationId) loadActiveConversation();
+                    }
+                }
+            } else if (type === "message_pinned") {
+                const conv = state.conversations.find(c => c.id === payload.conversationId);
+                if (conv) {
+                    const msg = conv.messages.find(m => m.messageId === payload.messageId);
+                    if (msg) {
+                        msg.isPinned = payload.isPinned;
+                        saveChatData();
+                        if (state.activeConversationId === payload.conversationId) loadActiveConversation();
+                    }
+                }
+            } else if (type === "typing_start") {
+                if (payload.conversationId === state.activeConversationId && payload.userId !== currentUser.id) {
+                    showTypingIndicator(payload.userName);
+                }
+            } else if (type === "typing_stop") {
+                if (payload.conversationId === state.activeConversationId) {
+                    hideTypingIndicator();
+                }
+            } else if (type === "emergency_alert") {
+                const conv = state.conversations.find(c => c.id === payload.conversationId) || state.conversations[0];
+                conv.messages.push(payload);
+                conv.isHighPriority = true;
+                conv.unreadCount = (conv.unreadCount || 0) + 1;
+                saveChatData();
+                renderConversations();
+                playAlertSound();
+                if (state.activeConversationId === conv.id) loadActiveConversation();
+            }
+        }
+
+        function playNotificationSound() {
+            if (!state.soundEnabled) return;
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(587.33, audioCtx.currentTime); // D5
+                gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.3);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.3);
+            } catch(e) {}
+        }
+
+        function playAlertSound() {
+            if (!state.soundEnabled) return;
+            try {
+                const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(880, audioCtx.currentTime);
+                osc.frequency.setValueAtTime(440, audioCtx.currentTime + 0.15);
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + 0.5);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + 0.5);
+            } catch(e) {}
+        }
+
+        function showNotificationBanner(payload) {
+            if (!state.desktopNotifEnabled) return;
+            if (window.Notification && Notification.permission === "granted") {
+                new Notification(payload.senderName, { body: payload.message });
+            }
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            // Check authentication first
+            const userRole = localStorage.getItem('borderSightUserRole');
+            const username = localStorage.getItem('borderSightUsername');
+            
+            if (!userRole || !username) {
+                // Not logged in, redirect to login
+                window.location.href = 'index.html';
+                return;
+            }
+            
+            updateHeaderUserInfo();
+            loadChatData();
+            renderConversations();
+            loadActiveConversation();
+
+            if (window.Notification && Notification.permission !== "granted" && Notification.permission !== "denied") {
+                Notification.requestPermission();
+            }
+
+            broadcastEvent("user_online", { userId: currentUser.id, name: currentUser.name });
+        });
+
+        window.addEventListener('beforeunload', () => {
+            broadcastEvent("user_offline", { userId: currentUser.id, name: currentUser.name });
+        });
+
+        function renderConversations() {
+            const listEl = document.getElementById('conversationsList');
+            listEl.innerHTML = '';
+
+            const filtered = state.conversations.filter(c => {
+                const matchesTab = state.currentTab === 'all' || 
+                                  (state.currentTab === 'channels' && c.type === 'channel') || 
+                                  (state.currentTab === 'direct' && c.type === 'direct');
+                const matchesSearch = c.name.toLowerCase().includes(state.searchQuery.toLowerCase()) || 
+                                    c.role.toLowerCase().includes(state.searchQuery.toLowerCase());
+                return matchesTab && matchesSearch;
+            });
+
+            if (filtered.length === 0) {
+                listEl.innerHTML = `<div class="p-6 text-center text-surveillance-textMuted text-xs italic font-mono">No matching secure channels found.</div>`;
+                updateHeaderBadge();
+                return;
+            }
+
+            filtered.forEach(conv => {
+                const isActive = conv.id === state.activeConversationId;
+                const lastMsg = conv.messages[conv.messages.length - 1] || { message: 'No messages yet', timestamp: '' };
+                
+                let avatarHTML = '';
+                if (conv.type === 'channel') {
+                    avatarHTML = `<div class="w-10 h-10 rounded-lg bg-surveillance-bg flex items-center justify-center text-base border border-surveillance-border shrink-0 shadow-inner group-hover:border-surveillance-accent transition">${conv.avatar}</div>`;
+                } else {
+                    avatarHTML = `<div class="relative shrink-0"><div class="w-10 h-10 rounded-lg bg-surveillance-bg flex items-center justify-center font-bold text-xs text-surveillance-accent border border-surveillance-border font-mono group-hover:border-surveillance-accent transition">${conv.avatar}</div><div class="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full ${conv.isOnline ? 'bg-surveillance-success' : 'bg-surveillance-textMuted'} border-2 border-surveillance-card"></div></div>`;
+                }
+
+                const itemHTML = `
+                    <div onclick="selectConversation('${conv.id}')" class="p-3.5 flex items-start space-x-3 cursor-pointer group channel-item-hover ${isActive ? 'bg-surveillance-border/80 border-l-2 border-surveillance-accent shadow-sm' : ''}">
+                        ${avatarHTML}
+                        <div class="flex-1 min-w-0">
+                            <div class="flex items-center justify-between mb-1">
+                                <h4 class="font-semibold text-xs text-surveillance-textLight truncate group-hover:text-white transition ${isActive ? 'text-white' : ''}">${conv.name}</h4>
+                                <span class="text-[10px] text-surveillance-textMuted shrink-0 font-mono">${lastMsg.timestamp || ''}</span>
+                            </div>
+                            <p class="text-[11px] text-surveillance-textMuted truncate mb-1.5 group-hover:text-surveillance-textLight transition">${lastMsg.message}</p>
+                            <div class="flex items-center justify-between">
+                                <span class="text-[10px] text-surveillance-textMuted uppercase font-mono">${conv.role}</span>
+                                ${conv.unreadCount > 0 ? `<span class="bg-surveillance-accent text-white px-1.5 py-0.2 rounded-full text-[10px] font-bold font-mono shadow-[0_0_8px_rgba(59,130,246,0.5)]">${conv.unreadCount}</span>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
+                listEl.insertAdjacentHTML('beforeend', itemHTML);
+            });
+            updateHeaderBadge();
+        }
+
+        function selectConversation(id) {
+            state.activeConversationId = id;
+            markAsRead(id);
+            renderConversations();
+            loadActiveConversation();
+        }
+
+        function markAsRead(id) {
+            const conv = state.conversations.find(c => c.id === id);
+            if (conv) {
+                conv.unreadCount = 0;
+                conv.messages.forEach(m => { if (m.status !== 'read') m.status = 'read'; });
+                saveChatData();
+                broadcastEvent("message_read", { conversationId: id });
+            }
+        }
+
+        function loadActiveConversation() {
+            const conv = state.conversations.find(c => c.id === state.activeConversationId);
+            if (!conv) return;
+
+            document.getElementById('activeName').textContent = conv.name;
+            document.getElementById('activeSubText').textContent = `${conv.role} • ${conv.lastSeen || 'Active Now'}`;
+            document.getElementById('panelSessionId').textContent = '#' + conv.id.toUpperCase() + '-X';
+            
+            const avatarBox = document.getElementById('activeAvatar');
+            avatarBox.textContent = conv.avatar || conv.name.substring(0,2).toUpperCase();
+
+            const priorityBadge = document.getElementById('activePriorityBadge');
+            if (conv.isHighPriority) priorityBadge.classList.remove('hidden');
+            else priorityBadge.classList.add('hidden');
+
+            const historyEl = document.getElementById('messageHistory');
+            historyEl.innerHTML = '';
+
+            conv.messages.forEach(msg => {
+                const isMe = msg.senderId === currentUser.id;
+                
+                let reactionsHTML = '';
+                if (msg.reactions && Object.keys(msg.reactions).length > 0) {
+                    let rxStr = '';
+                    for (let [emoji, count] of Object.entries(msg.reactions)) {
+                        rxStr += `<span onclick="addReaction('${msg.messageId}', '${emoji}')" class="bg-surveillance-bg border border-surveillance-border hover:border-surveillance-accent/50 px-1.5 py-0.5 rounded text-[10px] mr-1 font-mono transition cursor-pointer">${emoji} ${count}</span>`;
+                    }
+                    reactionsHTML = `<div class="flex items-center mt-1.5 space-x-1">${rxStr}</div>`;
+                }
+
+                let attachmentsHTML = '';
+                if (msg.attachments && msg.attachments.length > 0) {
+                    msg.attachments.forEach(att => {
+                        let contentDisplay = `<i class="fa-solid fa-file-shield text-surveillance-accent"></i>`;
+                        if (att.dataUrl && att.dataUrl.startsWith('data:image')) {
+                            contentDisplay = `<img src="${att.dataUrl}" class="max-h-40 rounded border border-surveillance-border object-cover"/>`;
+                        }
+                        attachmentsHTML += `
+                            <div class="mt-2.5 p-2 bg-surveillance-bg border border-surveillance-border rounded-lg flex flex-col space-y-1 text-xs glow-hover">
+                                ${contentDisplay}
+                                <div class="truncate flex items-center justify-between">
+                                    <span class="font-mono font-medium truncate text-white">${att.name}</span>
+                                    <span class="text-[10px] text-surveillance-textMuted font-mono">${att.size || 'Asset'}</span>
+                                </div>
+                            </div>
+                        `;
+                    });
+                }
+
+                let priorityIndicator = msg.priority === 'high' ? `<span class="text-surveillance-danger text-[10px] font-bold mr-2 font-mono"><i class="fa-solid fa-triangle-exclamation"></i> HIGH PRIORITY</span>` : '';
+                let pinIndicator = msg.isPinned ? `<span class="text-surveillance-warning text-[10px] mr-2" title="Pinned Message"><i class="fa-solid fa-thumbtack"></i></span>` : '';
+
+                let statusReceipt = '';
+                if (isMe) {
+                    if (msg.status === 'read') statusReceipt = '<span class="text-surveillance-success" title="Read">✓✓</span>';
+                    else if (msg.status === 'delivered') statusReceipt = '<span class="text-surveillance-textMuted" title="Delivered">✓✓</span>';
+                    else statusReceipt = '<span class="text-surveillance-textMuted" title="Sent">✓</span>';
+                }
+
+                const bubbleHTML = `
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} space-y-1">
+                        <div class="flex items-center space-x-2 text-[11px] text-surveillance-textMuted px-1 font-mono">
+                            <span class="font-semibold text-surveillance-textLight">${msg.senderName}</span>
+                            <span>(${msg.senderRole})</span>
+                            <span>•</span>
+                            <span>${msg.timestamp}</span>
+                            ${statusReceipt}
+                        </div>
+                        <div class="group relative max-w-xl bg-surveillance-card border ${isMe ? 'border-surveillance-accent/40 shadow-blue-950/20' : 'border-surveillance-border'} p-4 rounded-xl text-xs leading-relaxed text-surveillance-textLight shadow-md chat-bubble-hover">
+                            <div class="flex items-center justify-between mb-1.5">
+                                <div class="flex items-center">
+                                    ${pinIndicator}
+                                    ${priorityIndicator}
+                                </div>
+                                <div class="opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex items-center space-x-2.5 text-surveillance-textMuted ml-4">
+                                    <button onclick="addReaction('${msg.messageId}', '👍')" title="React 👍" class="hover:text-white transition">👍</button>
+                                    <button onclick="addReaction('${msg.messageId}', '⚠️')" title="React ⚠️" class="hover:text-white transition">⚠️</button>
+                                    <button onclick="addReaction('${msg.messageId}', '✅')" title="React ✅" class="hover:text-white transition">✅</button>
+                                    <button onclick="togglePinMessage('${msg.messageId}')" title="Pin / Unpin" class="hover:text-white transition"><i class="fa-solid fa-thumbtack"></i></button>
+                                    <button onclick="deleteMessage('${msg.messageId}')" title="Delete" class="hover:text-red-400 transition"><i class="fa-solid fa-trash"></i></button>
+                                </div>
+                            </div>
+                            <p class="whitespace-pre-wrap">${msg.message}</p>
+                            ${attachmentsHTML}
+                            ${reactionsHTML}
+                        </div>
+                    </div>
+                `;
+                historyEl.insertAdjacentHTML('beforeend', bubbleHTML);
+            });
+
+            historyEl.scrollTop = historyEl.scrollHeight;
+            renderDetailsPanel(conv);
+        }
+
+        function renderDetailsPanel(conv) {
+            const pList = document.getElementById('panelParticipantsList');
+            pList.innerHTML = '';
+            (conv.participants || []).forEach(p => {
+                pList.insertAdjacentHTML('beforeend', `
+                    <div class="flex items-center justify-between bg-surveillance-bg p-2.5 rounded-lg border border-surveillance-border font-mono glow-hover">
+                        <div class="flex items-center space-x-2 truncate">
+                            <div class="w-2 h-2 rounded-full ${p.status === 'online' ? 'bg-surveillance-success' : 'bg-surveillance-textMuted'}"></div>
+                            <span class="font-medium truncate text-white">${p.name}</span>
+                        </div>
+                        <span class="text-[10px] text-surveillance-textMuted">${p.role}</span>
+                    </div>
+                `);
+            });
+
+            const pinnedList = document.getElementById('panelPinnedList');
+            const pinnedMsgs = conv.messages.filter(m => m.isPinned);
+            document.getElementById('pinnedCountBadge').textContent = pinnedMsgs.length;
+            
+            if (pinnedMsgs.length === 0) {
+                pinnedList.innerHTML = `<p class="text-surveillance-textMuted italic text-[11px]">No transmissions pinned to this channel.</p>`;
+            } else {
+                pinnedList.innerHTML = '';
+                pinnedMsgs.forEach(m => {
+                    pinnedList.insertAdjacentHTML('beforeend', `
+                        <div class="bg-surveillance-bg p-2.5 rounded-lg border border-surveillance-border space-y-1 font-mono glow-hover cursor-pointer" onclick="selectConversation('${conv.id}')">
+                            <div class="flex justify-between text-[10px] text-surveillance-textMuted">
+                                <span>${m.senderName}</span>
+                                <span>${m.timestamp}</span>
+                            </div>
+                            <p class="text-[11px] truncate text-surveillance-textLight font-sans">${m.message}</p>
+                        </div>
+                    `);
+                });
+            }
+
+            const filesList = document.getElementById('panelFilesList');
+            let allFiles = [];
+            conv.messages.forEach(m => { if (m.attachments) allFiles.push(...m.attachments); });
+
+            if (allFiles.length === 0) {
+                filesList.innerHTML = `<p class="text-surveillance-textMuted italic text-[11px]">No files transferred in session.</p>`;
+            } else {
+                filesList.innerHTML = '';
+                allFiles.forEach(f => {
+                    filesList.insertAdjacentHTML('beforeend', `
+                        <div class="flex items-center justify-between bg-surveillance-bg p-2.5 rounded-lg border border-surveillance-border text-[11px] font-mono glow-hover">
+                            <div class="flex items-center space-x-2 truncate">
+                                <i class="fa-solid fa-file text-surveillance-accent"></i>
+                                <span class="truncate text-white">${f.name}</span>
+                            </div>
+                            <span class="text-[10px] text-surveillance-textMuted">${f.size || ''}</span>
+                        </div>
+                    `);
+                });
+            }
+        }
+
+        function sendMessage() {
+            const inputEl = document.getElementById('messageInput');
+            const text = inputEl.value.trim();
+            if (!text && !state.pendingAttachment) return;
+
+            const conv = state.conversations.find(c => c.id === state.activeConversationId);
+            if (!conv) return;
+
+            let attachmentsArr = state.pendingAttachment ? [state.pendingAttachment] : null;
+
+            const newMsg = {
+                messageId: 'msg-' + Date.now() + '-' + Math.random().toString(36).substring(2,5),
+                conversationId: conv.id,
+                senderId: currentUser.id,
+                senderName: currentUser.name,
+                senderRole: currentUser.role,
+                receiverId: conv.id,
+                message: text || '[Attachment Transmitted]',
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                status: 'delivered',
+                priority: conv.isHighPriority ? 'high' : 'normal',
+                isPinned: false,
+                reactions: {},
+                attachments: attachmentsArr
+            };
+
+            conv.messages.push(newMsg);
+            inputEl.value = '';
+            inputEl.style.height = 'auto';
+            clearAttachment();
+
+            saveChatData();
+            loadActiveConversation();
+            renderConversations();
+
+            broadcastEvent("new_message", newMsg);
+            stopTyping();
+        }
+
+        function handleKeyInput(e) {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                sendMessage();
+            }
+        }
+
+        function handleTypingInput() {
+            if (!isCurrentlyTyping) {
+                isCurrentlyTyping = true;
+                broadcastEvent("typing_start", { conversationId: state.activeConversationId, userId: currentUser.id, userName: currentUser.name });
+            }
+            clearTimeout(typingTimeout);
+            typingTimeout = setTimeout(() => {
+                stopTyping();
+            }, 1500);
+        }
+
+        function stopTyping() {
+            if (isCurrentlyTyping) {
+                isCurrentlyTyping = false;
+                broadcastEvent("typing_stop", { conversationId: state.activeConversationId, userId: currentUser.id });
+            }
+        }
+
+        function showTypingIndicator(name) {
+            const row = document.getElementById('typingIndicatorRow');
+            const textEl = document.getElementById('typingUserText');
+            textEl.textContent = `${name} is typing...`;
+            row.classList.remove('opacity-0');
+        }
+
+        function hideTypingIndicator() {
+            const row = document.getElementById('typingIndicatorRow');
+            row.classList.add('opacity-0');
+        }
+
+        function handleFileSelect(e) {
+            const file = e.target.files[0];
+            if (!file) return;
+            if (file.size > 1024 * 512) {
+                alert('File is too large for local storage transfer (>500KB). Please select a smaller file.');
+                return;
+            }
+            const reader = new FileReader();
+            reader.onload = function(uploadEvent) {
+                state.pendingAttachment = { 
+                    name: file.name, 
+                    size: (file.size / 1024).toFixed(1) + ' KB',
+                    dataUrl: uploadEvent.target.result
+                };
+                document.getElementById('attachedFileName').textContent = file.name;
+                document.getElementById('attachmentPreviewContainer').classList.remove('hidden');
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function clearAttachment() {
+            state.pendingAttachment = null;
+            document.getElementById('attachmentPreviewContainer').classList.add('hidden');
+            document.getElementById('fileInput').value = '';
+        }
+
+        function togglePinMessage(msgId) {
+            const conv = state.conversations.find(c => c.id === state.activeConversationId);
+            if (!conv) return;
+            const msg = conv.messages.find(m => m.messageId === msgId);
+            if (msg) {
+                msg.isPinned = !msg.isPinned;
+                saveChatData();
+                loadActiveConversation();
+                broadcastEvent("message_pinned", { conversationId: conv.id, messageId: msgId, isPinned: msg.isPinned });
+            }
+        }
+
+        function addReaction(msgId, emoji) {
+            const conv = state.conversations.find(c => c.id === state.activeConversationId);
+            if (!conv) return;
+            const msg = conv.messages.find(m => m.messageId === msgId);
+            if (msg) {
+                msg.reactions[emoji] = (msg.reactions[emoji] || 0) + 1;
+                saveChatData();
+                loadActiveConversation();
+                broadcastEvent("message_reaction", { conversationId: conv.id, messageId: msgId, reactions: msg.reactions });
+            }
+        }
+
+        function deleteMessage(msgId) {
+            const conv = state.conversations.find(c => c.id === state.activeConversationId);
+            if (!conv) return;
+            conv.messages = conv.messages.filter(m => m.messageId !== msgId);
+            saveChatData();
+            loadActiveConversation();
+            renderConversations();
+            broadcastEvent("message_deleted", { conversationId: conv.id, messageId: msgId });
+        }
+
+        function toggleEmojiPicker() {
+            const inputEl = document.getElementById('messageInput');
+            inputEl.value += ' ⚠️ ';
+            inputEl.focus();
+        }
+
+        function recordVoiceMessage() {
+            const inputEl = document.getElementById('messageInput');
+            inputEl.value += ' 🎙️ [SECURE_VOICE_TRANSMISSION] ';
+            inputEl.focus();
+        }
+
+        function openEmergencyModal() { document.getElementById('emergencyModal').classList.remove('hidden'); }
+        function closeEmergencyModal() { document.getElementById('emergencyModal').classList.add('hidden'); }
+
+        function submitEmergencyBroadcast() {
+            const targetChannelId = document.getElementById('emergencyChannelSelect').value;
+            const desc = document.getElementById('emergencyMessageInput').value.trim();
+            if (!desc) { alert('Please provide an emergency tactical directive description.'); return; }
+
+            const conv = state.conversations.find(c => c.id === targetChannelId) || state.conversations[0];
+            conv.isHighPriority = true;
+
+            const alertMsg = {
+                messageId: 'emg-' + Date.now(),
+                conversationId: conv.id,
+                senderId: currentUser.id,
+                senderName: currentUser.name,
+                senderRole: currentUser.role,
+                receiverId: conv.id,
+                message: `🚨 EMERGENCY BROADCAST: ${desc}`,
+                timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                status: 'delivered',
+                priority: 'high',
+                isPinned: true,
+                reactions: { '🚨': 1 },
+                attachments: null
+            };
+
+            conv.messages.push(alertMsg);
+            saveChatData();
+            closeEmergencyModal();
+            document.getElementById('emergencyMessageInput').value = '';
+            selectConversation(conv.id);
+            broadcastEvent("emergency_alert", alertMsg);
+        }
+
+        function switchTab(tab) {
+            state.currentTab = tab;
+            ['all', 'channels', 'direct'].forEach(t => {
+                const btn = document.getElementById(`tab-${t}`);
+                if (t === tab) btn.className = "flex-1 py-1.5 rounded bg-surveillance-border border border-surveillance-borderHover text-white transition shadow-sm font-medium glow-hover";
+                else btn.className = "flex-1 py-1.5 rounded text-surveillance-textMuted hover:text-white hover:bg-surveillance-border/50 transition font-medium";
+            });
+            renderConversations();
+        }
+
+        function filterConversations(val) {
+            state.searchQuery = val;
+            renderConversations();
+        }
+
+        function toggleDetailsPanel() {
+            state.isDetailsPanelOpen = !state.isDetailsPanelOpen;
+            const panel = document.getElementById('detailsPanel');
+            if (state.isDetailsPanelOpen) {
+                panel.classList.remove('w-0', 'overflow-hidden', 'opacity-0');
+                panel.classList.add('w-80');
+            } else {
+                panel.classList.remove('w-80');
+                panel.classList.add('w-0', 'overflow-hidden', 'opacity-0');
+            }
+        }
+
+        function toggleNotificationSound() {
+            state.soundEnabled = !state.soundEnabled;
+            const btn = document.getElementById('soundToggleBtn');
+            btn.innerHTML = state.soundEnabled ? '<i class="fa-solid fa-volume-high"></i>' : '<i class="fa-solid fa-volume-xmark text-surveillance-danger"></i>';
+        }
+
+        function toggleNotificationDesktop() {
+            state.desktopNotifEnabled = !state.desktopNotifEnabled;
+            const btn = document.getElementById('desktopNotifBtn');
+            btn.innerHTML = state.desktopNotifEnabled ? '<i class="fa-solid fa-bell"></i>' : '<i class="fa-solid fa-bell-slash text-surveillance-danger"></i>';
+        }
+
+        function updateHeaderBadge() {
+            const totalUnreads = state.conversations.reduce((acc, c) => acc + (c.unreadCount || 0), 0);
+            const badge = document.getElementById('headerUnreadBadge');
+            badge.textContent = totalUnreads;
+            if (totalUnreads === 0) badge.classList.add('hidden');
+            else badge.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

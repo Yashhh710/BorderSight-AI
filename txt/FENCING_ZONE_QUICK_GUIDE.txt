@@ -1,0 +1,212 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                     🔒 FENCING ZONE - QUICK GUIDE                        ║
+║                      BorderSight AI Detection Core                       ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🎯 WHAT IS IT?                                                            │
+└───────────────────────────────────────────────────────────────────────────┘
+
+A visual security boundary (fence) that appears on your video when you click
+the button. Shows where restricted areas begin and end.
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ ⚡ 3-STEP ACTIVATION                                                       │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   1. Open detection.html
+   2. Load video (upload or demo)
+   3. Click the ZONE/FENCE button in video control bar
+
+   ✓ Done! Fence appears on screen
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📍 BUTTON LOCATION                                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Video Control Bar (Bottom of Video):
+   
+   ┌────────────────────────────────────────────────────────┐
+   │ [ZONE] [Pause] [Snapshot] [Fullscreen] [Upload]       │
+   │   ↑                                                     │
+   │   Your Fencing Zone Button!                            │
+   └────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🔴 WHAT APPEARS WHEN FENCING IS ENABLED                                   │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌  ← Dashed yellow line
+   ╌  ┌────────────────────────┐  ╌
+   ╌  │                        │  ╌
+   ╌  │  🔒 FENCING ZONE       │  ╌
+   ╌  │      ACTIVE            │  ╌
+   ╌  │                        │  ╌
+   ╌  │ (Yellow glowing box)   │  ╌
+   ╌  │                        │  ╌
+   ╌  │ ★ Corner markers ★     │  ╌
+   ╌  │                        │  ╌
+   ╌  └────────────────────────┘  ╌
+   ╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌  ← Dashed yellow line
+
+   ✓ Yellow dashed boundary
+   ✓ Glowing effect around edges
+   ✓ Corner markers at 4 corners
+   ✓ "FENCING ZONE ACTIVE" label
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🎛️ BUTTON STATES                                                          │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   STATE: OFF (Default)
+   ├─ Color: Gray (normal)
+   ├─ Glow: None
+   └─ Fence: Hidden
+
+   STATE: ON (After Click)
+   ├─ Color: Orange with glow (#FFB000)
+   ├─ Glow: Bright orange shadow
+   └─ Fence: VISIBLE with yellow boundary
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🔄 HOW IT WORKS                                                           │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Click 1: OFF → ON
+   └─ Button turns orange
+   └─ Fence appears (yellow dashed box)
+   └─ Console: "🔒 FENCING ZONE: ENABLED"
+
+   Click 2: ON → OFF
+   └─ Button turns gray
+   └─ Fence disappears
+   └─ Console: "🔓 FENCING ZONE: DISABLED"
+
+   Click 3: OFF → ON (repeat cycle)
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📊 FENCE PROPERTIES                                                       │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Property               Value
+   ──────────────────────────────────
+   Color                  Yellow (#FFB000)
+   Style                  Dashed (10px dash, 5px gap)
+   Line Width             3 pixels
+   Glow Color             Orange
+   Glow Blur              15 pixels
+   Margin from Edge       15% on each side
+   Corner Markers         4 boxes (20x20 each)
+   Label                  "🔒 FENCING ZONE ACTIVE"
+   Label Position         Top center
+   Label Font             Bold 14px Inter
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ ✅ FEATURES                                                               │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   ✓ Real-time drawing on video
+   ✓ Toggle on/off with button click
+   ✓ Visual feedback (orange glow)
+   ✓ Corner markers for clarity
+   ✓ Glowing effect for visibility
+   ✓ Works with any video resolution
+   ✓ Works offline (client-side only)
+   ✓ No external dependencies
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🎬 EXAMPLE USAGE                                                          │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Scenario 1: Border Security
+   ├─ Open detection.html
+   ├─ Load border checkpoint video
+   ├─ Click Zone button
+   └─ Yellow fence appears around restricted area
+
+   Scenario 2: Facility Monitoring
+   ├─ Open detection.html
+   ├─ Load parking lot video
+   ├─ Click Zone button
+   └─ Yellow fence shows where parking is allowed
+
+   Scenario 3: Event Security
+   ├─ Open detection.html
+   ├─ Load event venue video
+   ├─ Click Zone button
+   └─ Yellow fence marks VIP area boundaries
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🔧 CUSTOMIZATION (Optional)                                               │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Location: detection.html, around line 1785
+
+   Change Fence Color:
+   ctx.strokeStyle = '#FF0000';  // Red instead of yellow
+
+   Change Margin (15% default):
+   const marginX = w * 0.25;  // 25% margin (wider)
+
+   Change Line Width (3 pixels default):
+   ctx.lineWidth = 5;  // Thicker line
+
+   Change Corner Size (20 pixels default):
+   const cornerSize = 30;  // Larger corners
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📞 TROUBLESHOOTING                                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Problem              Solution
+   ─────────────────────────────────────────────
+   Button not visible   Refresh page
+   Fence not appearing  Click button (may be already on)
+   Wrong video loaded   Upload new video first
+   Button not glowing   Check browser console (F12)
+   Fence color wrong    Edit detection.html line ~1800
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🌐 BROWSER SUPPORT                                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   ✅ Chrome (Recommended)
+   ✅ Firefox
+   ✅ Safari
+   ✅ Microsoft Edge
+   ❌ Internet Explorer
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📝 CONSOLE OUTPUT                                                         │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Press F12 to open Developer Tools and check console:
+
+   When you click the button:
+   ├─ If ON:  "🔒 FENCING ZONE: ENABLED"
+   └─ If OFF: "🔓 FENCING ZONE: DISABLED"
+
+   This confirms the feature is working.
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🚀 GET STARTED NOW!                                                       │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   1. Open detection.html in browser
+   2. Load a test video
+   3. Click the ZONE button (left of Pause)
+   4. See the yellow fence appear!
+
+   That's it! ✓
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📚 FOR MORE INFO                                                          │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   See: FENCING_ZONE_FEATURE.md for complete documentation
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                    Ready to Use! ✅                                       ║
+║                                                                           ║
+║          Click the Zone button and see the fencing boundary!             ║
+╚═══════════════════════════════════════════════════════════════════════════╝

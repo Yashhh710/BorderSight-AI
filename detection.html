@@ -1,0 +1,2076 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AI Detection – BorderSight AI</title>
+    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=12007&format=png&color=000000">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="theme.css">
+    <!-- Real AI object-detection engine: TensorFlow.js + COCO-SSD (runs entirely in the browser) -->
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+    <style>
+        /* ─── EXISTING COLOR PALETTE (UNCHANGED) ─────────────────────────── */
+        :root {
+            --bg-main: #030303;
+            --sidebar-bg: rgba(7,7,7,0.9);
+            --card-bg: #0D0D0D;
+            --card-hover: #141414;
+            --border-color: #242424;
+            --primary: #FFFFFF;
+            --primary-glow: rgba(255,255,255,0.08);
+            --secondary-text: #A1A1A1;
+            --muted-text: #666666;
+            --accent: #FFB000;
+            --accent-hover: #FFC533;
+            --accent-glow: rgba(255,176,0,0.12);
+            --success: #22C55E;
+            --warning: #FFB000;
+            --critical: #FF3B30;
+            --info: #3B82F6;
+            --transition-speed: 280ms;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 80px;
+        }
+
+        /* ─── RESET ──────────────────────────────────────────────────────── */
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: var(--font-family); }
+        body { background-color: var(--bg-main); color: var(--primary); display: flex; min-height: 100vh; overflow-x: hidden; }
+        .app-container { display: flex; width: 100%; position: relative; }
+
+        /* ─── SIDEBAR (COMPLETELY UNCHANGED) ────────────────────────────── */
+        .sidebar {
+            width: var(--sidebar-width); height: 100vh;
+            background-color: var(--sidebar-bg);
+            backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border-color);
+            position: fixed; top: 0; left: 0;
+            display: flex; flex-direction: column; justify-content: space-between;
+            z-index: 100;
+            transition: width var(--transition-speed) cubic-bezier(0.4,0,0.2,1);
+        }
+        .sidebar.collapsed { width: var(--sidebar-collapsed-width); }
+        .sidebar-header { padding: 24px 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-color); min-height: 80px; }
+        .logo-box { display: flex; align-items: center; gap: 12px; overflow: hidden; white-space: nowrap; text-decoration: none; }
+        .logo-icon { font-size: 24px; color: var(--accent); flex-shrink: 0; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; }
+        .logo-text { display: flex; flex-direction: column; transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease; }
+        .logo-title { font-size: 15px; font-weight: 700; color: var(--primary); letter-spacing: 0.5px; }
+        .logo-subtitle { font-size: 11px; color: var(--muted-text); font-family: var(--font-family-mono); text-transform: uppercase; }
+        .collapse-btn { background: transparent; border: 1px solid var(--border-color); color: var(--muted-text); width: 28px; height: 28px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; flex-shrink: 0; }
+        .collapse-btn:hover { background: var(--card-bg); color: var(--accent); border-color: var(--accent); }
+        .sidebar.collapsed .collapse-btn svg { transform: rotate(180deg); }
+        .sidebar-nav { flex: 1; overflow-y: auto; overflow-x: hidden; padding: 16px 12px; display: flex; flex-direction: column; gap: 20px; }
+        .sidebar-nav::-webkit-scrollbar { width: 4px; }
+        .sidebar-nav::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+        .nav-section { display: flex; flex-direction: column; gap: 4px; }
+        .nav-category { font-size: 10px; font-weight: 700; font-family: var(--font-family-mono); color: var(--muted-text); padding: 0 12px 8px 12px; letter-spacing: 1px; text-transform: uppercase; transition: opacity var(--transition-speed) ease; white-space: nowrap; }
+        .sidebar.collapsed .nav-category { opacity: 0; visibility: hidden; height: 0; padding: 0; margin: 0; }
+        .nav-item { position: relative; display: flex; align-items: center; gap: 12px; padding: 10px 12px; border-radius: 8px; color: var(--secondary-text); text-decoration: none; font-size: 13px; font-weight: 500; transition: all var(--transition-speed) cubic-bezier(0.4,0,0.2,1); background: transparent; cursor: pointer; border: 1px solid transparent; white-space: nowrap; }
+        .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; transition: transform var(--transition-speed) ease, color var(--transition-speed) ease; }
+        .nav-item span.nav-text { transition: opacity var(--transition-speed) ease; }
+        .sidebar.collapsed .nav-item span.nav-text { opacity: 0; visibility: hidden; position: absolute; }
+        .nav-item::before { content: ''; position: absolute; left: 0; top: 20%; height: 60%; width: 3px; background-color: var(--accent); border-radius: 0 3px 3px 0; opacity: 0; transform: scaleY(0); transition: all var(--transition-speed) cubic-bezier(0.4,0,0.2,1); box-shadow: 0 0 10px var(--accent); }
+        .nav-item:hover { color: var(--primary); background: linear-gradient(90deg, var(--accent-glow) 0%, rgba(0,0,0,0) 100%); border-color: rgba(255,176,0,0.15); padding-left: 16px; }
+        .nav-item:hover svg { transform: scale(1.1) rotate(4deg); color: var(--accent); }
+        .nav-item:hover::before { opacity: 1; transform: scaleY(1); }
+        .nav-item.active { color: var(--accent); background: var(--accent-glow); border-color: rgba(255,176,0,0.3); font-weight: 600; }
+        .nav-item.active::before { opacity: 1; transform: scaleY(1); }
+        .nav-item.active svg { color: var(--accent); }
+        .badge { margin-left: auto; background-color: var(--critical); color: white; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 10px; font-family: var(--font-family-mono); transition: opacity var(--transition-speed) ease; }
+        .sidebar.collapsed .badge { position: absolute; top: 6px; right: 10px; padding: 1px 4px; font-size: 9px; }
+        .nav-item .tooltip { position: absolute; left: calc(100% + 12px); top: 50%; transform: translateY(-50%); background: var(--card-bg); color: var(--primary); padding: 6px 10px; border-radius: 4px; font-size: 12px; white-space: nowrap; border: 1px solid var(--border-color); box-shadow: 0 4px 12px rgba(0,0,0,0.8); opacity: 0; visibility: hidden; pointer-events: none; transition: opacity 0.2s ease, transform 0.2s ease; z-index: 1000; }
+        .sidebar.collapsed .nav-item:hover .tooltip { opacity: 1; visibility: visible; transform: translateY(-50%) translateX(2px); }
+        .sidebar-footer { border-top: 1px solid var(--border-color); padding: 16px 12px; display: flex; flex-direction: column; gap: 16px; background: rgba(7,7,7,0.6); }
+        .system-status { display: flex; flex-direction: column; gap: 6px; font-family: var(--font-family-mono); font-size: 11px; color: var(--secondary-text); background: var(--card-bg); padding: 10px; border-radius: 6px; border: 1px solid var(--border-color); transition: opacity var(--transition-speed) ease; }
+        .sidebar.collapsed .system-status { opacity: 0; visibility: hidden; height: 0; padding: 0; margin: 0; border: none; }
+        .status-row { display: flex; align-items: center; justify-content: space-between; }
+        .live-dot { width: 8px; height: 8px; background-color: var(--success); border-radius: 50%; display: inline-block; box-shadow: 0 0 0 0 rgba(34,197,94,0.7); animation: pulse-green 2s infinite; }
+        @keyframes pulse-green { 0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34,197,94,0.7); } 70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34,197,94,0); } 100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34,197,94,0); } }
+        .user-profile { display: flex; align-items: center; gap: 10px; padding: 6px; border-radius: 8px; background: transparent; overflow: hidden; }
+        .user-avatar { width: 32px; height: 32px; border-radius: 6px; background: var(--border-color); color: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 13px; flex-shrink: 0; border: 1px solid rgba(255,176,0,0.3); }
+        .user-info { display: flex; flex-direction: column; transition: opacity var(--transition-speed) ease; white-space: nowrap; }
+        .sidebar.collapsed .user-info { opacity: 0; visibility: hidden; width: 0; }
+        .user-name { font-size: 12px; font-weight: 600; color: var(--primary); }
+        .user-role { font-size: 10px; color: var(--muted-text); font-family: var(--font-family-mono); }
+
+        /* ─── EXISTING TOGGLE SLIDER (UNCHANGED) ────────────────────────── */
+        .switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border-color); transition: .3s; border-radius: 22px; }
+        .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background-color: var(--accent); }
+        input:checked + .slider:before { transform: translateX(18px); }
+
+        /* ─── MAIN CONTENT SHELL ─────────────────────────────────────────── */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 28px 32px;
+            transition: margin-left var(--transition-speed) cubic-bezier(0.4,0,0.2,1);
+            background-color: var(--bg-main);
+            min-height: 100vh;
+        }
+        .sidebar.collapsed ~ .main-content { margin-left: var(--sidebar-collapsed-width); }
+
+        /* ─── PAGE HEADER ────────────────────────────────────────────────── */
+        .page-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 22px;
+            padding-bottom: 18px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .command-title { font-size: 26px; font-weight: 700; color: var(--primary); letter-spacing: -0.5px; display: flex; align-items: center; gap: 10px; }
+        .command-title span { color: var(--accent); }
+        .command-subtitle { font-size: 12px; color: var(--muted-text); font-family: var(--font-family-mono); margin-top: 4px; }
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .live-badge {
+            display: flex; align-items: center; gap: 6px;
+            background: rgba(34,197,94,0.1);
+            border: 1px solid rgba(34,197,94,0.3);
+            color: var(--success);
+            font-family: var(--font-family-mono);
+            font-size: 11px; font-weight: 700;
+            padding: 5px 12px; border-radius: 20px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+        }
+        .live-badge .live-dot { background-color: var(--success); width: 7px; height: 7px; }
+        .datetime-badge {
+            display: flex; align-items: center; gap: 8px;
+            font-family: var(--font-family-mono); font-size: 12px;
+            color: var(--secondary-text);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 5px 14px; border-radius: 6px;
+        }
+        .datetime-badge .dt-val { color: var(--accent); font-weight: 600; }
+
+        /* ─── TOP LAYOUT: VIDEO + RIGHT PANEL ───────────────────────────── */
+        .det-top {
+            display: grid;
+            grid-template-columns: 1fr 300px;
+            gap: 18px;
+            margin-bottom: 18px;
+        }
+
+        /* ─── PANEL CARD ─────────────────────────────────────────────────── */
+        .panel-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            overflow: hidden;
+            transition: border-color 0.2s ease;
+        }
+        .panel-card:hover { border-color: rgba(255,176,0,0.2); }
+        .panel-head {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.02);
+        }
+        .panel-head-title {
+            font-size: 11px; font-weight: 700;
+            font-family: var(--font-family-mono);
+            color: var(--primary); text-transform: uppercase; letter-spacing: 0.8px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .panel-head-title svg { color: var(--accent); }
+        .panel-head-meta { font-size: 11px; font-family: var(--font-family-mono); }
+        .panel-body { padding: 16px; }
+
+        /* ─── VIDEO FEED ─────────────────────────────────────────────────── */
+        .video-wrap {
+            position: relative;
+            width: 100%; height: 420px;
+            background: #060606;
+            overflow: hidden;
+        }
+        .video-placeholder {
+            position: absolute;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-direction: column;
+            gap: 18px;
+            background: radial-gradient(circle at center, rgba(255, 176, 0, 0.12), rgba(0,0,0,0.88) 42%, rgba(0,0,0,0.96));
+            border: 1px solid rgba(255,176,0,0.2);
+            box-shadow: inset 0 0 80px rgba(255,176,0,0.06), inset 0 0 320px rgba(255,176,0,0.04);
+            z-index: 2;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        .video-placeholder:hover {
+            transform: scale(1.005);
+            box-shadow: inset 0 0 90px rgba(255,176,0,0.08), 0 0 24px rgba(255,176,0,0.06);
+        }
+        .video-placeholder.hidden {
+            display: none;
+        }
+        .placeholder-icon {
+            width: 98px; height: 98px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255,176,0,0.08);
+            border: 2px solid rgba(255,176,0,0.42);
+            color: var(--accent);
+            font-size: 40px;
+            box-shadow: 0 0 0 10px rgba(255,176,0,0.03), 0 0 28px rgba(255,176,0,0.18), inset 0 0 30px rgba(255,176,0,0.08);
+            animation: uploadPulse 2.6s ease-in-out infinite;
+        }
+        @keyframes uploadPulse {
+            0%, 100% { transform: scale(1); box-shadow: 0 0 0 10px rgba(255,176,0,0.03), 0 0 28px rgba(255,176,0,0.18), inset 0 0 30px rgba(255,176,0,0.08); }
+            50% { transform: scale(1.04); box-shadow: 0 0 0 14px rgba(255,176,0,0.04), 0 0 35px rgba(255,176,0,0.22), inset 0 0 36px rgba(255,176,0,0.1); }
+        }
+        .placeholder-skeleton {
+            width: min(260px, 50vw);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            align-items: center;
+        }
+        .skeleton-pill,
+        .skeleton-line {
+            background: linear-gradient(90deg, rgba(255,176,0,0.08), rgba(255,176,0,0.22), rgba(255,176,0,0.08));
+            background-size: 200% 100%;
+            animation: shimmer 1.4s linear infinite;
+            border-radius: 999px;
+        }
+        @keyframes shimmer {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .skeleton-pill {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            margin-bottom: 4px;
+        }
+        .skeleton-line {
+            height: 12px;
+            width: 70%;
+        }
+        .skeleton-line.short {
+            width: 50%;
+        }
+        .placeholder-text {
+            font-family: var(--font-family-mono);
+            font-size: 15px;
+            line-height: 1.7;
+            text-align: center;
+            color: var(--secondary-text);
+            letter-spacing: 0.2px;
+        }
+        .placeholder-text strong {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 20px;
+            display: block;
+            margin-bottom: 4px;
+            text-shadow: 0 0 16px rgba(255,176,0,0.16);
+        }
+        .video-wrap video,
+        .video-wrap img.vid-bg {
+            width: 100%; height: 100%;
+            object-fit: cover;
+            opacity: 0.65;
+            filter: contrast(1.1) saturate(0.85);
+            display: block;
+        }
+        #detectionCanvas {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 4;
+            pointer-events: none;
+            display: block;
+        }
+        /* Scanline overlay */
+        .video-wrap::after {
+            content: '';
+            position: absolute; inset: 0;
+            background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.06) 2px, rgba(0,0,0,0.06) 4px);
+            pointer-events: none;
+        }
+        /* Corner HUD brackets */
+        .hud-corner { position: absolute; width: 20px; height: 20px; }
+        .hud-corner.tl { top: 10px; left: 10px; border-top: 2px solid var(--accent); border-left: 2px solid var(--accent); }
+        .hud-corner.tr { top: 10px; right: 10px; border-top: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+        .hud-corner.bl { bottom: 10px; left: 10px; border-bottom: 2px solid var(--accent); border-left: 2px solid var(--accent); }
+        .hud-corner.br { bottom: 10px; right: 10px; border-bottom: 2px solid var(--accent); border-right: 2px solid var(--accent); }
+
+        /* Cam label */
+        .cam-label {
+            position: absolute; top: 14px; left: 36px;
+            font-family: var(--font-family-mono); font-size: 11px; font-weight: 700;
+            color: var(--secondary-text);
+            background: rgba(0,0,0,0.6); padding: 3px 8px; border-radius: 4px;
+            border: 1px solid var(--border-color);
+        }
+
+        /* ─── BOUNDING BOXES ─────────────────────────────────────────────── */
+        .bbox {
+            position: absolute;
+            display: flex; flex-direction: column; justify-content: flex-start;
+            animation: bbox-pulse 2.4s ease-in-out infinite;
+        }
+        @keyframes bbox-pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.75; }
+        }
+        .bbox-border {
+            position: absolute; inset: 0;
+            border: 2px solid currentColor;
+        }
+        .bbox-fill {
+            position: absolute; inset: 0;
+            background: currentColor;
+            opacity: 0.08;
+        }
+        .bbox-label {
+            position: relative;
+            font-family: var(--font-family-mono);
+            font-size: 9px; font-weight: 700;
+            color: #fff;
+            background: currentColor;
+            padding: 2px 6px;
+            white-space: nowrap;
+            align-self: flex-start;
+            margin-top: -18px;
+            letter-spacing: 0.3px;
+        }
+        .bbox-conf {
+            position: absolute; bottom: 4px; right: 4px;
+            font-family: var(--font-family-mono); font-size: 9px; font-weight: 700;
+            background: rgba(0,0,0,0.75); color: #fff; padding: 1px 5px; border-radius: 3px;
+        }
+        /* colour variants */
+        .bbox.person  { color: var(--accent); top: 22%; left: 38%; width: 80px; height: 180px; }
+        .bbox.vehicle { color: var(--info);   top: 50%; left: 14%; width: 170px; height: 95px; }
+        .bbox.unknown { color: var(--critical); top: 55%; left: 60%; width: 90px; height: 90px; }
+
+        /* Tracking dot */
+        .track-dot {
+            position: absolute;
+            width: 6px; height: 6px; border-radius: 50%;
+            background: var(--accent);
+            animation: track-move 4s linear infinite;
+        }
+        @keyframes track-move {
+            0%   { top: 30%; left: 40%; opacity: 1; }
+            25%  { top: 40%; left: 50%; opacity: 0.8; }
+            50%  { top: 50%; left: 45%; opacity: 1; }
+            75%  { top: 35%; left: 38%; opacity: 0.8; }
+            100% { top: 30%; left: 40%; opacity: 1; }
+        }
+
+        /* ─── VIDEO CONTROL BAR ──────────────────────────────────────────── */
+        .video-controls {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            padding: 10px 16px;
+            border-top: 1px solid var(--border-color);
+            background: rgba(255,255,255,0.015);
+        }
+        .threat-panel {
+            margin-top: 18px;
+        }
+        .threat-grid {
+            display: grid;
+            grid-template-columns: repeat(6, minmax(140px, 1fr));
+            gap: 12px;
+            padding: 16px;
+        }
+        .threat-card {
+            background: var(--card-hover);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+        .threat-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 176, 0, 0.35);
+            box-shadow: 0 0 0 1px rgba(255,176,0,0.15);
+        }
+        .threat-card.active {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 1px rgba(255,176,0,0.25);
+        }
+        .threat-thumb {
+            position: relative;
+            height: 110px;
+            background: #0b0b0b;
+            border-bottom: 1px solid var(--border-color);
+            overflow: hidden;
+        }
+        .threat-thumb video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            background: #101010;
+        }
+        .video-skeleton {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(90deg, rgba(255,176,0,0.06), rgba(255,176,0,0.18), rgba(255,176,0,0.06));
+            background-size: 200% 100%;
+            animation: skeletonVideo 1.5s linear infinite;
+            z-index: 1;
+        }
+        @keyframes skeletonVideo {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        .threat-card.loaded .video-skeleton {
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.25s ease, visibility 0.25s ease;
+        }
+        .threat-badge {
+            position: absolute;
+            right: 8px;
+            bottom: 8px;
+            background: rgba(0,0,0,0.7);
+            border: 1px solid rgba(255,176,0,0.35);
+            color: var(--accent);
+            font-family: var(--font-family-mono);
+            font-size: 9px;
+            font-weight: 700;
+            padding: 3px 6px;
+            border-radius: 10px;
+            letter-spacing: 0.5px;
+        }
+        .threat-content {
+            padding: 10px 10px 12px;
+        }
+        .threat-name {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-bottom: 4px;
+        }
+        .threat-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-family-mono);
+            font-size: 10px;
+            color: var(--muted-text);
+        }
+        .threat-meta strong {
+            color: var(--critical);
+        }
+        .vc-live {
+            display: flex; align-items: center; gap: 5px;
+            font-family: var(--font-family-mono); font-size: 10px; font-weight: 700;
+            color: var(--success);
+        }
+        .vc-live .live-dot { width: 6px; height: 6px; }
+        .vc-sep { width: 1px; height: 14px; background: var(--border-color); }
+        .vc-tag {
+            font-family: var(--font-family-mono); font-size: 10px;
+            color: var(--secondary-text); white-space: nowrap;
+        }
+        .vc-tag span { color: var(--primary); font-weight: 600; }
+        .vc-btns { margin-left: auto; display: flex; align-items: center; gap: 6px; }
+        .vc-btn {
+            width: 30px; height: 30px; border-radius: 6px;
+            background: var(--card-hover); border: 1px solid var(--border-color);
+            color: var(--secondary-text); cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .vc-btn:hover { border-color: var(--accent); color: var(--accent); }
+        .vc-btn svg { width: 13px; height: 13px; }
+        .upload-btn {
+            display: flex; align-items: center; gap: 6px;
+            height: 30px; padding: 0 12px;
+            border-radius: 6px; border: 1px solid var(--border-color);
+            background: var(--card-hover); color: var(--secondary-text);
+            font-family: var(--font-family-mono); font-size: 10px; font-weight: 600;
+            cursor: pointer; white-space: nowrap;
+            transition: all 0.2s ease;
+        }
+        .upload-btn:hover { border-color: var(--accent); color: var(--accent); }
+        #videoFileInput { display: none; }
+
+        /* ─── RIGHT PANEL ────────────────────────────────────────────────── */
+        .right-col { display: flex; flex-direction: column; gap: 18px; }
+
+        /* Module cards */
+        .module-list { display: flex; flex-direction: column; gap: 2px; }
+        .module-row {
+            display: flex; align-items: center; gap: 10px;
+            padding: 9px 12px; border-radius: 6px;
+            border: 1px solid transparent;
+            transition: background 0.2s ease, border-color 0.2s ease;
+        }
+        .module-row:hover { background: var(--card-hover); border-color: var(--border-color); }
+        .module-icon {
+            width: 30px; height: 30px; border-radius: 6px;
+            background: rgba(255,176,0,0.08); border: 1px solid rgba(255,176,0,0.15);
+            color: var(--accent); flex-shrink: 0;
+            display: flex; align-items: center; justify-content: center;
+        }
+        .module-icon svg { width: 14px; height: 14px; }
+        .module-text { flex: 1; min-width: 0; }
+        .module-name { font-size: 12px; font-weight: 600; color: var(--primary); }
+        .module-desc { font-size: 10px; color: var(--muted-text); font-family: var(--font-family-mono); margin-top: 1px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Inference Settings */
+        .inf-settings { display: flex; flex-direction: column; gap: 14px; padding: 14px 16px 16px; }
+        .inf-row { display: flex; flex-direction: column; gap: 6px; }
+        .inf-label-row { display: flex; justify-content: space-between; align-items: center; }
+        .inf-label { font-size: 11px; color: var(--secondary-text); font-family: var(--font-family-mono); }
+        .inf-val { font-size: 11px; color: var(--accent); font-family: var(--font-family-mono); font-weight: 700; }
+        /* Range slider — same visual style as existing project */
+        input[type="range"] {
+            appearance: none; -webkit-appearance: none; width: 100%; height: 4px;
+            background: var(--border-color); border-radius: 2px; outline: none; cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none; width: 14px; height: 14px; border-radius: 50%;
+            background: var(--accent); border: 2px solid #000; cursor: pointer;
+            box-shadow: 0 0 4px rgba(255,176,0,0.4);
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 14px; height: 14px; border-radius: 50%;
+            background: var(--accent); border: 2px solid #000; cursor: pointer;
+        }
+        .inf-select {
+            width: 100%; padding: 7px 10px;
+            background: var(--card-hover); border: 1px solid var(--border-color);
+            color: var(--primary); border-radius: 6px;
+            font-family: var(--font-family-mono); font-size: 11px;
+            cursor: pointer; outline: none;
+        }
+        .inf-select:focus { border-color: var(--accent); }
+
+        /* Section label */
+        .sec-label {
+            font-size: 10px; font-weight: 700; font-family: var(--font-family-mono);
+            color: var(--muted-text); text-transform: uppercase; letter-spacing: 1px;
+            padding: 12px 16px 0;
+        }
+        .inf-adv-link { font-size: 10px; font-family: var(--font-family-mono); color: var(--accent); cursor: pointer; padding: 12px 16px 0; margin-left: auto; }
+
+        /* ─── BOTTOM SECTION ─────────────────────────────────────────────── */
+        .det-bottom {
+            display: grid;
+            grid-template-columns: 1fr 1.1fr 1fr;
+            gap: 18px;
+        }
+
+        /* --- DETECTION STATS --- */
+        .stats-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 14px 16px; }
+        .stat-cell {
+            display: flex; flex-direction: column; gap: 4px;
+            padding: 12px 14px; border-radius: 8px;
+            background: var(--card-hover); border: 1px solid var(--border-color);
+            text-align: center; transition: border-color 0.2s ease;
+        }
+        .stat-cell:hover { border-color: rgba(255,176,0,0.3); }
+        .stat-cell-icon { margin-bottom: 2px; }
+        .stat-cell-icon svg { width: 16px; height: 16px; }
+        .stat-cell-val {
+            font-family: var(--font-family-mono); font-size: 22px; font-weight: 700;
+            color: var(--primary);
+            animation: count-in 0.6s ease both;
+        }
+        @keyframes count-in { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+        .stat-cell-name { font-size: 9px; font-weight: 700; font-family: var(--font-family-mono); color: var(--muted-text); text-transform: uppercase; letter-spacing: 0.5px; }
+        .stat-cell-trend { font-size: 9px; font-family: var(--font-family-mono); color: var(--success); }
+        .stat-cell.crit .stat-cell-icon svg { color: var(--critical); }
+        .stat-cell.crit .stat-cell-val { color: var(--critical); }
+
+        /* --- LIVE AI EVENTS --- */
+        .events-body { display: flex; flex-direction: column; gap: 1px; max-height: 220px; overflow-y: auto; padding: 10px 16px 14px; }
+        .events-body::-webkit-scrollbar { width: 3px; }
+        .events-body::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+        .event-item {
+            display: grid; grid-template-columns: 52px 1fr auto;
+            align-items: center; gap: 8px;
+            padding: 7px 0; border-bottom: 1px solid rgba(255,255,255,0.04);
+            font-family: var(--font-family-mono); font-size: 10px;
+            animation: slide-in 0.3s ease both;
+        }
+        @keyframes slide-in { from { opacity: 0; transform: translateX(-6px); } to { opacity: 1; transform: translateX(0); } }
+        .event-time { color: var(--muted-text); font-size: 10px; white-space: nowrap; }
+        .event-desc { color: var(--secondary-text); }
+        .event-desc strong { color: var(--primary); font-weight: 600; }
+        .event-cam {
+            font-size: 9px; padding: 2px 6px; border-radius: 3px; white-space: nowrap;
+            background: rgba(255,176,0,0.1); color: var(--accent);
+            border: 1px solid rgba(255,176,0,0.2);
+        }
+        .event-cam.blue { background: rgba(59,130,246,0.1); color: var(--info); border-color: rgba(59,130,246,0.2); }
+        .event-cam.red  { background: rgba(255,59,48,0.1);  color: var(--critical); border-color: rgba(255,59,48,0.2); }
+        .view-all-row {
+            display: flex; justify-content: flex-end; padding: 8px 16px;
+            border-top: 1px solid var(--border-color);
+        }
+        .view-all-link {
+            font-family: var(--font-family-mono); font-size: 10px;
+            color: var(--accent); text-decoration: none; cursor: pointer;
+            display: flex; align-items: center; gap: 4px;
+        }
+        .view-all-link:hover { color: var(--accent-hover); }
+
+        /* --- TRACKING & ANALYSIS --- */
+        .track-body { padding: 14px 16px; display: flex; flex-direction: column; gap: 12px; }
+        .track-entity {
+            display: flex; align-items: flex-start; gap: 12px;
+        }
+        .track-thumb {
+            width: 54px; height: 54px; border-radius: 6px; flex-shrink: 0;
+            background: #111; border: 1px solid var(--border-color);
+            display: flex; align-items: center; justify-content: center;
+            font-family: var(--font-family-mono); font-size: 11px; font-weight: 700;
+            color: var(--accent); overflow: hidden; position: relative;
+        }
+        .track-thumb-badge {
+            position: absolute; bottom: 0; left: 0; right: 0;
+            background: rgba(255,176,0,0.85); color: #000;
+            font-size: 8px; font-weight: 700; text-align: center; padding: 2px 0;
+            font-family: var(--font-family-mono); letter-spacing: 0.5px;
+        }
+        .track-meta { flex: 1; display: flex; flex-direction: column; gap: 4px; }
+        .track-meta-row { display: flex; justify-content: space-between; align-items: center; font-size: 10px; font-family: var(--font-family-mono); }
+        .track-meta-key { color: var(--muted-text); }
+        .track-meta-val { color: var(--primary); font-weight: 600; }
+        .threat-med { color: #f97316; font-weight: 700; }
+        .threat-low { color: var(--success); font-weight: 700; }
+        .threat-high { color: var(--critical); font-weight: 700; }
+
+        /* Tracking path canvas */
+        .track-path-wrap {
+            position: relative; height: 56px; border-radius: 6px;
+            background: #080808; border: 1px solid var(--border-color); overflow: hidden;
+        }
+        .track-path-wrap canvas { width: 100%; height: 100%; }
+        .track-path-label {
+            position: absolute; bottom: 5px; right: 8px;
+            font-family: var(--font-family-mono); font-size: 9px; color: var(--muted-text);
+        }
+
+        /* ─── RESPONSIVE ─────────────────────────────────────────────────── */
+        @media (max-width: 1200px) {
+            .det-top { grid-template-columns: 1fr; }
+            .right-col { flex-direction: row; flex-wrap: wrap; }
+            .right-col .panel-card { flex: 1 1 260px; }
+        }
+        @media (max-width: 900px) {
+            .det-bottom { grid-template-columns: 1fr; }
+        }
+        @media (max-width: 768px) {
+            .sidebar { width: var(--sidebar-collapsed-width); }
+            .sidebar .nav-text, .sidebar .nav-category,
+            .sidebar .logo-text, .sidebar .system-status, .sidebar .user-info {
+                opacity: 0; visibility: hidden; display: none;
+            }
+            .main-content { margin-left: var(--sidebar-collapsed-width); padding: 16px; }
+            .det-top { grid-template-columns: 1fr; }
+            .video-wrap { height: 260px; }
+        }
+    </style>
+</head>
+<body>
+<div class="app-container">
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         SIDEBAR NAVIGATION — COMPLETELY UNCHANGED
+    ═══════════════════════════════════════════════════════════════════ -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <a href="index.html" class="logo-box">
+                <div class="logo-icon">
+                    <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                    </svg>
+                </div>
+                <div class="logo-text">
+                    <span class="logo-title">BORDER SIGHT AI</span>
+                    <span class="logo-subtitle">Border Surveillance AI</span>
+                </div>
+            </a>
+            <button class="collapse-btn" id="collapseBtn" title="Toggle Sidebar">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="15 18 9 12 15 6"></polyline>
+                </svg>
+            </button>
+        </div>
+
+        <div class="sidebar-nav">
+            <div class="nav-section">
+                <span class="nav-category">Monitoring</span>
+                <a href="dashboard.html" class="nav-item" data-page="dashboard.html">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    <span class="nav-text">Dashboard</span><span class="tooltip">Dashboard</span>
+                </a>
+                <a href="cameras.html" class="nav-item" data-page="cameras.html">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                    <span class="nav-text">Live Cameras</span><span class="tooltip">Live Cameras</span>
+                </a>
+                <a href="alerts.html" class="nav-item" data-page="alerts.html">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    <span class="nav-text">Alerts</span><span class="badge">4</span><span class="tooltip">Alerts</span>
+                </a>
+                <a href="incidents.html" class="nav-item" data-page="incidents.html">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <span class="nav-text">Incidents</span><span class="tooltip">Incidents</span>
+                </a>
+            </div>
+            <div class="nav-section">
+                <span class="nav-category">AI Intelligence</span>
+                <a href="detection.html" class="nav-item" data-page="detection.html">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <span class="nav-text">AI Detection</span><span class="tooltip">AI Detection</span>
+                </a>
+                <a href="tracking.html" class="nav-item" data-page="tracking.html">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                    <span class="nav-text">Tracking</span><span class="tooltip">Tracking</span>
+                </a>
+                <a href="zones.html" class="nav-item" data-page="zones.html">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                    <span class="nav-text">Zones & Fences</span><span class="tooltip">Zones & Fences</span>
+                </a>
+            </div>
+            <div class="nav-section">
+                <span class="nav-category">Map</span>
+                <a href="map.html" class="nav-item" data-page="map.html">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                    <span class="nav-text">Map & Heatmap</span><span class="tooltip">Map & Heatmap</span>
+                </a>
+            </div>
+            <div class="nav-section">
+                <span class="nav-category">Analytics</span>
+                <a href="analytics.html" class="nav-item" data-page="analytics.html">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    <span class="nav-text">Analytics</span><span class="tooltip">Analytics</span>
+                </a>
+            </div>
+            <div class="nav-section">
+                <span class="nav-category">Reports</span>
+                <a href="reports.html" class="nav-item" data-page="reports.html">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                    <span class="nav-text">Reports</span><span class="tooltip">Reports</span>
+                </a>
+            </div>
+            <div class="nav-section">
+                <span class="nav-category">System</span>
+                <a href="settings.html" class="nav-item" data-page="settings.html">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <span class="nav-text">Settings</span><span class="tooltip">Settings</span>
+                </a>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="system-status">
+                <span style="font-weight:700;color:var(--primary);margin-bottom:2px;">SYSTEM STATUS</span>
+                <div class="status-row">
+                    <span>AI Engine</span>
+                    <span style="display:flex;align-items:center;gap:5px;"><span class="live-dot"></span> ONLINE</span>
+                </div>
+                <div class="status-row">
+                    <span>Cameras</span>
+                    <span style="color:var(--accent);">24/26</span>
+                </div>
+                <div class="status-row">
+                    <span>Database</span>
+                    <span style="display:flex;align-items:center;gap:5px;"><span class="live-dot"></span> ONLINE</span>
+                </div>
+            </div>
+            <div class="user-profile">
+                <div class="user-avatar">AD</div>
+                <div class="user-info">
+                    <span class="user-name">Administrator</span>
+                    <span class="user-role">Security Manager</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <!-- ═══════════════════════════════════════════════════════════════════
+         MAIN CONTENT — AI DETECTION PAGE
+    ═══════════════════════════════════════════════════════════════════ -->
+    <main class="main-content">
+
+        <!-- ── PAGE HEADER ────────────────────────────────────────────── -->
+        <div class="page-header">
+            <div class="page-header-left">
+                <h1 class="command-title">AI <span>Detection</span> Core</h1>
+                <p class="command-subtitle">Neural Network Classification, Object Bounding &amp; Inference Tuning</p>
+            </div>
+            <div class="header-right">
+                <button data-theme-toggle style="background: var(--card-bg); border: 1px solid var(--border-color); color: var(--secondary-text); padding: 8px 14px; border-radius: 7px; font-size: 12px; font-family: var(--font-family); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;" title="Toggle theme">
+                    🌙 Dark
+                </button>
+                <div class="live-badge">
+                    <span class="live-dot"></span> LIVE
+                </div>
+                <div class="datetime-badge">
+                    <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+                    <span class="dt-val" id="liveDatetime">--</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── TOP: VIDEO LEFT | MODULES RIGHT ───────────────────────── -->
+        <div class="det-top">
+
+            <!-- LEFT: Video feed + controls -->
+            <div class="panel-card" style="display:flex;flex-direction:column;">
+                <div class="panel-head">
+                    <div class="panel-head-title">
+                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"></circle><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path></svg>
+                        Active Neural Inference Stream
+                    </div>
+                    <span class="panel-head-meta" style="color:var(--success);font-size:11px;font-family: var(--font-family-mono);font-weight:700;">FPS: 59.4</span>
+                </div>
+
+                <!-- Video area -->
+                <div class="video-wrap" id="videoWrap">
+                    <div class="video-placeholder" id="videoPlaceholder">
+                        <div class="placeholder-skeleton" aria-hidden="true">
+                            <div class="skeleton-pill"></div>
+                            <div class="skeleton-line"></div>
+                            <div class="skeleton-line short"></div>
+                        </div>
+                        <div class="placeholder-text"><strong>Upload your video</strong><br>or select video</div>
+                    </div>
+                    <!-- Hidden video element for uploaded content -->
+                    <video id="uploadedVideo" style="display:none;width:100%;height:100%;object-fit:cover;" autoplay loop muted></video>
+                    <canvas id="detectionCanvas" aria-label="Detection overlay"></canvas>
+
+                    <!-- HUD corners -->
+                    <div class="hud-corner tl"></div>
+                    <div class="hud-corner tr"></div>
+                    <div class="hud-corner bl"></div>
+                    <div class="hud-corner br"></div>
+
+                    <!-- Camera label -->
+                    <div class="cam-label" id="cameraLabel">CAM-04 • LOADING MODEL</div>
+
+                    <!-- Live detection boxes are drawn by the canvas below -->
+                </div>
+
+                <!-- Video control bar -->
+                <div class="video-controls">
+                    <div class="vc-live"><span class="live-dot"></span> LIVE</div>
+                    <div class="vc-sep"></div>
+                    <div class="vc-tag"><span>CAM-04</span></div>
+                    <div class="vc-sep"></div>
+                    <div class="vc-tag"><span>DEMO AI</span></div>
+                    <div class="vc-sep"></div>
+                    <div class="vc-tag">Resolution: <span>1920 × 1080</span></div>
+                    <div class="vc-sep"></div>
+                    <div class="vc-tag">FPS: <span>59.4</span></div>
+                    <div class="vc-sep"></div>
+                    <div class="vc-tag">AI Latency: <span>42ms</span></div>
+
+                    <div class="vc-btns">
+                        <!-- Fencing Zone Enable Button -->
+                        <button class="vc-btn" id="fencingBtn" title="Enable Fencing Zone">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                        </button>
+                        <!-- Auto-Download Toggle -->
+                        <button class="vc-btn" id="autoDownloadBtn" title="Toggle Auto-Download (Currently ON)">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        </button>
+                        <!-- Pause -->
+                        <button class="vc-btn" id="pauseBtn" title="Pause / Resume">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
+                        </button>
+                        <!-- Snapshot -->
+                        <button class="vc-btn" id="snapshotBtn" title="Take Snapshot">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"></path><circle cx="12" cy="13" r="4"></circle></svg>
+                        </button>
+                        <!-- Fullscreen -->
+                        <button class="vc-btn" id="fsBtn" title="Fullscreen">
+                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><polyline points="15 3 21 3 21 9"></polyline><polyline points="9 21 3 21 3 15"></polyline><line x1="21" y1="3" x2="14" y2="10"></line><line x1="3" y1="21" x2="10" y2="14"></line></svg>
+                        </button>
+                        <!-- Demo video picker (uses same select styling as Inference Settings) -->
+                        <select class="inf-select" id="demoVideoSelect" style="width:auto;min-width:150px;padding:6px 10px;font-size:11px;">
+                            <option value="" selected>Demo Feed…</option>
+                            <option value="https://assets.mixkit.co/videos/preview/mixkit-going-down-a-crowded-street-in-a-big-city-32-large.mp4">Crowded City Street</option>
+                            <option value="https://assets.mixkit.co/videos/preview/mixkit-people-walking-on-a-city-street-33-large.mp4">Pedestrian Crossing</option>
+                            <option value="https://assets.mixkit.co/videos/preview/mixkit-cars-driving-on-a-highway-in-the-city-4262-large.mp4">Highway Traffic</option>
+                            <option value="https://assets.mixkit.co/videos/preview/mixkit-top-view-of-a-parking-lot-with-cars-40672-large.mp4">Parking Lot (Top View)</option>
+                            <option value="https://assets.mixkit.co/videos/preview/mixkit-people-walking-in-a-mall-4633-large.mp4">Mall Interior</option>
+                        </select>
+                        <!-- Upload -->
+                        <input type="file" id="videoFileInput" accept="video/mp4,video/webm,video/quicktime">
+                        <button class="upload-btn" id="uploadBtn" title="Upload video (MP4, WebM, MOV)">
+                            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none"><polyline points="16 16 12 12 8 16"></polyline><line x1="12" y1="12" x2="12" y2="21"></line><path d="M20.39 18.39A5 5 0 0 0 18 9h-1.26A8 8 0 1 0 3 16.3"></path></svg>
+                            Upload Video
+                        </button>
+                    </div>
+                </div>
+            </div><!-- end left video card -->
+
+            <!-- RIGHT: Modules + Inference Settings -->
+            <div class="right-col">
+
+                <!-- AI Detection Modules -->
+                <div class="panel-card">
+                    <div class="panel-head">
+                        <div class="panel-head-title">
+                            <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                            AI Detection Modules
+                        </div>
+                    </div>
+                    <div class="module-list" style="padding:8px 8px 10px;">
+
+                        <!-- Human Detection -->
+                        <div class="module-row">
+                            <div class="module-icon">
+                                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                            </div>
+                            <div class="module-text">
+                                <div class="module-name">Human Detection</div>
+                                <div class="module-desc">Identify and track human movement</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+
+                        <!-- Vehicle / ATV -->
+                        <div class="module-row">
+                            <div class="module-icon">
+                                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><rect x="1" y="3" width="15" height="13" rx="2"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                            </div>
+                            <div class="module-text">
+                                <div class="module-name">Vehicle / ATV Tracking</div>
+                                <div class="module-desc">Detect and track vehicles &amp; ATVs</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+
+                        <!-- Number Plate -->
+                        <div class="module-row">
+                            <div class="module-icon">
+                                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><rect x="2" y="7" width="20" height="10" rx="2"></rect><path d="M6 11h1m3 0h6m-2 2h2"></path></svg>
+                            </div>
+                            <div class="module-text">
+                                <div class="module-name">Number Plate Recognition</div>
+                                <div class="module-desc">Read and identify vehicle plates</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+
+                        <!-- Thermal -->
+                        <div class="module-row">
+                            <div class="module-icon" style="background:rgba(255,59,48,0.08);border-color:rgba(255,59,48,0.2);color:var(--critical);">
+                                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M14 14.76V3.5a2.5 2.5 0 0 0-5 0v11.26a4.5 4.5 0 1 0 5 0z"></path></svg>
+                            </div>
+                            <div class="module-text">
+                                <div class="module-name">Thermal Heat Signatures</div>
+                                <div class="module-desc">Detect heat signatures (night/low-light)</div>
+                            </div>
+                            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                        </div>
+
+                        <!-- Night Detection -->
+                        <div class="module-row">
+                            <div class="module-icon">
+                                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                            </div>
+                            <div class="module-text">
+                                <div class="module-name">Night Detection</div>
+                                <div class="module-desc">Enhance visibility in low-light conditions</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+
+                        <!-- Suspicious Activity -->
+                        <div class="module-row">
+                            <div class="module-icon" style="background:rgba(255,176,0,0.1);border-color:rgba(255,176,0,0.25);color:var(--accent);">
+                                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                            </div>
+                            <div class="module-text">
+                                <div class="module-name">Suspicious Activity</div>
+                                <div class="module-desc">Detect unusual behaviour patterns</div>
+                            </div>
+                            <label class="switch"><input type="checkbox" checked><span class="slider"></span></label>
+                        </div>
+
+                        <!-- Drone / UAV -->
+                        <div class="module-row">
+                            <div class="module-icon">
+                                <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+                            </div>
+                            <div class="module-text">
+                                <div class="module-name">Drone / UAV Detection</div>
+                                <div class="module-desc">Identify and track aerial objects</div>
+                            </div>
+                            <label class="switch"><input type="checkbox"><span class="slider"></span></label>
+                        </div>
+
+                    </div>
+                </div><!-- end modules card -->
+
+                <!-- Inference Settings -->
+                <div class="panel-card">
+                    <div class="panel-head">
+                        <div class="panel-head-title">
+                            <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><line x1="4" y1="6" x2="20" y2="6"></line><line x1="8" y1="12" x2="20" y2="12"></line><line x1="12" y1="18" x2="20" y2="18"></line></svg>
+                            Inference Settings
+                        </div>
+                        <span class="inf-adv-link" style="padding:0;font-size:10px;">Advanced ↑</span>
+                    </div>
+                    <div class="inf-settings">
+                        <!-- Confidence Threshold -->
+                        <div class="inf-row">
+                            <div class="inf-label-row">
+                                <span class="inf-label">Detection Confidence Threshold</span>
+                                <span class="inf-val" id="confVal">25%</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="25" id="confSlider">
+                        </div>
+                        <!-- Tracking Sensitivity -->
+                        <div class="inf-row">
+                            <div class="inf-label-row">
+                                <span class="inf-label">Tracking Sensitivity</span>
+                                <span class="inf-val" id="trackVal">75%</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="75" id="trackSlider">
+                        </div>
+                        <!-- Processing Quality -->
+                        <div class="inf-row">
+                            <div class="inf-label-row">
+                                <span class="inf-label">AI Processing Quality</span>
+                            </div>
+                            <select class="inf-select">
+                                <option selected>High</option>
+                                <option>Medium</option>
+                                <option>Low (Edge)</option>
+                                <option>Ultra (GPU)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div><!-- end inference settings -->
+
+            </div><!-- end right-col -->
+        </div><!-- end det-top -->
+
+        <div class="panel-card threat-panel">
+            <div class="panel-head">
+                <div class="panel-head-title">
+                    <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg>
+                    Threat Clips
+                </div>
+                <span class="panel-head-meta" style="color:var(--secondary-text);">12 incidents queued</span>
+            </div>
+            <div class="threat-grid">
+                <div class="threat-card active" data-video="models/video/1st.mp4" data-name="Threat 01">
+                    <div class="threat-thumb">
+                        <div class="video-skeleton"></div>
+                        <video muted loop playsinline preload="metadata" src="models/video/1st.mp4"></video>
+                        <span class="threat-badge">PLAY</span>
+                    </div>
+                    <div class="threat-content">
+                        <div class="threat-name">Threat 01</div>
+                        <div class="threat-meta"><span>CAM-04</span><strong>MED</strong></div>
+                    </div>
+                </div>
+                <div class="threat-card" data-video="models/video/2nd.mp4" data-name="Threat 02">
+                    <div class="threat-thumb">
+                        <div class="video-skeleton"></div>
+                        <video muted loop playsinline preload="metadata" src="models/video/2nd.mp4"></video>
+                        <span class="threat-badge">PLAY</span>
+                    </div>
+                    <div class="threat-content">
+                        <div class="threat-name">Threat 02</div>
+                        <div class="threat-meta"><span>CAM-02</span><strong>HIGH</strong></div>
+                    </div>
+                </div>
+                <div class="threat-card" data-video="models/video/3rd.mp4" data-name="Threat 03">
+                    <div class="threat-thumb">
+                        <div class="video-skeleton"></div>
+                        <video muted loop playsinline preload="metadata" src="models/video/3rd.mp4"></video>
+                        <span class="threat-badge">PLAY</span>
+                    </div>
+                    <div class="threat-content">
+                        <div class="threat-name">Threat 03</div>
+                        <div class="threat-meta"><span>CAM-06</span><strong>MED</strong></div>
+                    </div>
+                </div>
+                <div class="threat-card" data-video="models/video/4th.mp4" data-name="Threat 04">
+                    <div class="threat-thumb">
+                        <div class="video-skeleton"></div>
+                        <video muted loop playsinline preload="metadata" src="models/video/4th.mp4"></video>
+                        <span class="threat-badge">PLAY</span>
+                    </div>
+                    <div class="threat-content">
+                        <div class="threat-name">Threat 04</div>
+                        <div class="threat-meta"><span>CAM-08</span><strong>LOW</strong></div>
+                    </div>
+                </div>
+                <div class="threat-card" data-video="models/video/5th.mp4" data-name="Threat 05">
+                    <div class="threat-thumb">
+                        <div class="video-skeleton"></div>
+                        <video muted loop playsinline preload="metadata" src="models/video/5th.mp4"></video>
+                        <span class="threat-badge">PLAY</span>
+                    </div>
+                    <div class="threat-content">
+                        <div class="threat-name">Threat 05</div>
+                        <div class="threat-meta"><span>CAM-11</span><strong>HIGH</strong></div>
+                    </div>
+                </div>
+                <div class="threat-card" data-video="models/video/6th.mp4" data-name="Threat 06">
+                    <div class="threat-thumb">
+                        <div class="video-skeleton"></div>
+                        <video muted loop playsinline preload="metadata" src="models/video/6th.mp4"></video>
+                        <span class="threat-badge">PLAY</span>
+                    </div>
+                    <div class="threat-content">
+                        <div class="threat-name">Threat 06</div>
+                        <div class="threat-meta"><span>CAM-15</span><strong>MED</strong></div>
+                    </div>
+                </div>
+                <div class="threat-card" data-video="models/video/7th.mp4" data-name="Threat 07">
+                    <div class="threat-thumb">
+                        <div class="video-skeleton"></div>
+                        <video muted loop playsinline preload="metadata" src="models/video/7th.mp4"></video>
+                        <span class="threat-badge">PLAY</span>
+                    </div>
+                    <div class="threat-content">
+                        <div class="threat-name">Threat 07</div>
+                        <div class="threat-meta"><span>CAM-03</span><strong>CRIT</strong></div>
+                    </div>
+                </div>
+                <div class="threat-card" data-video="models/video/8th.mp4" data-name="Threat 08">
+                    <div class="threat-thumb">
+                        <div class="video-skeleton"></div>
+                        <video muted loop playsinline preload="metadata" src="models/video/8th.mp4"></video>
+                        <span class="threat-badge">PLAY</span>
+                    </div>
+                    <div class="threat-content">
+                        <div class="threat-name">Threat 08</div>
+                        <div class="threat-meta"><span>CAM-07</span><strong>HIGH</strong></div>
+                    </div>
+                </div>
+                <div class="threat-card" data-video="models/video/9th.mp4" data-name="Threat 09">
+                    <div class="threat-thumb">
+                        <div class="video-skeleton"></div>
+                        <video muted loop playsinline preload="metadata" src="models/video/9th.mp4"></video>
+                        <span class="threat-badge">PLAY</span>
+                    </div>
+                    <div class="threat-content">
+                        <div class="threat-name">Threat 09</div>
+                        <div class="threat-meta"><span>CAM-09</span><strong>MED</strong></div>
+                    </div>
+                </div>
+                <div class="threat-card" data-video="models/video/10.mp4" data-name="Threat 10">
+                    <div class="threat-thumb">
+                        <div class="video-skeleton"></div>
+                        <video muted loop playsinline preload="metadata" src="models/video/10.mp4"></video>
+                        <span class="threat-badge">PLAY</span>
+                    </div>
+                    <div class="threat-content">
+                        <div class="threat-name">Threat 10</div>
+                        <div class="threat-meta"><span>CAM-12</span><strong>LOW</strong></div>
+                    </div>
+                </div>
+                <div class="threat-card" data-video="models/video/11.mp4" data-name="Threat 11">
+                    <div class="threat-thumb">
+                        <div class="video-skeleton"></div>
+                        <video muted loop playsinline preload="metadata" src="models/video/11.mp4"></video>
+                        <span class="threat-badge">PLAY</span>
+                    </div>
+                    <div class="threat-content">
+                        <div class="threat-name">Threat 11</div>
+                        <div class="threat-meta"><span>CAM-14</span><strong>HIGH</strong></div>
+                    </div>
+                </div>
+                <div class="threat-card" data-video="models/video/12.mp4" data-name="Threat 12">
+                    <div class="threat-thumb">
+                        <div class="video-skeleton"></div>
+                        <video muted loop playsinline preload="metadata" src="models/video/12.mp4"></video>
+                        <span class="threat-badge">PLAY</span>
+                    </div>
+                    <div class="threat-content">
+                        <div class="threat-name">Threat 12</div>
+                        <div class="threat-meta"><span>CAM-16</span><strong>MED</strong></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ── BOTTOM: STATS | EVENTS | TRACKING ─────────────────────── -->
+        <div class="det-bottom">
+
+            <!-- 1. DETECTION STATS -->
+            <div class="panel-card">
+                <div class="panel-head">
+                    <div class="panel-head-title">
+                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                        Detection Stats
+                    </div>
+                </div>
+                <div class="stats-row">
+                    <!-- Persons -->
+                    <div class="stat-cell">
+                        <div class="stat-cell-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--accent)" stroke-width="2" fill="none"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+                        </div>
+                        <div class="stat-cell-val" id="personStat">0</div>
+                        <div class="stat-cell-name">Persons</div>
+                        <div class="stat-cell-trend">LIVE</div>
+                    </div>
+                    <!-- Vehicles -->
+                    <div class="stat-cell">
+                        <div class="stat-cell-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--info)" stroke-width="2" fill="none"><rect x="1" y="3" width="15" height="13" rx="2"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>
+                        </div>
+                        <div class="stat-cell-val" id="vehicleStat" style="color:var(--info);">0</div>
+                        <div class="stat-cell-name">Vehicles</div>
+                        <div class="stat-cell-trend">LIVE</div>
+                    </div>
+                    <!-- Plates -->
+                    <div class="stat-cell">
+                        <div class="stat-cell-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--secondary-text)" stroke-width="2" fill="none"><rect x="2" y="7" width="20" height="10" rx="2"></rect></svg>
+                        </div>
+                        <div class="stat-cell-val" id="plateStat" style="color:var(--secondary-text);">0</div>
+                        <div class="stat-cell-name">Plates</div>
+                        <div class="stat-cell-trend" style="color:var(--muted-text);">N/A</div>
+                    </div>
+                    <!-- Suspicious -->
+                    <div class="stat-cell crit">
+                        <div class="stat-cell-icon">
+                            <svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--critical)" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+                        </div>
+                        <div class="stat-cell-val" id="suspiciousStat">0</div>
+                        <div class="stat-cell-name">Suspicious</div>
+                        <div class="stat-cell-trend" style="color:var(--critical);">LIVE</div>
+                    </div>
+                </div>
+            </div><!-- end stats -->
+
+            <!-- 2. LIVE AI EVENTS -->
+            <div class="panel-card" style="display:flex;flex-direction:column;">
+                <div class="panel-head">
+                    <div class="panel-head-title">
+                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        Live AI Events
+                    </div>
+                    <span id="liveEventsTime" style="font-family: var(--font-family-mono);font-size:10px;color:var(--muted-text);"></span>
+                </div>
+                <div class="events-body" id="eventsLog">
+                    <div class="event-item">
+                        <span class="event-time" id="et1">--:--:--</span>
+                        <span class="event-desc"><strong>Person detected</strong> (P-104)</span>
+                        <span class="event-cam">CAM-04</span>
+                    </div>
+                    <div class="event-item">
+                        <span class="event-time" id="et2">--:--:--</span>
+                        <span class="event-desc"><strong>Vehicle detected</strong> (V-042)</span>
+                        <span class="event-cam blue">CAM-04</span>
+                    </div>
+                    <div class="event-item">
+                        <span class="event-time" id="et3">--:--:--</span>
+                        <span class="event-desc"><strong>Unknown object</strong> (U-017)</span>
+                        <span class="event-cam red">CAM-04</span>
+                    </div>
+                    <div class="event-item">
+                        <span class="event-time" id="et4">--:--:--</span>
+                        <span class="event-desc"><strong>Person tracked</strong> (P-088)</span>
+                        <span class="event-cam">CAM-03</span>
+                    </div>
+                    <div class="event-item">
+                        <span class="event-time" id="et5">--:--:--</span>
+                        <span class="event-desc"><strong>Plate detected</strong> (MH12AB1234)</span>
+                        <span class="event-cam blue">CAM-02</span>
+                    </div>
+                </div>
+                <div class="view-all-row">
+                    <a class="view-all-link" href="alerts.html">
+                        VIEW ALL
+                        <svg viewBox="0 0 24 24" width="10" height="10" stroke="currentColor" stroke-width="2" fill="none"><polyline points="9 18 15 12 9 6"></polyline></svg>
+                    </a>
+                </div>
+            </div><!-- end events -->
+
+            <!-- 3. TRACKING & ANALYSIS -->
+            <div class="panel-card">
+                <div class="panel-head">
+                    <div class="panel-head-title">
+                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
+                        Tracking &amp; Analysis
+                    </div>
+                    <a href="tracking.html" style="font-family: var(--font-family-mono);font-size:10px;color:var(--accent);text-decoration:none;">View Details</a>
+                </div>
+                <div class="track-body">
+                    <!-- Entity thumbnail + meta -->
+                    <div class="track-entity">
+                        <div class="track-thumb">
+                            P-104
+                            <div class="track-thumb-badge">TRACKING</div>
+                        </div>
+                        <div class="track-meta">
+                            <div class="track-meta-row">
+                                <span class="track-meta-key">Type</span>
+                                <span class="track-meta-val">Person</span>
+                            </div>
+                            <div class="track-meta-row">
+                                <span class="track-meta-key">Threat Level</span>
+                                <span class="threat-med">MEDIUM</span>
+                            </div>
+                            <div class="track-meta-row">
+                                <span class="track-meta-key">Confidence</span>
+                                <span class="track-meta-val">98.4%</span>
+                            </div>
+                            <div class="track-meta-row">
+                                <span class="track-meta-key">Last Seen</span>
+                                <span class="track-meta-val" id="lastSeen">--:--:--</span>
+                            </div>
+                            <div class="track-meta-row">
+                                <span class="track-meta-key">Location</span>
+                                <span class="track-meta-val">CAM-04</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tracking path canvas -->
+                    <div class="track-path-wrap">
+                        <canvas id="trackCanvas"></canvas>
+                        <span class="track-path-label">Tracking Path</span>
+                    </div>
+                </div>
+            </div><!-- end tracking -->
+
+        </div><!-- end det-bottom -->
+    </main><!-- end main-content -->
+</div><!-- end app-container -->
+
+<script>
+    /* ── SIDEBAR COLLAPSE ─────────────────────────────────────────── */
+    const sidebar    = document.getElementById('sidebar');
+    const collapseBtn = document.getElementById('collapseBtn');
+    const navItems   = document.querySelectorAll('.nav-item');
+
+    if (collapseBtn) collapseBtn.addEventListener('click', () => sidebar.classList.toggle('collapsed'));
+
+    const currentPath = window.location.pathname.split('/').pop() || 'index.html';
+    navItems.forEach(item => {
+        if (item.getAttribute('data-page') === currentPath) item.classList.add('active');
+    });
+
+    /* ── LIVE DATE / TIME ─────────────────────────────────────────── */
+    function formatTime(d) {
+        return d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    }
+    function updateDatetime() {
+        const now = new Date();
+        const formatted = now.toLocaleString('en-US', {
+            year: 'numeric', month: 'short', day: '2-digit',
+            hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true
+        }).replace(',', ' ·');
+        const el = document.getElementById('liveDatetime');
+        if (el) el.textContent = formatted;
+
+        const offsets = [0, -5, -11, -20, -25];
+        ['et1','et2','et3','et4','et5'].forEach((id, i) => {
+            const el2 = document.getElementById(id);
+            if (el2) {
+                const t = new Date(now.getTime() + offsets[i] * 1000);
+                el2.textContent = formatTime(t);
+            }
+        });
+
+        const ls = document.getElementById('lastSeen');
+        if (ls) ls.textContent = formatTime(now);
+    }
+    updateDatetime();
+    setInterval(updateDatetime, 1000);
+
+    /* ── SLIDER LIVE VALUES ───────────────────────────────────────── */
+    const confSlider = document.getElementById('confSlider');
+    const trackSlider = document.getElementById('trackSlider');
+    document.getElementById('confVal').textContent = confSlider.value + '%';
+    document.getElementById('trackVal').textContent = trackSlider.value + '%';
+    confSlider.addEventListener('input', () => {
+        document.getElementById('confVal').textContent = confSlider.value + '%';
+    });
+    trackSlider.addEventListener('input', () => {
+        document.getElementById('trackVal').textContent = trackSlider.value + '%';
+    });
+
+    /* ── VIDEO CONTROLS ───────────────────────────────────────────── */
+    const vid = document.getElementById('uploadedVideo');
+    const videoPlaceholder = document.getElementById('videoPlaceholder');
+    const videoWrap = document.getElementById('videoWrap');
+    const detectionCanvas = document.getElementById('detectionCanvas');
+    const cameraLabel = document.getElementById('cameraLabel');
+    const demoVideoSelect = document.getElementById('demoVideoSelect');
+    let paused = false;
+    let animationFrameId = null;
+    let model = null;
+    let lastDetectionTime = 0;
+    let lastStatusText = 'CAM-04 • READY';
+
+    function setCameraLabel(text) {
+        if (cameraLabel) {
+            cameraLabel.textContent = text;
+            lastStatusText = text;
+        }
+    }
+
+    function getVideoElement() {
+        return vid && vid.style.display !== 'none' ? vid : null;
+    }
+
+    function resizeDetectionCanvas() {
+        if (!detectionCanvas || !videoWrap) return;
+        const rect = videoWrap.getBoundingClientRect();
+        const ratio = window.devicePixelRatio || 1;
+        detectionCanvas.width = Math.max(1, Math.floor(rect.width * ratio));
+        detectionCanvas.height = Math.max(1, Math.floor(rect.height * ratio));
+        detectionCanvas.style.width = rect.width + 'px';
+        detectionCanvas.style.height = rect.height + 'px';
+        const ctx = detectionCanvas.getContext('2d');
+        ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
+    }
+
+    /* ── REAL AI OBJECT DETECTION (TensorFlow.js + COCO-SSD) ─────────
+       Runs an actual pretrained neural network in the browser on every
+       video frame and draws real bounding boxes for people/vehicles. */
+    async function loadModel() {
+        if (!window.cocoSsd || !window.tf) {
+            setCameraLabel('CAM-04 • MODEL UNAVAILABLE');
+            return;
+        }
+        try {
+            setCameraLabel('CAM-04 • LOADING AI MODEL');
+            model = await window.cocoSsd.load();
+            setCameraLabel('CAM-04 • AI READY');
+        } catch (error) {
+            console.error('Model load failed:', error);
+            setCameraLabel('CAM-04 • MODEL ERROR');
+        }
+    }
+
+    async function runDetectionFrame() {
+        const activeVideo = getVideoElement();
+        if (!activeVideo || !model || paused) return;
+        if (activeVideo.readyState < 2 || activeVideo.paused || activeVideo.ended) return;
+        if (Date.now() - lastDetectionTime < 200) return;
+        lastDetectionTime = Date.now();
+
+        try {
+            const predictions = await model.detect(activeVideo);
+            drawDetectionOverlay(predictions, activeVideo);
+            setCameraLabel('CAM-04 • ANALYZING VIDEO');
+        } catch (error) {
+            console.error('Detection failed:', error);
+        }
+    }
+
+    function tick() {
+        if (document.hidden) {
+            animationFrameId = requestAnimationFrame(tick);
+            return;
+        }
+        runDetectionFrame();
+        animationFrameId = requestAnimationFrame(tick);
+    }
+
+    function drawDetectionOverlay(predictions, video) {
+        const ctx = detectionCanvas.getContext('2d');
+        const rect = videoWrap.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+        ctx.clearRect(0, 0, w, h);
+
+        const personStat = document.getElementById('personStat');
+        const vehicleStat = document.getElementById('vehicleStat');
+        const suspiciousStat = document.getElementById('suspiciousStat');
+
+        if (!predictions || !predictions.length) {
+            if (personStat) personStat.textContent = '0';
+            if (vehicleStat) vehicleStat.textContent = '0';
+            if (suspiciousStat) suspiciousStat.textContent = '0';
+            return;
+        }
+
+        const threshold = Number(confSlider.value) / 100;
+        const vehicleClasses = ['car', 'truck', 'bus', 'motorcycle', 'bicycle'];
+        const relevant = predictions.filter(p => {
+            const label = p.class.toLowerCase();
+            return (label === 'person' || vehicleClasses.includes(label)) && p.score >= threshold;
+        });
+
+        // COCO-SSD returns boxes in native video pixel coordinates;
+        // scale them to the size the video is actually rendered at (object-fit: cover).
+        const vw = video.videoWidth || 1;
+        const vh = video.videoHeight || 1;
+        const videoAspect = vw / vh;
+        const wrapAspect = w / h;
+        let scale, offsetX = 0, offsetY = 0;
+        if (videoAspect > wrapAspect) {
+            scale = h / vh;
+            offsetX = (w - vw * scale) / 2;
+        } else {
+            scale = w / vw;
+            offsetY = (h - vh * scale) / 2;
+        }
+
+        const colors = {
+            person: '#FFB000', car: '#3B82F6', truck: '#8B5CF6',
+            bus: '#22C55E', motorcycle: '#F97316', bicycle: '#EC4899'
+        };
+
+        let personCount = 0;
+        let vehicleCount = 0;
+
+        relevant.forEach((pred) => {
+            const label = pred.class.toLowerCase();
+            const [bx, by, bw, bh] = pred.bbox;
+            const x = bx * scale + offsetX;
+            const y = by * scale + offsetY;
+            const boxWidth = bw * scale;
+            const boxHeight = bh * scale;
+            const color = colors[label] || '#FFB000';
+
+            if (label === 'person') personCount += 1;
+            else vehicleCount += 1;
+
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 2;
+            ctx.fillStyle = color;
+            ctx.globalAlpha = 0.18;
+            ctx.fillRect(x, y, boxWidth, boxHeight);
+            ctx.globalAlpha = 1;
+            ctx.strokeRect(x, y, boxWidth, boxHeight);
+
+            const displayName = label === 'person' ? 'PERSON' : label.toUpperCase();
+            const txt = `${displayName} ${(pred.score * 100).toFixed(0)}%`;
+            ctx.fillStyle = color;
+            ctx.font = '600 11px Inter, sans-serif';
+            ctx.fillRect(x, Math.max(y - 18, 4), ctx.measureText(txt).width + 12, 18);
+            ctx.fillStyle = '#000';
+            ctx.fillText(txt, x + 6, Math.max(y - 5, 16));
+        });
+
+        if (personStat) personStat.textContent = String(personCount);
+        if (vehicleStat) vehicleStat.textContent = String(vehicleCount);
+        if (suspiciousStat) suspiciousStat.textContent = String(Math.max(0, relevant.length - (personCount + vehicleCount)));
+    }
+
+    document.getElementById('pauseBtn').addEventListener('click', function () {
+        const activeVideo = getVideoElement();
+        paused = !paused;
+        if (paused) {
+            if (activeVideo) activeVideo.pause();
+            img.style.filter = 'contrast(1.1) saturate(0.85) brightness(0.4)';
+            this.innerHTML = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" width="13" height="13"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg>';
+        } else {
+            if (activeVideo) activeVideo.play().catch(() => {});
+            img.style.filter = 'contrast(1.1) saturate(0.85)';
+            this.innerHTML = '<svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" width="13" height="13"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>';
+        }
+    });
+
+    document.getElementById('snapshotBtn').addEventListener('click', function () {
+        const canvas = document.createElement('canvas');
+        const wrap = document.getElementById('videoWrap');
+        const activeVideo = getVideoElement();
+        canvas.width = wrap.offsetWidth;
+        canvas.height = wrap.offsetHeight;
+        const ctx = canvas.getContext('2d');
+        if (activeVideo) {
+            ctx.drawImage(activeVideo, 0, 0, canvas.width, canvas.height);
+        } else {
+            const image = document.getElementById('vidBg');
+            ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+        }
+        const link = document.createElement('a');
+        link.download = 'snapshot-' + Date.now() + '.png';
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+    });
+
+    document.getElementById('fsBtn').addEventListener('click', function () {
+        const wrap = document.getElementById('videoWrap');
+        if (!document.fullscreenElement) wrap.requestFullscreen().catch(() => {});
+        else document.exitFullscreen().catch(() => {});
+    });
+
+    document.getElementById('uploadBtn').addEventListener('click', () => {
+        document.getElementById('videoFileInput').click();
+    });
+
+    if (videoPlaceholder) {
+        videoPlaceholder.addEventListener('click', () => {
+            document.getElementById('videoFileInput').click();
+        });
+    }
+
+    function showVideoPlaceholderState(message) {
+        if (!videoPlaceholder) return;
+        const title = videoPlaceholder.querySelector('.placeholder-text strong');
+        if (title) title.textContent = message;
+        videoPlaceholder.classList.remove('hidden');
+    }
+
+    function loadVideoSource(url) {
+        if (videoPlaceholder) videoPlaceholder.classList.remove('hidden');
+        if (vid) {
+            vid.style.display = 'block';
+            vid.src = url;
+            vid.crossOrigin = 'anonymous';
+            vid.load();
+            vid.play().catch(() => {});
+        }
+        setCameraLabel(model ? 'CAM-04 • ANALYZING VIDEO' : 'CAM-04 • LOADING AI MODEL');
+        resizeDetectionCanvas();
+    }
+
+    if (vid) {
+        vid.addEventListener('loadeddata', () => {
+            if (videoPlaceholder) videoPlaceholder.classList.add('hidden');
+        });
+
+        vid.addEventListener('error', () => {
+            showVideoPlaceholderState('Video failed to load');
+        });
+    }
+
+    document.getElementById('videoFileInput').addEventListener('change', function () {
+        if (this.files && this.files[0]) {
+            demoVideoSelect.value = '';
+            loadVideoSource(URL.createObjectURL(this.files[0]));
+        }
+    });
+
+    demoVideoSelect.addEventListener('change', function () {
+        if (this.value) loadVideoSource(this.value);
+    });
+
+    document.querySelectorAll('.threat-card').forEach((card) => {
+        const video = card.querySelector('video');
+        if (video) {
+            video.addEventListener('loadeddata', () => {
+                card.classList.add('loaded');
+            });
+            video.addEventListener('error', () => {
+                card.classList.add('loaded');
+            });
+        }
+
+        card.addEventListener('click', () => {
+            const targetVideo = card.dataset.video || 'models/video/1st.mp4';
+            document.querySelectorAll('.threat-card').forEach((item) => item.classList.toggle('active', item === card));
+            loadVideoSource(targetVideo);
+            setCameraLabel('CAM-04 • THREAT CLIP: ' + (card.dataset.name || 'Threat'));
+        });
+    });
+
+    function updateTrackPath() {
+        const canvas = document.getElementById('trackCanvas');
+        if (!canvas) return;
+        const wrap = canvas.parentElement;
+        canvas.width = wrap.offsetWidth || 260;
+        canvas.height = wrap.offsetHeight || 56;
+        const ctx = canvas.getContext('2d');
+
+        const pts = [
+            [0.05, 0.7], [0.15, 0.5], [0.28, 0.6], [0.42, 0.35],
+            [0.55, 0.45], [0.67, 0.3], [0.78, 0.5], [0.9, 0.4], [0.98, 0.55]
+        ];
+        let progress = 0;
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.fillStyle = 'rgba(255,255,255,0.04)';
+            for (let x = 10; x < canvas.width; x += 18)
+                for (let y = 8; y < canvas.height; y += 14)
+                    ctx.fillRect(x, y, 1, 1);
+
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(255,176,0,0.15)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([4, 3]);
+            pts.forEach((p, i) => {
+                const x = p[0] * canvas.width;
+                const y = p[1] * canvas.height;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            });
+            ctx.stroke();
+
+            const count = Math.max(2, Math.floor(progress * (pts.length - 1)));
+            ctx.beginPath();
+            ctx.strokeStyle = 'rgba(255,176,0,0.9)';
+            ctx.lineWidth = 1.5;
+            ctx.setLineDash([]);
+            for (let i = 0; i <= count && i < pts.length; i++) {
+                const x = pts[i][0] * canvas.width;
+                const y = pts[i][1] * canvas.height;
+                i === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y);
+            }
+            ctx.stroke();
+
+            const ci = Math.min(count, pts.length - 1);
+            const cx = pts[ci][0] * canvas.width;
+            const cy = pts[ci][1] * canvas.height;
+            ctx.beginPath();
+            ctx.arc(cx, cy, 4, 0, Math.PI * 2);
+            ctx.fillStyle = '#FFB000';
+            ctx.shadowColor = 'rgba(255,176,0,0.6)';
+            ctx.shadowBlur = 6;
+            ctx.fill();
+            ctx.shadowBlur = 0;
+
+            ctx.beginPath();
+            ctx.arc(pts[0][0] * canvas.width, pts[0][1] * canvas.height, 3, 0, Math.PI * 2);
+            ctx.fillStyle = 'rgba(255,176,0,0.5)';
+            ctx.fill();
+
+            progress += 0.004;
+            if (progress > 1) progress = 0;
+            requestAnimationFrame(draw);
+        }
+        draw();
+    }
+
+    window.addEventListener('resize', resizeDetectionCanvas);
+    resizeDetectionCanvas();
+    updateTrackPath();
+    loadModel();
+    tick();
+
+    /* ─── FENCING ZONE ENABLE ──────────────────────── */
+    let fencingEnabled = false;
+    let autoDownloadEnabled = false; // AUTO-DOWNLOAD OFF BY DEFAULT
+    let trackedObjects = new Map(); // Track objects and their duration
+    let lastScreenshotTime = 0; // Track last periodic screenshot
+    const OBJECT_SHOW_THRESHOLD = 5500; // 5.5 seconds in milliseconds (5-6 seconds)
+    const PERIODIC_SCREENSHOT_INTERVAL = 10000; // 10 seconds in milliseconds
+    const fencingBtn = document.getElementById('fencingBtn');
+    const autoDownloadBtn = document.getElementById('autoDownloadBtn');
+
+    fencingBtn.addEventListener('click', function () {
+        fencingEnabled = !fencingEnabled;
+        if (fencingEnabled) {
+            this.style.borderColor = 'var(--accent)';
+            this.style.color = 'var(--accent)';
+            this.style.boxShadow = '0 0 10px rgba(255, 176, 0, 0.5)';
+            trackedObjects.clear();
+            console.log('🔒 FENCING ZONE: ENABLED - Tracking objects for 5-6 seconds');
+        } else {
+            this.style.borderColor = 'var(--border-color)';
+            this.style.color = 'var(--secondary-text)';
+            this.style.boxShadow = 'none';
+            console.log('🔓 FENCING ZONE: DISABLED');
+        }
+    });
+
+    // AUTO-DOWNLOAD TOGGLE
+    autoDownloadBtn.addEventListener('click', function () {
+        autoDownloadEnabled = !autoDownloadEnabled;
+        if (autoDownloadEnabled) {
+            this.style.borderColor = 'var(--accent)';
+            this.style.color = 'var(--accent)';
+            this.style.boxShadow = '0 0 10px rgba(255, 176, 0, 0.5)';
+            this.title = 'Toggle Auto-Download (Currently ON)';
+            console.log('✅ AUTO-DOWNLOAD: ON - Screenshots will be downloaded');
+        } else {
+            this.style.borderColor = 'var(--border-color)';
+            this.style.color = 'var(--secondary-text)';
+            this.style.boxShadow = 'none';
+            this.title = 'Toggle Auto-Download (Currently OFF)';
+            console.log('❌ AUTO-DOWNLOAD: OFF - Screenshots will NOT be downloaded');
+        }
+    });
+
+    // Set initial state for auto-download button (OFF by default)
+    autoDownloadBtn.style.borderColor = 'var(--border-color)';
+    autoDownloadBtn.style.color = 'var(--secondary-text)';
+    autoDownloadBtn.style.boxShadow = 'none';
+
+    // Generate filename with timestamp
+    function generateFilename() {
+        const now = new Date();
+        return `object_detection_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}.png`;
+    }
+
+    // Capture and download screenshot
+    function captureAndDownloadScreenshot() {
+        if (!autoDownloadEnabled) {
+            console.log('⚠️ Auto-download is OFF - Screenshot not downloaded');
+            return;
+        }
+        
+        const canvas = document.createElement('canvas');
+        const wrap = document.getElementById('videoWrap');
+        const activeVideo = getVideoElement();
+        canvas.width = wrap.offsetWidth;
+        canvas.height = wrap.offsetHeight;
+        const ctx = canvas.getContext('2d');
+        if (activeVideo && activeVideo.readyState >= 2) {
+            ctx.drawImage(activeVideo, 0, 0, canvas.width, canvas.height);
+        }
+        
+        const link = document.createElement('a');
+        link.download = generateFilename();
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+        
+        console.log('📸 Screenshot downloaded: ' + link.download);
+    }
+
+    // Periodic screenshot every 10 seconds
+    function takePeriodicScreenshot() {
+        const now = Date.now();
+        if (fencingEnabled && (now - lastScreenshotTime >= PERIODIC_SCREENSHOT_INTERVAL)) {
+            lastScreenshotTime = now;
+            if (autoDownloadEnabled) {
+                captureAndDownloadScreenshot();
+                console.log('⏱️ Periodic screenshot taken (10s interval)');
+            } else {
+                console.log('⏱️ Periodic screenshot time reached but auto-download is OFF');
+            }
+        }
+    }
+
+    // Draw fencing zone overlay on canvas
+    function drawFencingZone() {
+        if (!fencingEnabled || !detectionCanvas) return;
+        
+        const ctx = detectionCanvas.getContext('2d');
+        const rect = videoWrap.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+
+        // Draw multiple fence boundaries with glowing effect
+        
+        // Center rectangular zone (main area)
+        const marginX = w * 0.15;
+        const marginY = h * 0.15;
+        
+        ctx.strokeStyle = '#FFB000';
+        ctx.lineWidth = 3;
+        ctx.setLineDash([10, 5]);
+        ctx.globalAlpha = 0.8;
+        
+        // Outer fence
+        ctx.strokeRect(marginX, marginY, w - marginX * 2, h - marginY * 2);
+        
+        // Glow effect
+        ctx.shadowColor = 'rgba(255, 176, 0, 0.6)';
+        ctx.shadowBlur = 15;
+        ctx.strokeStyle = 'rgba(255, 176, 0, 0.5)';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(marginX - 2, marginY - 2, w - marginX * 2 + 4, h - marginY * 2 + 4);
+        
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = 1;
+        ctx.setLineDash([]);
+        
+        // Add corner markers
+        const cornerSize = 20;
+        const corners = [
+            [marginX, marginY],
+            [w - marginX, marginY],
+            [marginX, h - marginY],
+            [w - marginX, h - marginY]
+        ];
+        
+        corners.forEach(([x, y]) => {
+            // Corner box
+            ctx.fillStyle = 'rgba(255, 176, 0, 0.3)';
+            ctx.fillRect(x - cornerSize/2, y - cornerSize/2, cornerSize, cornerSize);
+            
+            // Corner outline
+            ctx.strokeStyle = '#FFB000';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(x - cornerSize/2, y - cornerSize/2, cornerSize, cornerSize);
+            
+            // Center dot
+            ctx.fillStyle = '#FFB000';
+            ctx.beginPath();
+            ctx.arc(x, y, 3, 0, Math.PI * 2);
+            ctx.fill();
+        });
+        
+        // Add zone label
+        ctx.fillStyle = '#FFB000';
+        ctx.font = 'bold 14px Inter, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🔒 FENCING ZONE ACTIVE', w / 2, marginY - 20);
+    }
+
+    // Track objects and highlight if shown for 2-3 seconds
+    function trackObjectsAndHighlight(predictions, video) {
+        if (!fencingEnabled || !predictions || predictions.length === 0) {
+            trackedObjects.clear();
+            return;
+        }
+
+        // Take periodic screenshot every 10 seconds
+        takePeriodicScreenshot();
+
+        const ctx = detectionCanvas.getContext('2d');
+        const rect = videoWrap.getBoundingClientRect();
+        const w = rect.width;
+        const h = rect.height;
+
+        const threshold = Number(confSlider.value) / 100;
+        const currentTime = Date.now();
+        const detectedObjects = predictions.filter(p => p.score >= threshold);
+
+        // Scale predictions to canvas coordinates
+        const vw = video.videoWidth || 1;
+        const vh = video.videoHeight || 1;
+        const videoAspect = vw / vh;
+        const wrapAspect = w / h;
+        let scale, offsetX = 0, offsetY = 0;
+        if (videoAspect > wrapAspect) {
+            scale = h / vh;
+            offsetX = (w - vw * scale) / 2;
+        } else {
+            scale = w / vw;
+            offsetY = (h - vh * scale) / 2;
+        }
+
+        // Track current objects
+        const currentObjectIds = new Set();
+
+        detectedObjects.forEach((pred, idx) => {
+            const objectId = `${pred.class}_${idx}`;
+            currentObjectIds.add(objectId);
+
+            const [bx, by, bw, bh] = pred.bbox;
+            const x = bx * scale + offsetX;
+            const y = by * scale + offsetY;
+            const boxWidth = bw * scale;
+            const boxHeight = bh * scale;
+
+            if (!trackedObjects.has(objectId)) {
+                // First time seeing this object
+                trackedObjects.set(objectId, {
+                    firstSeen: currentTime,
+                    lastSeen: currentTime,
+                    class: pred.class,
+                    bbox: pred.bbox,
+                    highlighted: false,
+                    screenshotTaken: false
+                });
+            } else {
+                const obj = trackedObjects.get(objectId);
+                obj.lastSeen = currentTime;
+                const duration = currentTime - obj.firstSeen;
+
+                // If object shown for 2-3 seconds, highlight it and download screenshot
+                if (duration >= OBJECT_SHOW_THRESHOLD && !obj.highlighted) {
+                    obj.highlighted = true;
+                    console.log(`🎯 Object detected for ${(duration/1000).toFixed(1)}s: ${pred.class}`);
+
+                    // Draw BRIGHT RED box for highlighted object
+                    ctx.strokeStyle = '#FF0000';
+                    ctx.lineWidth = 5;
+                    ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
+                    ctx.shadowBlur = 20;
+                    ctx.strokeRect(x, y, boxWidth, boxHeight);
+                    ctx.shadowBlur = 0;
+
+                    // Draw fill with transparency
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.15)';
+                    ctx.fillRect(x, y, boxWidth, boxHeight);
+
+                    // Label
+                    const label = `${pred.class.toUpperCase()} - ${(duration/1000).toFixed(1)}s`;
+                    ctx.fillStyle = '#FF0000';
+                    ctx.font = 'bold 13px Inter, sans-serif';
+                    const textWidth = ctx.measureText(label).width;
+                    ctx.fillRect(x, Math.max(y - 25, 4), textWidth + 16, 22);
+                    ctx.fillStyle = '#FFF';
+                    ctx.fillText(label, x + 8, Math.max(y - 8, 18));
+
+                    // Download screenshot
+                    if (!obj.screenshotTaken) {
+                        obj.screenshotTaken = true;
+                        captureAndDownloadScreenshot();
+                    }
+                } else if (duration >= OBJECT_SHOW_THRESHOLD && obj.highlighted) {
+                    // Keep drawing red box for already highlighted objects
+                    ctx.strokeStyle = '#FF0000';
+                    ctx.lineWidth = 5;
+                    ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
+                    ctx.shadowBlur = 20;
+                    ctx.strokeRect(x, y, boxWidth, boxHeight);
+                    ctx.shadowBlur = 0;
+
+                    // Draw fill with transparency
+                    ctx.fillStyle = 'rgba(255, 0, 0, 0.15)';
+                    ctx.fillRect(x, y, boxWidth, boxHeight);
+
+                    // Label
+                    const duration_str = ((currentTime - obj.firstSeen) / 1000).toFixed(1);
+                    const label = `${pred.class.toUpperCase()} - ${duration_str}s`;
+                    ctx.fillStyle = '#FF0000';
+                    ctx.font = 'bold 13px Inter, sans-serif';
+                    const textWidth = ctx.measureText(label).width;
+                    ctx.fillRect(x, Math.max(y - 25, 4), textWidth + 16, 22);
+                    ctx.fillStyle = '#FFF';
+                    ctx.fillText(label, x + 8, Math.max(y - 8, 18));
+                }
+            }
+        });
+
+        // Clean up objects no longer in scene
+        for (let [objectId, obj] of trackedObjects.entries()) {
+            if (!currentObjectIds.has(objectId)) {
+                trackedObjects.delete(objectId);
+            }
+        }
+    }
+
+    // Override detection overlay to include object tracking
+    const originalDrawDetectionOverlay2 = window.drawDetectionOverlay || function(){};
+    window.drawDetectionOverlay = function(predictions, video) {
+        originalDrawDetectionOverlay2(predictions, video);
+        
+        if (fencingEnabled) {
+            drawFencingZone();
+            trackObjectsAndHighlight(predictions, video);
+        }
+    };
+
+
+</script>
+<script src="theme.js"></script>
+
+<!-- Authentication Check -->
+<script>
+    // Check if user is logged in on page load
+    function checkAuth() {
+        const userRole = localStorage.getItem('borderSightUserRole');
+        const username = localStorage.getItem('borderSightUsername');
+        
+        if (!userRole || !username) {
+            // Not logged in, redirect to login
+            window.location.href = 'index.html';
+        }
+    }
+    
+    // Check authentication immediately when page loads
+    checkAuth();
+</script>
+</body>
+</html>

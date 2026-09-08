@@ -1,0 +1,1620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Active Alerts – BorderSight AI</title>
+    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=mh9Y16ZEPLfW&format=png&color=000000">
+    <!-- Google Fonts for professional technical dashboard styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Global Theme System -->
+    <link rel="stylesheet" href="theme.css">
+    <style>
+        /* Updated Color Palette Variables */
+        :root {
+            --bg-main: #030303;
+            --sidebar-bg: rgba(7, 7, 7, 0.9);
+            --card-bg: #0D0D0D;
+            --card-hover: #141414;
+            --border-color: #242424;
+            
+            --primary: #FFFFFF;
+            --primary-glow: rgba(255, 255, 255, 0.08);
+            
+            --secondary-text: #A1A1A1;
+            --muted-text: #666666;
+            
+            --accent: #FFB000;
+            --accent-hover: #FFC533;
+            --accent-glow: rgba(255, 176, 0, 0.12);
+            
+            --success: #22C55E;
+            --warning: #FFB000;
+            --critical: #FF3B30;
+            --info: #3B82F6;
+            
+            --transition-speed: 280ms;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 80px;
+        }
+
+        /* Reset & Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--primary);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Layout Container */
+        .app-container {
+            display: flex;
+            width: 100%;
+            position: relative;
+        }
+
+        /* --- SIDEBAR STYLES --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--sidebar-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 100;
+            transition: width var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        /* Logo Area */
+        .sidebar-header {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            min-height: 80px;
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            font-size: 24px;
+            color: var(--accent);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
+        }
+
+        .logo-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+        }
+
+        .logo-subtitle {
+            font-size: 11px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+            text-transform: uppercase;
+        }
+
+        .collapse-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--muted-text);
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .collapse-btn:hover {
+            background: var(--card-bg);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .sidebar.collapsed .collapse-btn svg {
+            transform: rotate(180deg);
+        }
+
+        /* Navigation Menu Sections */
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+
+        .nav-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-category {
+            font-size: 10px;
+            font-weight: 700;
+            font-family: var(--font-family-mono);
+            color: var(--muted-text);
+            padding: 0 12px 8px 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: opacity var(--transition-speed) ease;
+            white-space: nowrap;
+        }
+
+        .sidebar.collapsed .nav-category {
+            opacity: 0;
+            visibility: hidden;
+            height: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Nav Items */
+        .nav-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--secondary-text);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            background: transparent;
+            cursor: pointer;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            transition: transform var(--transition-speed) ease, color var(--transition-speed) ease;
+        }
+
+        .nav-item span.nav-text {
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .nav-item span.nav-text {
+            opacity: 0;
+            visibility: hidden;
+            position: absolute;
+        }
+
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20%;
+            height: 60%;
+            width: 3px;
+            background-color: var(--accent);
+            border-radius: 0 3px 3px 0;
+            opacity: 0;
+            transform: scaleY(0);
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        .nav-item:hover {
+            color: var(--primary);
+            background: linear-gradient(90deg, var(--accent-glow) 0%, rgba(0,0,0,0) 100%);
+            border-color: rgba(255, 176, 0, 0.15);
+            padding-left: 16px;
+        }
+
+        .nav-item:hover svg {
+            transform: scale(1.1) rotate(4deg);
+            color: var(--accent);
+        }
+
+        .nav-item:hover::before {
+            opacity: 1;
+            transform: scaleY(1);
+        }
+
+        .nav-item.active {
+            color: var(--accent);
+            background: var(--accent-glow);
+            border-color: rgba(255, 176, 0, 0.3);
+            font-weight: 600;
+        }
+
+        .nav-item.active::before {
+            opacity: 1;
+            transform: scaleY(1);
+        }
+
+        .nav-item.active svg {
+            color: var(--accent);
+        }
+
+        .badge {
+            margin-left: auto;
+            background-color: var(--critical);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-family: var(--font-family-mono);
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .badge {
+            position: absolute;
+            top: 6px;
+            right: 10px;
+            padding: 1px 4px;
+            font-size: 9px;
+        }
+
+        .nav-item .tooltip {
+            position: absolute;
+            left: calc(100% + 12px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--card-bg);
+            color: var(--primary);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed .nav-item:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(-50%) translateX(2px);
+        }
+
+        .sidebar-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: rgba(7, 7, 7, 0.6);
+        }
+
+        .system-status {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-family: var(--font-family-mono);
+            font-size: 11px;
+            color: var(--secondary-text);
+            background: var(--card-bg);
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .system-status {
+            opacity: 0;
+            visibility: hidden;
+            height: 0;
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px;
+            border-radius: 8px;
+            background: transparent;
+            overflow: hidden;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: var(--border-color);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 176, 0, 0.3);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            transition: opacity var(--transition-speed) ease;
+            white-space: nowrap;
+        }
+
+        .sidebar.collapsed .user-info {
+            opacity: 0;
+            visibility: hidden;
+            width: 0;
+        }
+
+        .user-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .user-role {
+            font-size: 10px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+        }
+
+        /* --- DASHBOARD MAIN CONTENT --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 24px 32px;
+            transition: margin-left var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: var(--bg-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar.collapsed ~ .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        /* Live Date/Time Badge */
+        .live-datetime { display:flex; align-items:center; gap:8px; font-family: var(--font-family-mono); font-size:12px; color:var(--secondary-text); background:var(--card-bg); border:1px solid var(--border-color); padding:6px 14px; border-radius:6px; margin-top:8px; width:fit-content; }
+        .live-datetime .live-dot { width:7px; height:7px; flex-shrink:0; }
+        .live-datetime .dt-value { color:var(--accent); font-weight:600; }
+
+        /* Top Header Strip */
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 16px;
+        }
+
+        .header-title-box h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.3px;
+        }
+
+        .header-title-box p {
+            font-size: 12px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+            margin-top: 2px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .live-monitoring-indicator {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-family: var(--font-family-mono);
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 6px 12px;
+            border-radius: 20px;
+        }
+
+        .search-box-top {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .search-box-top input {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--primary);
+            padding: 6px 12px 6px 32px;
+            border-radius: 6px;
+            font-size: 12px;
+            width: 200px;
+            font-family: var(--font-family-mono);
+        }
+
+        .search-box-top svg {
+            position: absolute;
+            left: 10px;
+            width: 14px;
+            height: 14px;
+            color: var(--muted-text);
+        }
+
+        .top-action-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            font-family: var(--font-family-mono);
+        }
+
+        .top-action-btn:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* Metrics Summary Cards Grid */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+        }
+
+        .metric-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 14px 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .metric-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+        }
+
+        .metric-card.active-alerts::before { background: var(--accent); }
+        .metric-card.critical::before { background: var(--critical); }
+        .metric-card.warnings::before { background: var(--warning); }
+        .metric-card.resolved::before { background: var(--success); }
+        .metric-card.escalated::before { background: var(--info); }
+
+        .metric-top {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: var(--secondary-text);
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+        }
+
+        .metric-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: var(--font-family-mono);
+        }
+
+        /* Filter Toolbar */
+        .filter-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            padding: 10px 16px;
+            border-radius: 8px;
+        }
+
+        .filter-tags {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .filter-tag {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text);
+            padding: 5px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .filter-tag.active {
+            background: var(--card-hover);
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        .filter-dropdowns {
+            display: flex;
+            gap: 10px;
+        }
+
+        .dropdown-select {
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text);
+            padding: 5px 10px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+            cursor: pointer;
+        }
+
+        /* Workspace Grid (Main Alerts Stack + Right Details Panel) */
+        .workspace-layout {
+            display: grid;
+            grid-template-columns: 1fr 340px;
+            gap: 16px;
+            align-items: start;
+        }
+
+        /* Alerts List Column */
+        .alerts-column {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .alert-card {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            position: relative;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+
+        .alert-card:hover {
+            border-color: rgba(255, 176, 0, 0.3);
+            background: var(--card-hover);
+        }
+
+        .alert-card.selected {
+            border-color: var(--accent);
+            background: var(--card-hover);
+            box-shadow: 0 0 15px rgba(255, 176, 0, 0.1);
+        }
+
+        .alert-card.critical::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--critical);
+            border-radius: 8px 0 0 8px;
+        }
+
+        .alert-card.warning::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--warning);
+            border-radius: 8px 0 0 8px;
+        }
+
+        .alert-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .alert-title-group {
+            display: flex;
+            gap: 12px;
+            align-items: flex-start;
+        }
+
+        .alert-type-icon {
+            color: var(--critical);
+            margin-top: 2px;
+        }
+        .alert-card.warning .alert-type-icon {
+            color: var(--warning);
+        }
+
+        .alert-main-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .alert-meta-line {
+            font-size: 11px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+            margin-top: 3px;
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
+        .alert-state-meta {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-end;
+            gap: 2px;
+            font-family: var(--font-family-mono);
+            font-size: 11px;
+        }
+
+        /* Embedded Camera Feed Box with Smooth Expand/Collapse Animation */
+        .embedded-feed-container {
+            display: grid;
+            grid-template-rows: 0fr;
+            opacity: 0;
+            transition: grid-template-rows 0.4s cubic-bezier(0.4, 0, 0.2, 1), 
+                        opacity 0.3s ease-in-out, 
+                        margin-top 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            background: var(--bg-main);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            overflow: hidden;
+            margin-top: 0px;
+        }
+
+        .alert-card.selected .embedded-feed-container {
+            grid-template-rows: 1fr;
+            opacity: 1;
+            margin-top: 4px;
+        }
+
+        .feed-wrapper-inner {
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 0; /* Important for grid row animation */
+        }
+
+        .feed-top-bar {
+            background: #0D0D0D;
+            padding: 8px 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-family: var(--font-family-mono);
+            font-size: 11px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .feed-viewport {
+            position: relative;
+            height: 220px;
+            background: #050505;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .feed-viewport img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
+            transition: opacity 0.3s ease, transform 0.5s ease;
+        }
+
+        .alert-card.selected .feed-viewport img {
+            transform: scale(1.02);
+            opacity: 0.95;
+        }
+
+        .bounding-box {
+            position: absolute;
+            border: 1px solid var(--critical);
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--critical);
+            font-family: var(--font-family-mono);
+            font-size: 9px;
+            padding: 2px;
+        }
+
+        .alert-card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 4px;
+            border-top: 1px solid rgba(255, 255, 255, 0.04);
+        }
+
+        .footer-links {
+            display: flex;
+            gap: 16px;
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+            color: var(--secondary-text);
+            cursor: pointer;
+        }
+        .footer-links span:hover {
+            color: var(--accent);
+        }
+
+        .dismiss-link {
+            color: var(--muted-text);
+        }
+
+        /* Right Panel: Detailed Inspection Sidebar */
+        .details-panel {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            position: sticky;
+            top: 24px;
+        }
+
+        .details-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        .details-header h3 {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .status-badge-top {
+            font-size: 9px;
+            font-family: var(--font-family-mono);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+        .status-badge-top.critical {
+            background: rgba(255, 59, 48, 0.15);
+            color: var(--critical);
+            border: 1px solid rgba(255, 59, 48, 0.3);
+        }
+        .status-badge-top.warning {
+            background: rgba(255, 176, 0, 0.15);
+            color: var(--warning);
+            border: 1px solid rgba(255, 176, 0, 0.3);
+        }
+
+        .details-grid {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-family: var(--font-family-mono);
+            font-size: 11px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
+        }
+
+        .detail-label {
+            color: var(--muted-text);
+        }
+
+        .detail-value {
+            color: var(--primary);
+            text-align: right;
+        }
+
+        .evidence-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .evidence-title {
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+            color: var(--secondary-text);
+            font-weight: 600;
+        }
+
+        .evidence-thumbs {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 8px;
+        }
+
+        .thumb-box {
+            height: 60px;
+            background: #000;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+            cursor: pointer;
+        }
+
+        .thumb-box:hover {
+            border-color: var(--accent);
+        }
+
+        .thumb-box img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            opacity: 0.8;
+        }
+
+        .timeline-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            border-top: 1px solid var(--border-color);
+            padding-top: 12px;
+        }
+
+        .timeline-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-family: var(--font-family-mono);
+            font-size: 10px;
+            color: var(--secondary-text);
+        }
+
+        .timeline-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--success);
+        }
+
+        .panel-actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 4px;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 8px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+            cursor: pointer;
+            border: 1px solid var(--border-color);
+            text-align: center;
+            font-weight: 600;
+            transition: all 0.2s ease;
+        }
+
+        .action-btn.ack {
+            background: var(--accent);
+            color: #030303;
+            border-color: var(--accent);
+        }
+        .action-btn.ack:hover {
+            background: var(--accent-hover);
+        }
+        .action-btn.esc {
+            background: var(--card-bg);
+            color: var(--accent);
+            border-color: rgba(255, 176, 0, 0.3);
+        }
+        .action-btn.esc:hover {
+            background: var(--accent-glow);
+        }
+        .action-btn.res {
+            background: var(--card-bg);
+            color: var(--critical);
+            border-color: rgba(255, 59, 48, 0.3);
+        }
+        .action-btn.res:hover {
+            background: rgba(255, 59, 48, 0.1);
+        }
+
+        @media (max-width: 1200px) {
+            .workspace-layout {
+                grid-template-columns: 1fr;
+            }
+            .metrics-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-header">
+                <a href="index.html" class="logo-box">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-title">BORDER SIGHT AI</span>
+                        <span class="logo-subtitle">BORDER SURVEILLANCE AI</span>
+                    </div>
+                </a>
+                <button class="collapse-btn" id="collapseBtn" title="Toggle Sidebar">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <div class="sidebar-nav">
+                <div class="nav-section">
+                    <span class="nav-category">Monitoring</span>
+                    <a href="dashboard.html" class="nav-item" data-page="dashboard.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <span class="nav-text">Dashboard</span>
+                        <span class="tooltip">Dashboard</span>
+                    </a>
+                    <a href="cameras.html" class="nav-item" data-page="cameras.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                        <span class="nav-text">Live Cameras</span>
+                        <span class="tooltip">Live Cameras</span>
+                    </a>
+                    <a href="alerts.html" class="nav-item active" data-page="alerts.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <span class="nav-text">Alerts</span>
+                        <span class="badge" id="sidebarBadge">4</span>
+                        <span class="tooltip">Alerts</span>
+                    </a>
+                    <a href="incidents.html" class="nav-item" data-page="incidents.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        <span class="nav-text">Incidents</span>
+                        <span class="tooltip">Incidents</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-category">AI Intelligence</span>
+                    <a href="detection.html" class="nav-item" data-page="detection.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        <span class="nav-text">AI Detection</span>
+                        <span class="tooltip">AI Detection</span>
+                    </a>
+                    <a href="tracking.html" class="nav-item" data-page="tracking.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        <span class="nav-text">Tracking</span>
+                        <span class="tooltip">Tracking</span>
+                    </a>
+                    <a href="zones.html" class="nav-item" data-page="zones.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                        <span class="nav-text">Zones & Fences</span>
+                        <span class="tooltip">Zones & Fences</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-category">Map</span>
+                    <a href="map.html" class="nav-item" data-page="map.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                        <span class="nav-text">Map & Heatmap</span>
+                        <span class="tooltip">Map & Heatmap</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-category">Analytics</span>
+                    <a href="analytics.html" class="nav-item" data-page="analytics.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                        <span class="nav-text">Analytics</span>
+                        <span class="tooltip">Analytics</span>
+                    </a>
+                </div>
+
+                <div class="nav-section">
+                    <span class="nav-category">System</span>
+                    <a href="settings.html" class="nav-item" data-page="settings.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        <span class="nav-text">Settings</span>
+                        <span class="tooltip">Settings</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="sidebar-footer">
+                <div class="system-status">
+                    <span style="font-weight: 700; color: var(--primary); margin-bottom: 2px;">SYSTEM STATUS</span>
+                    <div class="status-row">
+                        <span>AI Engine</span>
+                        <span style="display:flex; align-items:center; gap:5px;"><span class="live-dot"></span> ONLINE</span>
+                    </div>
+                    <div class="status-row">
+                        <span>Cameras</span>
+                        <span style="color: var(--accent);">24/26</span>
+                    </div>
+                    <div class="status-row">
+                        <span>Database</span>
+                        <span style="display:flex; align-items:center; gap:5px;"><span class="live-dot"></span> ONLINE</span>
+                    </div>
+                </div>
+
+                <div class="user-profile">
+                    <div class="user-avatar">AD</div>
+                    <div class="user-info">
+                        <span class="user-name">Administrator</span>
+                        <span class="user-role">Security Manager</span>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- MAIN DASHBOARD CONTENT -->
+        <main class="main-content">
+            <!-- Header Section -->
+            <header class="page-header">
+                <div class="header-title-box">
+                    <h1>Active Alerts</h1>
+                    <p>Real-time perimeter security events & AI threat notifications</p>
+                    <div class="live-datetime"><span class="live-dot"></span><span>LIVE &nbsp;|&nbsp;</span><span class="dt-value" id="liveDatetime">--</span></div>
+                </div>
+                <div class="header-actions">
+                    <button data-theme-toggle style="background: var(--card-bg); border: 1px solid var(--border-color); color: var(--secondary-text); padding: 8px 12px; border-radius: 6px; font-size: 12px; font-family: var(--font-family); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                        🌙 Dark
+                    </button>
+                    <div class="live-monitoring-indicator">
+                        <span class="live-dot"></span> LIVE MONITORING
+                    </div>
+                    <div class="search-box-top">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" id="searchInput" placeholder="Search alerts...">
+                    </div>
+                    <button class="top-action-btn" id="refreshBtn">
+                        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><polyline points="23 4 23 10 17 10"></polyline><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path></svg>
+                        <span>Refresh</span>
+                    </button>
+                </div>
+            </header>
+
+            <!-- Metrics Summary Cards -->
+            <div class="metrics-grid">
+                <div class="metric-card active-alerts">
+                    <div class="metric-top"><span>Active Alerts</span> <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg></div>
+                    <div class="metric-value" id="countActive">04</div>
+                </div>
+                <div class="metric-card critical">
+                    <div class="metric-top"><span>Critical</span> <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg></div>
+                    <div class="metric-value" id="countCritical">02</div>
+                </div>
+                <div class="metric-card warnings">
+                    <div class="metric-top"><span>Warnings</span> <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg></div>
+                    <div class="metric-value" id="countWarnings">02</div>
+                </div>
+                <div class="metric-card resolved">
+                    <div class="metric-top"><span>Resolved Today</span> <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+                    <div class="metric-value" id="countResolved">18</div>
+                </div>
+                <div class="metric-card escalated">
+                    <div class="metric-top"><span>Escalated</span> <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none"><polyline points="18 15 12 9 6 15"></polyline></svg></div>
+                    <div class="metric-value" id="countEscalated">03</div>
+                </div>
+            </div>
+
+            <!-- Filter Toolbar -->
+            <div class="filter-toolbar">
+                <div class="filter-tags" id="filterTags">
+                    <button class="filter-tag active" data-filter="all">All Alerts</button>
+                    <button class="filter-tag" data-filter="critical">Critical</button>
+                    <button class="filter-tag" data-filter="warning">Warning</button>
+                    <button class="filter-tag" data-filter="ai">AI Detection</button>
+                    <button class="filter-tag" data-filter="zone">Restricted Zone</button>
+                    <button class="filter-tag" data-filter="camera">Camera</button>
+                </div>
+                <div class="filter-dropdowns">
+                    <select class="dropdown-select" id="dateFilter"><option>All Dates</option><option>Today</option></select>
+                    <select class="dropdown-select" id="sortFilter"><option value="newest">Sort: Newest</option><option value="oldest">Sort: Oldest</option></select>
+                </div>
+            </div>
+
+            <!-- Main Workspace Layout (Alerts List + Inspector) -->
+            <div class="workspace-layout">
+                
+                <!-- Left Alerts Stack -->
+                <div class="alerts-column" id="alertsContainer">
+                    <!-- Dynamically Injected -->
+                </div>
+
+                <!-- Right Details Panel -->
+                <div class="details-panel" id="detailsPanel">
+                    <!-- Dynamically Injected -->
+                </div>
+
+            </div>
+        </main>
+
+    </div>
+
+    <!-- JavaScript for Dynamic State Management -->
+    <script>
+        // Sidebar Toggle Logic
+        const sidebar = document.getElementById('sidebar');
+        const collapseBtn = document.getElementById('collapseBtn');
+        const navItems = document.querySelectorAll('.nav-item');
+
+        collapseBtn.addEventListener('click', () => {
+            sidebar.classList.toggle('collapsed');
+        });
+
+        // Live Date/Time
+        function updateDatetime() { const now = new Date(); const el = document.getElementById('liveDatetime'); if (el) el.textContent = now.toLocaleString('en-US',{year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true}).replace(',',' ·'); }
+        updateDatetime(); setInterval(updateDatetime, 1000);
+
+        const currentPath = window.location.pathname.split("/").pop() || 'alerts.html';
+        navItems.forEach(item => {
+            const pageTarget = item.getAttribute('data-page');
+            if (pageTarget === currentPath) {
+                item.classList.add('active');
+            } else {
+                item.classList.remove('active');
+            }
+        });
+
+        // Dynamic State Data Store (All cards configured with hasFeed: true)
+        let alertsData = [
+            {
+                id: "ALT-2025-05-19-102432",
+                title: "Unauthorized Perimeter Breach Detected",
+                category: "critical",
+                tags: ["critical", "ai", "zone"],
+                location: "Sector B West Perimeter",
+                camera: "CAM-02 Valley Checkpoint West",
+                timeAgo: "2 mins ago",
+                timestamp: "May 19, 2025 10:24:32 AM",
+                sortValue: 1747650272,
+                confidence: "97%",
+                threatScore: "92/100",
+                objectsDetected: "1 Human, 1 Vehicle",
+                behavior: "Perimeter breach attempt detected. Subject moving towards restricted zone.",
+                zoneStatus: "BREACH DETECTED",
+                hasFeed: true,
+                images: [
+                    "models/img/Unauthorized.png",
+                    "https://as2.ftcdn.net/v2/jpg/01/83/50/61/1000_F_183506116_aFjXtJvssx2XSfcXJX1jwu8s5SAcJbpj.jpg"
+                ],
+                timeline: [
+                    { time: "10:24:32 AM", event: "Alert Triggered" },
+                    { time: "10:24:33 AM", event: "AI Analysis Completed" },
+                    { time: "10:24:35 AM", event: "Notification Sent" }
+                ]
+            },
+            {
+                id: "ALT-2025-05-19-101211",
+                title: "Thermal Signature Anomaly",
+                category: "critical",
+                tags: ["critical", "ai"],
+                location: "Northern Ridge Pass",
+                camera: "CAM-01 Northern Ridge",
+                timeAgo: "14 mins ago",
+                timestamp: "May 19, 2025 10:12:11 AM",
+                sortValue: 1747649531,
+                confidence: "94%",
+                threatScore: "87/100",
+                objectsDetected: "Unidentified Heat Source",
+                behavior: "Abnormal temperature signature detected along ridge boundary layer.",
+                zoneStatus: "ELEVATED MONITORING",
+                hasFeed: true,
+                images: [
+                    "models/img/Thermal.png",
+                    "https://tse1.mm.bing.net/th/id/OIP.U1AusEcEilU3N59YlvZazwHaFi?r=0&w=550&h=411&rs=1&pid=ImgDetMain&o=7&rm=3"
+                ],
+                timeline: [
+                    { time: "10:12:11 AM", event: "Thermal Spike Detected" },
+                    { time: "10:12:15 AM", event: "Sensor Array Verified" },
+                    { time: "10:15:00 AM", event: "Command Logged" }
+                ]
+            },
+            {
+                id: "ALT-2025-05-19-094155",
+                title: "Sensor Battery Low",
+                category: "warning",
+                tags: ["warning", "zone"],
+                location: "Hardware Grid Node 4",
+                camera: "Post 08 Sensor Unit",
+                timeAgo: "45 mins ago",
+                timestamp: "May 19, 2025 09:41:55 AM",
+                sortValue: 1747647715,
+                confidence: "N/A",
+                threatScore: "35/100",
+                objectsDetected: "Hardware Node",
+                behavior: "Power supply dropping under threshold limit. Maintenance recommended.",
+                zoneStatus: "POWER WARNING",
+                hasFeed: true,
+                images: [
+                    "models/img/Battery.png",
+                    "https://www.wonderfulpcb.com/wp-content/uploads/2025/10/3376c612943a44c4a61df9aef4eec41d.jpg"
+                ],
+                timeline: [
+                    { time: "09:41:55 AM", event: "Low Voltage Flagged" },
+                    { time: "09:45:00 AM", event: "Backup Cell Engaged" }
+                ]
+            },
+            {
+                id: "ALT-2025-05-19-092000",
+                title: "Intermittent Signal Loss",
+                category: "warning",
+                tags: ["warning", "camera"],
+                location: "Sector F Perimeter",
+                camera: "CAM-25 Secondary Array",
+                timeAgo: "1 hour ago",
+                timestamp: "May 19, 2025 09:20:00 AM",
+                sortValue: 1747646400,
+                confidence: "88%",
+                threatScore: "45/100",
+                objectsDetected: "1 Vehicle, Multiple Signatures",
+                behavior: "Packet drop rate exceeding 40% threshold over wireless link.",
+                zoneStatus: "DEGRADED LINK",
+                hasFeed: true,
+                images: [
+                    "models/img/SignalLoss.png",
+                    "https://www.researchgate.net/publication/301754747/figure/fig7/AS:356898533593089@1462102649746/Monitoring-signal-corresponding-to-a-1-dB-loss-induced-at-600-m-in-a-11-km-long-single.png"
+                ],
+                timeline: [
+                    { time: "09:20:00 AM", event: "Packet Loss Detected" },
+                    { time: "09:22:10 AM", event: "Auto-Reconnect Attempted" },
+                    { time: "09:25:00 AM", event: "Operator Alerted" }
+                ]
+            }
+        ];
+
+        let selectedId = alertsData.length > 0 ? alertsData[0].id : null;
+        let activeFilter = 'all';
+        let searchQuery = '';
+        let sortOrder = 'newest';
+        let resolvedCount = 18;
+        let escalatedCount = 3;
+
+        // Core Dashboard Render Engine
+        function renderDashboard() {
+            const container = document.getElementById('alertsContainer');
+            container.innerHTML = '';
+
+            // Filter & Search Execution
+            let processed = alertsData.filter(item => {
+                const matchesFilter = activeFilter === 'all' || item.tags.includes(activeFilter);
+                const matchesSearch = item.title.toLowerCase().includes(searchQuery) || 
+                                      item.location.toLowerCase().includes(searchQuery) || 
+                                      item.camera.toLowerCase().includes(searchQuery) ||
+                                      item.id.toLowerCase().includes(searchQuery);
+                return matchesFilter && matchesSearch;
+            });
+
+            // Sorting Execution
+            processed.sort((a, b) => {
+                if (sortOrder === 'newest') return b.sortValue - a.sortValue;
+                return a.sortValue - b.sortValue;
+            });
+
+            // Update Metric Counters dynamically
+            const criticalCount = alertsData.filter(a => a.category === 'critical').length;
+            const warningCount = alertsData.filter(a => a.category === 'warning').length;
+
+            document.getElementById('countActive').innerText = String(alertsData.length).padStart(2, '0');
+            document.getElementById('countCritical').innerText = String(criticalCount).padStart(2, '0');
+            document.getElementById('countWarnings').innerText = String(warningCount).padStart(2, '0');
+            document.getElementById('countResolved').innerText = resolvedCount;
+            document.getElementById('countEscalated').innerText = String(escalatedCount).padStart(2, '0');
+            document.getElementById('sidebarBadge').innerText = alertsData.length;
+
+            if (processed.length === 0) {
+                container.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--muted-text); font-family: var(--font-family-mono); font-size: 12px;">No active alerts match your query criteria.</div>`;
+                document.getElementById('detailsPanel').innerHTML = `<div style="text-align:center; padding: 40px; color: var(--muted-text); font-family: var(--font-family-mono); font-size: 11px;">No alert selected.</div>`;
+                return;
+            }
+
+            // Ensure selection safety check
+            if (!processed.some(a => a.id === selectedId)) {
+                selectedId = processed[0].id;
+            }
+
+            // Render Alert Cards
+            processed.forEach(alert => {
+                const isSelected = alert.id === selectedId;
+                const card = document.createElement('div');
+                card.className = `alert-card ${alert.category} ${isSelected ? 'selected' : ''}`;
+                
+                let feedHtml = '';
+                if (alert.hasFeed) {
+                    feedHtml = `
+                        <div class="embedded-feed-container">
+                            <div class="feed-wrapper-inner">
+                                <div class="feed-top-bar">
+                                    <span style="color: var(--primary); font-weight:600;">${alert.camera}</span>
+                                    <span style="display:flex; gap:12px; color:var(--muted-text);">
+                                        <span>FPS: 24</span>
+                                        <span>Resolution: 1920x1080</span>
+                                        <span style="color:var(--success); display:flex; align-items:center; gap:4px;"><span class="live-dot" style="width:5px;height:5px;"></span> LIVE</span>
+                                        <span style="color:var(--critical); font-weight:700;">● RECORDING</span>
+                                    </span>
+                                </div>
+                                <div class="feed-viewport">
+                                    <img src="${alert.images[0]}" alt="Surveillance Feed">
+                                    <div class="bounding-box" style="top: 70%; left: 45%;">ID: 4523</div>
+                                    <div class="bounding-box" style="top: 80%; left: 60%; border-color:var(--warning); background:rgba(255,176,0,0.1); color:var(--warning);">ID: 4622</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                card.innerHTML = `
+                    <div class="alert-card-header">
+                        <div class="alert-title-group">
+                            <div class="alert-type-icon">
+                                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path></svg>
+                            </div>
+                            <div>
+                                <div class="alert-main-title">${alert.title}</div>
+                                <div class="alert-meta-line">
+                                    <span>${alert.location}</span>
+                                    <span>•</span>
+                                    <span>${alert.camera}</span>
+                                    <span>•</span>
+                                    <span>Threat Score: <strong style="color:${alert.category === 'critical' ? 'var(--critical)' : 'var(--warning)'};">${alert.threatScore}</strong></span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="alert-state-meta">
+                            <span style="display:flex; align-items:center; gap:4px;"><span class="live-dot" style="width:6px;height:6px;"></span> ACTIVE</span>
+                            <span style="color:var(--muted-text);">${alert.timeAgo}</span>
+                        </div>
+                    </div>
+                    ${feedHtml}
+                    <div class="alert-card-footer">
+                        <div class="footer-links">
+                            <span onclick="event.stopPropagation(); selectAlert('${alert.id}')">View Details</span>
+                        </div>
+                        <span class="footer-links dismiss-link" onclick="event.stopPropagation(); dismissAlert('${alert.id}')">Dismiss</span>
+                    </div>
+                `;
+
+                card.addEventListener('click', () => {
+                    selectAlert(alert.id);
+                });
+
+                container.appendChild(card);
+            });
+
+            renderDetailsPanel();
+        }
+
+        // Render Inspector Panel for Selected Item
+        function renderDetailsPanel() {
+            const alert = alertsData.find(a => a.id === selectedId);
+            const panel = document.getElementById('detailsPanel');
+
+            if (!alert) {
+                panel.innerHTML = `<div style="text-align:center; padding: 20px; color: var(--muted-text); font-family: var(--font-family-mono); font-size:11px;">Select an alert to inspect details.</div>`;
+                return;
+            }
+
+            panel.innerHTML = `
+                <div class="details-header">
+                    <h3>Alert Details</h3>
+                    <span class="status-badge-top ${alert.category}">${alert.category.toUpperCase()}</span>
+                </div>
+
+                <div class="details-grid">
+                    <div class="detail-row"><span class="detail-label">Alert ID</span><span class="detail-value">${alert.id}</span></div>
+                    <div class="detail-row"><span class="detail-label">Detection Type</span><span class="detail-value">${alert.title}</span></div>
+                    <div class="detail-row"><span class="detail-label">Camera</span><span class="detail-value">${alert.camera}</span></div>
+                    <div class="detail-row"><span class="detail-label">Location</span><span class="detail-value">${alert.location}</span></div>
+                    <div class="detail-row"><span class="detail-label">Timestamp</span><span class="detail-value">${alert.timestamp}</span></div>
+                    <div class="detail-row"><span class="detail-label">AI Confidence</span><span class="detail-value" style="color:var(--success);">${alert.confidence}</span></div>
+                    <div class="detail-row"><span class="detail-label">Threat Score</span><span class="detail-value" style="color:${alert.category === 'critical' ? 'var(--critical)' : 'var(--warning)'};">${alert.threatScore}</span></div>
+                    <div class="detail-row"><span class="detail-label">Detected Objects</span><span class="detail-value">${alert.objectsDetected}</span></div>
+                    <div class="detail-row"><span class="detail-label" style="align-self:flex-start;">Behaviour Analysis</span><span class="detail-value" style="max-width:160px; text-align:right;">${alert.behavior}</span></div>
+                    <div class="detail-row"><span class="detail-label">Zone Status</span><span class="detail-value" style="color:${alert.category === 'critical' ? 'var(--critical)' : 'var(--warning)'}; font-weight:700;">${alert.zoneStatus}</span></div>
+                </div>
+
+                <div class="evidence-section">
+                    <span class="evidence-title">Evidence Snapshot</span>
+                    <div class="evidence-thumbs">
+                        <div class="thumb-box"><img src="${alert.images[0]}" alt="Snapshot 1"></div>
+                        <div class="thumb-box"><img src="${alert.images[1]}" alt="Snapshot 2"></div>
+                    </div>
+                </div>
+
+                <div class="timeline-section">
+                    <span class="evidence-title">Alert Timeline</span>
+                    ${alert.timeline.map(t => `
+                        <div class="timeline-item"><span class="timeline-dot"></span><span>${t.time}</span> <span style="color:var(--primary); margin-left:auto;">${t.event}</span></div>
+                    `).join('')}
+                </div>
+
+                <div class="panel-actions">
+                    <button class="action-btn ack" onclick="handleAction('acknowledge', '${alert.id}')">Acknowledge</button>
+                    <button class="action-btn esc" onclick="handleAction('escalate', '${alert.id}')">Escalate</button>
+                    <button class="action-btn res" onclick="handleAction('resolve', '${alert.id}')">Resolve</button>
+                </div>
+            `;
+        }
+
+        // Selection Action Handler
+        function selectAlert(id) {
+            selectedId = id;
+            renderDashboard();
+        }
+
+        // Dismiss Item from State
+        function dismissAlert(id) {
+            alertsData = alertsData.filter(a => a.id !== id);
+            resolvedCount += 1; // Mark dismissed/cleared as resolved
+            renderDashboard();
+        }
+
+        // Action Handlers (Acknowledge, Escalate, Resolve)
+        function handleAction(actionType, id) {
+            const alertIndex = alertsData.findIndex(a => a.id === id);
+            if (alertIndex === -1) return;
+
+            if (actionType === 'resolve') {
+                resolvedCount += 1;
+                alertsData.splice(alertIndex, 1);
+                alert(`Alert ${id} has been marked as RESOLVED and archived.`);
+            } else if (actionType === 'escalate') {
+                escalatedCount += 1;
+                alertsData[alertIndex].zoneStatus = "ESCALATED TO COMMAND";
+                alert(`Alert ${id} successfully escalated to regional command HQ.`);
+            } else if (actionType === 'acknowledge') {
+                alertsData[alertIndex].zoneStatus = "ACKNOWLEDGED";
+                alert(`Alert ${id} acknowledged by Operator.`);
+            }
+            renderDashboard();
+        }
+
+        // Event Listeners for Filters and Inputs
+        document.querySelectorAll('.filter-tag').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                document.querySelectorAll('.filter-tag').forEach(b => b.classList.remove('active'));
+                e.target.classList.add('active');
+                activeFilter = e.target.getAttribute('data-filter');
+                renderDashboard();
+            });
+        });
+
+        document.getElementById('searchInput').addEventListener('input', (e) => {
+            searchQuery = e.target.value.toLowerCase().trim();
+            renderDashboard();
+        });
+
+        document.getElementById('sortFilter').addEventListener('change', (e) => {
+            sortOrder = e.target.value;
+            renderDashboard();
+        });
+
+        document.getElementById('refreshBtn').addEventListener('click', () => {
+            renderDashboard();
+            console.log("Dashboard state refetched from server node.");
+        });
+
+        // Initialize state preview on load
+        renderDashboard();
+    </script>
+    <!-- Global Theme Manager -->
+    <script src="theme.js"></script>
+</body>
+</html>

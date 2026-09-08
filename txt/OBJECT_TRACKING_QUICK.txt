@@ -1,0 +1,262 @@
+╔═══════════════════════════════════════════════════════════════════════════╗
+║          🎯 OBJECT TRACKING WITH AUTO-SCREENSHOT - QUICK GUIDE           ║
+║                      BorderSight AI Detection Core                       ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🎯 WHAT IT DOES                                                           │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Tracks objects (people, vehicles, etc.) in the video.
+   
+   When an object shows for 2-3 seconds:
+   ├─ Highlights it with a RED BOX
+   ├─ Shows elapsed time
+   └─ Automatically downloads screenshot
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ ⚡ QUICK START (3 STEPS)                                                  │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   1. Open detection.html
+   2. Load a video (upload or demo)
+   3. Click ZONE button → System starts tracking!
+
+   Wait 2.5 seconds with an object in frame → RED BOX + DOWNLOAD!
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📊 TIMELINE EXAMPLE                                                       │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   0s:  Click Zone button (ON)
+        └─ System ready to track
+
+   1s:  Person appears in video
+        └─ Normal detection box (yellow/blue)
+
+   2.5s: ⚡ THRESHOLD REACHED!
+        └─ Box turns RED
+        └─ Label: "PERSON - 2.5s"
+        └─ 📸 Screenshot DOWNLOADS!
+
+   3s:  Continue tracking
+        └─ RED box stays
+        └─ Time updates (PERSON - 3.0s)
+
+   5s:  Object leaves
+        └─ Tracking stops
+        └─ Box disappears
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🔴 VISUAL: WHAT YOU SEE                                                   │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   BEFORE (< 2.5 seconds):
+   ┌─────────────────┐
+   │ PERSON 85%      │  ← Standard box (yellow/blue)
+   │   ┌─────────┐   │
+   │   │ (person)│   │
+   │   │         │   │
+   │   └─────────┘   │
+   └─────────────────┘
+
+   AFTER (≥ 2.5 seconds):
+   ┌─────────────────────────────┐
+   │ PERSON - 2.5s               │  ← RED box + time label
+   │   ┌─────────────────────┐   │
+   │   │    (person)         │   │ ← Thick RED border (5px)
+   │   │                     │   │ ← Glowing red shadow
+   │   │                     │   │
+   │   └─────────────────────┘   │
+   │ 📸 SCREENSHOT DOWNLOADED!   │
+   └─────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📍 BUTTON LOCATION                                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   [ZONE BUTTON] [Pause] [Snapshot] [Fullscreen]
+         ↑
+      Click here!
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📸 SCREENSHOT AUTO-DOWNLOAD                                               │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   When 2.5 seconds reached:
+   
+   ✅ Screenshot taken
+   ✅ Automatic download to Downloads folder
+   ✅ Filename: object_detection_YYYY-MM-DD_HH-MM-SS.png
+   ✅ One download per object
+   ✅ No manual action needed!
+
+   Example filename:
+   → object_detection_2024-09-08_14-30-45.png
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🎯 BOX PROPERTIES                                                         │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Standard Detection:       Highlighted (2.5s+):
+   ├─ Color: Yellow/Blue     ├─ Color: RED (#FF0000)
+   ├─ Thickness: 2px         ├─ Thickness: 5px
+   ├─ No glow               ├─ Glow: Red shadow (20px)
+   └─ No time label         └─ Label: CLASS - TIME
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ ✨ FEATURES                                                               │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   ✅ Tracks all object types (person, vehicle, etc.)
+   ✅ Multiple objects at once
+   ✅ 2.5 second threshold
+   ✅ Automatic RED box at threshold
+   ✅ Time display in label
+   ✅ Auto-screenshot on highlight
+   ✅ One download per object
+   ✅ Console logging (F12)
+   ✅ Real-time processing
+   ✅ Works with any video
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🔧 CUSTOMIZATION                                                          │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Change threshold (detection.html, line ~1758):
+   
+   const OBJECT_SHOW_THRESHOLD = 2500;  // milliseconds
+   
+   Options:
+   1000 = 1 second
+   2000 = 2 seconds
+   2500 = 2.5 seconds (default)
+   3000 = 3 seconds
+   5000 = 5 seconds
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📊 WHAT GETS TRACKED                                                      │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   ✅ People (PERSON)
+   ✅ Vehicles (CAR, TRUCK, BUS)
+   ✅ Motorcycles (MOTORCYCLE)
+   ✅ Bicycles (BICYCLE)
+   ✅ All COCO-SSD object types
+
+   Tracked by:
+   ├─ First appearance time
+   ├─ Last seen time
+   ├─ Object class
+   └─ Bounding box position
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📞 CONSOLE OUTPUT (Press F12)                                             │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   When you enable:
+   🔒 FENCING ZONE: ENABLED - Tracking objects for 2-3 seconds
+
+   When 2.5s reached:
+   🎯 Object detected for 2.5s: person
+   📸 Screenshot downloaded: object_detection_2024-09-08_14-30-45.png
+
+   When disabled:
+   🔓 FENCING ZONE: DISABLED
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🎬 EXAMPLE USAGE SCENARIOS                                                │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Scenario 1: Border Security
+   ├─ Person crosses border → Tracked
+   ├─ After 2.5 seconds → RED BOX
+   └─ Screenshot saved automatically
+
+   Scenario 2: Suspicious Loitering
+   ├─ Person stands in restricted area
+   ├─ 2.5 seconds → RED BOX + Alert
+   └─ Screenshot for record
+
+   Scenario 3: Vehicle Inspection
+   ├─ Vehicle appears in frame
+   ├─ 2.5 seconds → RED BOX
+   └─ Screenshot shows vehicle details
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ ❓ TROUBLESHOOTING                                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Problem                  Solution
+   ──────────────────────────────────────────
+   Objects not tracked      Load a video first
+   No RED boxes             Wait 2.5+ seconds
+   No screenshots           Check Downloads folder
+   Button not working       Refresh page
+   Time not updating        Object may have left
+   Console errors           Check browser console (F12)
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🌐 BROWSER SUPPORT                                                        │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   ✅ Chrome (Recommended)
+   ✅ Firefox
+   ✅ Safari
+   ✅ Edge
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🚀 GET STARTED NOW!                                                       │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   1. Open detection.html
+   2. Upload a test video
+   3. Click ZONE button
+   4. Wait 2.5 seconds
+   5. See RED box appear!
+   6. Check Downloads folder!
+
+   That's it! ✓
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 📥 WHERE ARE THE SCREENSHOTS?                                             │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Automatic location: Your Downloads folder
+   
+   File name pattern:
+   object_detection_YYYY-MM-DD_HH-MM-SS.png
+   
+   Example:
+   object_detection_2024-09-08_14-30-45.png
+   object_detection_2024-09-08_14-30-46.png
+   (One for each object that reaches threshold)
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│ 🔐 HOW IT WORKS INTERNALLY                                                │
+└───────────────────────────────────────────────────────────────────────────┘
+
+   Frame Analysis Loop:
+   
+   For each video frame:
+   ├─ Get all detected objects
+   ├─ For each object:
+   │  ├─ Check if already tracking
+   │  ├─ If not → Create tracking entry
+   │  ├─ Check elapsed time since first seen
+   │  ├─ If time < 2.5s → Normal box
+   │  ├─ If time >= 2.5s:
+   │  │  ├─ Draw RED box
+   │  │  ├─ Show time label
+   │  │  └─ Download screenshot (once)
+   │  └─ Update last seen time
+   └─ Remove objects that left frame
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                         READY TO USE! ✅                                  ║
+║                                                                           ║
+║  Click Zone button → Drag objects into frame → After 2.5s:              ║
+║  ✓ RED BOX appears                                                       ║
+║  ✓ Time label shows                                                      ║
+║  ✓ Screenshot downloads                                                  ║
+╚═══════════════════════════════════════════════════════════════════════════╝

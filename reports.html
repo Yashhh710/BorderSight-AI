@@ -1,0 +1,1973 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reports – BorderSight AI</title>
+    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=80444&format=png&color=000000">
+    <!-- Google Fonts for professional technical dashboard styling -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <!-- Global Theme System -->
+    <link rel="stylesheet" href="theme.css">
+    <style>
+        /* Updated Color Palette Variables */
+        :root {
+            --bg-main: #030303;
+            --sidebar-bg: rgba(7, 7, 7, 0.9);
+            --card-bg: #0D0D0D;
+            --card-hover: #141414;
+            --border-color: #242424;
+            
+            --primary: #FFFFFF;
+            --primary-glow: rgba(255, 255, 255, 0.08);
+            
+            --secondary-text: #A1A1A1;
+            --muted-text: #666666;
+            
+            --accent: #FFB000;
+            --accent-hover: #FFC533;
+            --accent-glow: rgba(255, 176, 0, 0.12);
+            
+            --success: #22C55E;
+            --warning: #FFB000;
+            --critical: #FF3B30;
+            --info: #3B82F6;
+            
+            --transition-speed: 280ms;
+            --sidebar-width: 280px;
+            --sidebar-collapsed-width: 80px;
+        }
+
+        /* Reset & Base Styles */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: var(--font-family);
+        }
+
+        body {
+            background-color: var(--bg-main);
+            color: var(--primary);
+            display: flex;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        /* Layout Container */
+        .app-container {
+            display: flex;
+            width: 100%;
+            position: relative;
+        }
+
+        /* --- SIDEBAR STYLES --- */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--sidebar-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid var(--border-color);
+            position: fixed;
+            top: 0;
+            left: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 100;
+            transition: width var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+
+        /* Logo Area */
+        .sidebar-header {
+            padding: 24px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+            min-height: 80px;
+        }
+
+        .logo-box {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            overflow: hidden;
+            white-space: nowrap;
+            text-decoration: none;
+        }
+
+        .logo-icon {
+            font-size: 24px;
+            color: var(--accent);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 32px;
+            height: 32px;
+        }
+
+        .logo-text {
+            display: flex;
+            flex-direction: column;
+            transition: opacity var(--transition-speed) ease, visibility var(--transition-speed) ease;
+        }
+
+        .logo-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+        }
+
+        .logo-subtitle {
+            font-size: 11px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+            text-transform: uppercase;
+        }
+
+        .collapse-btn {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--muted-text);
+            width: 28px;
+            height: 28px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            flex-shrink: 0;
+        }
+
+        .collapse-btn:hover {
+            background: var(--card-bg);
+            color: var(--accent);
+            border-color: var(--accent);
+        }
+
+        .sidebar.collapsed .collapse-btn svg {
+            transform: rotate(180deg);
+        }
+
+        /* Navigation Menu Sections */
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: var(--border-color);
+            border-radius: 2px;
+        }
+
+        .nav-section {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .nav-category {
+            font-size: 10px;
+            font-weight: 700;
+            font-family: var(--font-family-mono);
+            color: var(--muted-text);
+            padding: 0 12px 8px 12px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            transition: opacity var(--transition-speed) ease;
+            white-space: nowrap;
+        }
+
+        .sidebar.collapsed .nav-category {
+            opacity: 0;
+            visibility: hidden;
+            height: 0;
+            padding: 0;
+            margin: 0;
+        }
+
+        /* Nav Items */
+        .nav-item {
+            position: relative;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 12px;
+            border-radius: 8px;
+            color: var(--secondary-text);
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            background: transparent;
+            cursor: pointer;
+            border: 1px solid transparent;
+            white-space: nowrap;
+        }
+
+        .nav-item svg {
+            width: 18px;
+            height: 18px;
+            flex-shrink: 0;
+            transition: transform var(--transition-speed) ease, color var(--transition-speed) ease;
+        }
+
+        .nav-item span.nav-text {
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .nav-item span.nav-text {
+            opacity: 0;
+            visibility: hidden;
+            position: absolute;
+        }
+
+        /* Active Left Glowing Indicator */
+        .nav-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 20%;
+            height: 60%;
+            width: 3px;
+            background-color: var(--accent);
+            border-radius: 0 3px 3px 0;
+            opacity: 0;
+            transform: scaleY(0);
+            transition: all var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 0 0 10px var(--accent);
+        }
+
+        /* Hover Interactions */
+        .nav-item:hover {
+            color: var(--primary);
+            background: linear-gradient(90deg, var(--accent-glow) 0%, rgba(0,0,0,0) 100%);
+            border-color: rgba(255, 176, 0, 0.15);
+            padding-left: 16px;
+        }
+
+        .nav-item:hover svg {
+            transform: scale(1.1) rotate(4deg);
+            color: var(--accent);
+        }
+
+        .nav-item:hover::before {
+            opacity: 1;
+            transform: scaleY(1);
+        }
+
+        /* Active Navigation Item */
+        .nav-item.active {
+            color: var(--accent);
+            background: var(--accent-glow);
+            border-color: rgba(255, 176, 0, 0.3);
+            font-weight: 600;
+        }
+
+        .nav-item.active::before {
+            opacity: 1;
+            transform: scaleY(1);
+        }
+
+        .nav-item.active svg {
+            color: var(--accent);
+        }
+
+        /* Badges & Dots */
+        .badge {
+            margin-left: auto;
+            background-color: var(--critical);
+            color: white;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 6px;
+            border-radius: 10px;
+            font-family: var(--font-family-mono);
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .badge {
+            position: absolute;
+            top: 6px;
+            right: 10px;
+            padding: 1px 4px;
+            font-size: 9px;
+        }
+
+        /* Tooltip for collapsed state */
+        .nav-item .tooltip {
+            position: absolute;
+            left: calc(100% + 12px);
+            top: 50%;
+            transform: translateY(-50%);
+            background: var(--card-bg);
+            color: var(--primary);
+            padding: 6px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            white-space: nowrap;
+            border: 1px solid var(--border-color);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.8);
+            opacity: 0;
+            visibility: hidden;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+            z-index: 1000;
+        }
+
+        .sidebar.collapsed .nav-item:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(-50%) translateX(2px);
+        }
+
+        /* Bottom Section: System Status & User Profile */
+        .sidebar-footer {
+            border-top: 1px solid var(--border-color);
+            padding: 16px 12px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            background: rgba(7, 7, 7, 0.6);
+        }
+
+        .system-status {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            font-family: var(--font-family-mono);
+            font-size: 11px;
+            color: var(--secondary-text);
+            background: var(--card-bg);
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            transition: opacity var(--transition-speed) ease;
+        }
+
+        .sidebar.collapsed .system-status {
+            opacity: 0;
+            visibility: hidden;
+            height: 0;
+            padding: 0;
+            margin: 0;
+            border: none;
+        }
+
+        .status-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        /* Pulse live status indicator */
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success);
+            border-radius: 50%;
+            display: inline-block;
+            box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7);
+            animation: pulse-green 2s infinite;
+        }
+
+        @keyframes pulse-green {
+            0% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.7); }
+            70% { transform: scale(1); box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+            100% { transform: scale(0.95); box-shadow: 0 0 0 0 rgba(34, 197, 94, 0); }
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 6px;
+            border-radius: 8px;
+            background: transparent;
+            overflow: hidden;
+        }
+
+        .user-avatar {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            background: var(--border-color);
+            color: var(--accent);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+            border: 1px solid rgba(255, 176, 0, 0.3);
+        }
+
+        .user-info {
+            display: flex;
+            flex-direction: column;
+            transition: opacity var(--transition-speed) ease;
+            white-space: nowrap;
+        }
+
+        .sidebar.collapsed .user-info {
+            opacity: 0;
+            visibility: hidden;
+            width: 0;
+        }
+
+        .user-name {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--primary);
+        }
+
+        .user-role {
+            font-size: 10px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+        }
+
+        /* --- MAIN CONTENT STYLES (Reports Page Specific) --- */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 40px;
+            transition: margin-left var(--transition-speed) cubic-bezier(0.4, 0, 0.2, 1);
+            background-color: var(--bg-main);
+            min-height: 100vh;
+        }
+
+        .sidebar.collapsed ~ .main-content {
+            margin-left: var(--sidebar-collapsed-width);
+        }
+
+        .command-header {
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .command-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--primary);
+            letter-spacing: -0.5px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .command-title span {
+            color: var(--accent);
+        }
+
+        .command-subtitle {
+            font-size: 14px;
+            color: var(--muted-text);
+            font-family: var(--font-family-mono);
+        }
+
+        /* Statistics Row */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 1024px) {
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        @media (max-width: 600px) {
+            .stats-grid { grid-template-columns: 1fr; }
+        }
+
+        .stat-card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+            color: var(--muted-text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .stat-value {
+            font-size: 22px;
+            font-weight: 700;
+            font-family: var(--font-family-mono);
+            color: var(--primary);
+        }
+        .stat-value.accent { color: var(--accent); }
+
+        /* Generate Report Quick Toolbar */
+        .toolbar-panel {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .toolbar-group {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        .form-select, .form-input {
+            background: #080808;
+            border: 1px solid var(--border-color);
+            color: var(--primary);
+            padding: 10px 14px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-family: var(--font-family-mono);
+            outline: none;
+            transition: border-color 0.2s ease;
+        }
+
+        .form-select:focus, .form-input:focus {
+            border-color: var(--accent);
+        }
+
+        .custom-range-wrapper {
+            display: none;
+            align-items: center;
+            gap: 8px;
+            background: rgba(0,0,0,0.3);
+            padding: 6px 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+        }
+        .custom-range-wrapper.active {
+            display: flex;
+        }
+        .custom-range-wrapper label {
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+            color: var(--muted-text);
+        }
+
+        .btn-primary {
+            background-color: var(--accent);
+            color: #030303;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 700;
+            font-family: var(--font-family-mono);
+            cursor: pointer;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--accent-hover);
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        /* Reports Table Container */
+        .reports-panel {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .panel-header {
+            padding: 20px;
+            border-bottom: 1px solid var(--border-color);
+            font-size: 14px;
+            font-weight: 700;
+            font-family: var(--font-family-mono);
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .search-filter-bar {
+            padding: 12px 20px;
+            background: #080808;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .search-input-wrap {
+            position: relative;
+            flex: 1;
+            min-width: 240px;
+        }
+
+        .search-input-wrap input {
+            width: 100%;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--primary);
+            padding: 8px 12px 8px 34px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-family: var(--font-family-mono);
+            outline: none;
+        }
+        .search-input-wrap input:focus { border-color: var(--accent); }
+        .search-input-wrap svg {
+            position: absolute;
+            left: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 14px;
+            height: 14px;
+            color: var(--muted-text);
+        }
+
+        .filter-pills {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .filter-pill {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text);
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-pill:hover, .filter-pill.active {
+            background: var(--accent-glow);
+            border-color: rgba(255, 176, 0, 0.3);
+            color: var(--accent);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 13px;
+        }
+
+        .data-table th, .data-table td {
+            padding: 14px 20px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .data-table th {
+            font-family: var(--font-family-mono);
+            font-size: 11px;
+            color: var(--muted-text);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            background: #080808;
+            cursor: pointer;
+            user-select: none;
+            transition: color 0.2s ease;
+        }
+        .data-table th:hover {
+            color: var(--accent);
+        }
+        .data-table th span.sort-indicator {
+            margin-left: 4px;
+            font-size: 10px;
+            color: var(--accent);
+        }
+
+        .data-table tbody tr {
+            transition: background-color 0.2s ease;
+        }
+
+        .data-table tbody tr:hover {
+            background-color: var(--card-hover);
+        }
+
+        .data-table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        .report-name-link {
+            font-weight: 600; 
+            color: var(--primary); 
+            text-decoration: none;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+        .report-name-link:hover {
+            color: var(--accent);
+            text-decoration: underline;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-family: var(--font-family-mono);
+            font-weight: 600;
+        }
+
+        .status-badge.ready {
+            background: rgba(34, 197, 94, 0.12);
+            color: var(--success);
+            border: 1px solid rgba(34, 197, 94, 0.3);
+        }
+
+        .status-badge.generating {
+            background: var(--accent-glow);
+            color: var(--accent);
+            border: 1px solid rgba(255, 176, 0, 0.3);
+        }
+        .status-badge.processing {
+            background: rgba(59, 130, 246, 0.12);
+            color: var(--info);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .action-cell {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .action-link {
+            color: var(--accent);
+            text-decoration: none;
+            font-family: var(--font-family-mono);
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            transition: color 0.2s ease;
+            cursor: pointer;
+            background: none;
+            border: none;
+            padding: 0;
+        }
+
+        .action-link:hover {
+            color: var(--accent-hover);
+            text-decoration: underline;
+        }
+
+        .delete-btn {
+            background: none;
+            border: none;
+            color: var(--muted-text);
+            cursor: pointer;
+            padding: 4px;
+            border-radius: 4px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .delete-btn:hover {
+            color: var(--critical);
+            background: rgba(255, 59, 48, 0.1);
+        }
+
+        /* Drawer / Modal for Report Preview */
+        .drawer-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .drawer-backdrop.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .report-drawer {
+            position: fixed;
+            top: 0;
+            right: -600px;
+            width: 560px;
+            max-width: 100%;
+            height: 100vh;
+            background: var(--card-bg);
+            border-left: 1px solid var(--border-color);
+            z-index: 1001;
+            display: flex;
+            flex-direction: column;
+            transition: right 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: -10px 0 30px rgba(0,0,0,0.8);
+        }
+        .report-drawer.open {
+            right: 0;
+        }
+
+        .drawer-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border-color);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: #080808;
+        }
+
+        .drawer-title {
+            font-size: 16px;
+            font-weight: 700;
+            font-family: var(--font-family-mono);
+            color: var(--primary);
+        }
+
+        .drawer-close {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--muted-text);
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .drawer-close:hover { color: var(--primary); border-color: var(--primary); }
+
+        .drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .drawer-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            background: #080808;
+            padding: 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border-color);
+        }
+
+        .meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        .meta-label {
+            font-size: 10px;
+            font-family: var(--font-family-mono);
+            color: var(--muted-text);
+            text-transform: uppercase;
+        }
+        .meta-val {
+            font-size: 12px;
+            font-family: var(--font-family-mono);
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .preview-section-box {
+            background: #050505;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .preview-section-title {
+            font-size: 12px;
+            font-weight: 700;
+            font-family: var(--font-family-mono);
+            color: var(--accent);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .preview-text-content {
+            font-family: var(--font-family-mono);
+            font-size: 11px;
+            color: var(--secondary-text);
+            line-height: 1.6;
+            white-space: pre-wrap;
+            background: #020202;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid var(--border-color);
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .drawer-footer {
+            padding: 20px 24px;
+            border-top: 1px solid var(--border-color);
+            background: #080808;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* Confirmation Modal for Delete */
+        .modal-backdrop {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+        .modal-backdrop.open {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .modal-box {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            width: 400px;
+            max-width: 90%;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.9);
+        }
+
+        .modal-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            font-family: var(--font-family-mono);
+        }
+
+        .modal-desc {
+            font-size: 13px;
+            color: var(--secondary-text);
+            line-height: 1.5;
+        }
+
+        .modal-actions {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 12px;
+            margin-top: 8px;
+        }
+
+        .btn-secondary {
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--secondary-text);
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            font-family: var(--font-family-mono);
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .btn-secondary:hover { color: var(--primary); border-color: var(--primary); }
+
+        .btn-danger {
+            background: var(--critical);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 700;
+            font-family: var(--font-family-mono);
+            cursor: pointer;
+            transition: opacity 0.2s ease;
+        }
+        .btn-danger:hover { opacity: 0.9; }
+
+        /* Notification Toast Container */
+        .toast-container {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 3000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            pointer-events: none;
+        }
+
+        .toast {
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            color: var(--primary);
+            padding: 12px 18px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-family: var(--font-family-mono);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            pointer-events: auto;
+            transform: translateY(20px);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 360px;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+
+        .toast.success { border-left: 4px solid var(--success); }
+        .toast.error { border-left: 4px solid var(--critical); }
+        .toast.warning { border-left: 4px solid var(--warning); }
+        .toast.info { border-left: 4px solid var(--info); }
+
+        /* Live Date/Time Badge */
+        .live-datetime { display:flex; align-items:center; gap:8px; font-family: var(--font-family-mono); font-size:12px; color:var(--secondary-text); background:var(--card-bg); border:1px solid var(--border-color); padding:6px 14px; border-radius:6px; margin-top:12px; width:fit-content; }
+        .live-datetime .live-dot { width:7px; height:7px; flex-shrink:0; }
+        .live-datetime .dt-value { color:var(--accent); font-weight:600; }
+
+        /* Responsive Breakpoints */
+        @media (max-width: 768px) {
+            .sidebar {
+                width: var(--sidebar-collapsed-width);
+            }
+            .sidebar .nav-text,
+            .sidebar .nav-category,
+            .sidebar .logo-text,
+            .sidebar .system-status,
+            .sidebar .user-info {
+                opacity: 0;
+                visibility: hidden;
+                display: none;
+            }
+            .main-content {
+                margin-left: var(--sidebar-collapsed-width);
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="app-container">
+        
+        <!-- SIDEBAR NAVIGATION -->
+        <aside class="sidebar" id="sidebar">
+            
+            <!-- Logo Section -->
+            <div class="sidebar-header">
+                <a href="index.html" class="logo-box">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                        </svg>
+                    </div>
+                    <div class="logo-text">
+                        <span class="logo-title">BORDER SIGHT AI</span>
+                        <span class="logo-subtitle">Border Surveillance AI</span>
+                    </div>
+                </a>
+                <button class="collapse-btn" id="collapseBtn" title="Toggle Sidebar">
+                    <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                        <polyline points="15 18 9 12 15 6"></polyline>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="sidebar-nav">
+                
+                <!-- MONITORING -->
+                <div class="nav-section">
+                    <span class="nav-category">Monitoring</span>
+                    <a href="dashboard.html" class="nav-item" data-page="dashboard.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                        <span class="nav-text">Dashboard</span>
+                        <span class="tooltip">Dashboard</span>
+                    </a>
+                    <a href="cameras.html" class="nav-item" data-page="cameras.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                        <span class="nav-text">Live Cameras</span>
+                        <span class="tooltip">Live Cameras</span>
+                    </a>
+                    <a href="alerts.html" class="nav-item" data-page="alerts.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                        <span class="nav-text">Alerts</span>
+                        <span class="badge">4</span>
+                        <span class="tooltip">Alerts</span>
+                    </a>
+                    <a href="incidents.html" class="nav-item" data-page="incidents.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                        <span class="nav-text">Incidents</span>
+                        <span class="tooltip">Incidents</span>
+                    </a>
+                </div>
+
+                <!-- AI INTELLIGENCE -->
+                <div class="nav-section">
+                    <span class="nav-category">AI Intelligence</span>
+                    <a href="detection.html" class="nav-item" data-page="detection.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                        <span class="nav-text">AI Detection</span>
+                        <span class="tooltip">AI Detection</span>
+                    </a>
+                    <a href="tracking.html" class="nav-item" data-page="tracking.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
+                        <span class="nav-text">Tracking</span>
+                        <span class="tooltip">Tracking</span>
+                    </a>
+                    <a href="zones.html" class="nav-item" data-page="zones.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                        <span class="nav-text">Zones & Fences</span>
+                        <span class="tooltip">Zones & Fences</span>
+                    </a>
+                </div>
+
+                <!-- MAP -->
+                <div class="nav-section">
+                    <span class="nav-category">Map</span>
+                    <a href="map.html" class="nav-item" data-page="map.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                        <span class="nav-text">Map & Heatmap</span>
+                        <span class="tooltip">Map & Heatmap</span>
+                    </a>
+                </div>
+
+                <!-- ANALYTICS -->
+                <div class="nav-section">
+                    <span class="nav-category">Analytics</span>
+                    <a href="analytics.html" class="nav-item" data-page="analytics.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                        <span class="nav-text">Analytics</span>
+                        <span class="tooltip">Analytics</span>
+                    </a>
+                </div>
+
+                <!-- REPORTS -->
+                <div class="nav-section">
+                    <span class="nav-category">Reports</span>
+                    <a href="reports.html" class="nav-item" data-page="reports.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                        <span class="nav-text">Reports</span>
+                        <span class="tooltip">Reports</span>
+                    </a>
+                </div>
+
+                <!-- SYSTEM -->
+                <div class="nav-section">
+                    <span class="nav-category">System</span>
+                    <a href="settings.html" class="nav-item" data-page="settings.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                        <span class="nav-text">Settings</span>
+                        <span class="tooltip">Settings</span>
+                    </a>
+                </div>
+
+            </div>
+
+            <!-- Bottom Section (System Status & User) -->
+            <div class="sidebar-footer">
+                
+                <!-- System Status Box -->
+                <div class="system-status">
+                    <span style="font-weight: 700; color: var(--primary); margin-bottom: 2px;">SYSTEM STATUS</span>
+                    <div class="status-row">
+                        <span>AI Engine</span>
+                        <span style="display:flex; align-items:center; gap:5px;"><span class="live-dot"></span> <span id="sysAiStatus">ONLINE</span></span>
+                    </div>
+                    <div class="status-row">
+                        <span>Cameras</span>
+                        <span style="color: var(--accent);" id="sysCamerasStatus">24/26</span>
+                    </div>
+                    <div class="status-row">
+                        <span>Database</span>
+                        <span style="display:flex; align-items:center; gap:5px;"><span class="live-dot"></span> <span id="sysDbStatus">ONLINE</span></span>
+                    </div>
+                </div>
+
+                <!-- User Profile Box -->
+                <div class="user-profile">
+                    <div class="user-avatar">AD</div>
+                    <div class="user-info">
+                        <span class="user-name">Administrator</span>
+                        <span class="user-role">Security Manager</span>
+                    </div>
+                </div>
+
+            </div>
+
+        </aside>
+
+        <!-- MAIN REPORTS PAGE CONTENT -->
+        <main class="main-content">
+            <header class="command-header">
+                <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; width: 100%;">
+                    <div>
+                        <h1 class="command-title">System <span>Reports</span></h1>
+                        <p class="command-subtitle">Automated & Manual Security Logs, Threat Assessments & Export Center</p>
+                        <div class="live-datetime"><span class="live-dot"></span><span>LIVE &nbsp;|&nbsp;</span><span class="dt-value" id="liveDatetime">--</span></div>
+                    </div>
+                    <button data-theme-toggle style="background: var(--card-bg); border: 1px solid var(--border-color); color: var(--secondary-text); padding: 8px 14px; border-radius: 7px; font-size: 12px; font-family: var(--font-family); font-weight: 600; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap;" title="Toggle theme">
+                        🌙 Dark
+                    </button>
+                </div>
+            </header>
+
+            <!-- Compact Statistics Row -->
+            <div class="stats-grid" id="statsGrid">
+                <div class="stat-card">
+                    <span class="stat-label">Total Reports</span>
+                    <span class="stat-value" id="statTotalReports">24</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Generated Today</span>
+                    <span class="stat-value accent" id="statTodayReports">08</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Pending</span>
+                    <span class="stat-value" id="statPendingReports">01</span>
+                </div>
+                <div class="stat-card">
+                    <span class="stat-label">Storage Used</span>
+                    <span class="stat-value" id="statStorageUsed">2.4 GB</span>
+                </div>
+            </div>
+
+            <!-- Quick Report Generation Toolbar -->
+            <div class="toolbar-panel">
+                <div class="toolbar-group">
+                    <select class="form-select" id="reportTypeSelect">
+                        <option value="Comprehensive Security Audit">Type: Comprehensive Security Audit</option>
+                        <option value="Daily Incident Report">Type: Daily Incident Report</option>
+                        <option value="Weekly Security Summary">Type: Weekly Security Summary</option>
+                        <option value="Monthly Security Report">Type: Monthly Security Report</option>
+                        <option value="AI Detection Performance">Type: AI Detection Performance</option>
+                        <option value="Threat Assessment">Type: Threat Assessment</option>
+                        <option value="Camera & System Health">Type: Camera & System Health</option>
+                        <option value="Tracking Activity Report">Type: Tracking Activity Report</option>
+                    </select>
+                    <select class="form-select" id="reportRangeSelect">
+                        <option value="Last 24 Hours">Range: Last 24 Hours</option>
+                        <option value="Last 7 Days">Range: Last 7 Days</option>
+                        <option value="Last 30 Days">Range: Last 30 Days</option>
+                        <option value="Custom Range">Range: Custom Range</option>
+                    </select>
+                    <div class="custom-range-wrapper" id="customRangeWrapper">
+                        <label>Start:</label>
+                        <input type="date" class="form-input" id="customStartDate" style="padding:6px 8px; font-size:11px;">
+                        <label>End:</label>
+                        <input type="date" class="form-input" id="customEndDate" style="padding:6px 8px; font-size:11px;">
+                    </div>
+                </div>
+                <div class="toolbar-group">
+                    <button class="btn-primary" id="generateBtn">
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        Generate Report
+                    </button>
+                </div>
+            </div>
+
+            <!-- Reports Archive Data Table -->
+            <div class="reports-panel">
+                <div class="panel-header">
+                    <span>Generated Report Archives</span>
+                    <span style="font-size: 11px; color: var(--muted-text);">SECURE ENCRYPTED STORAGE</span>
+                </div>
+
+                <!-- Search and Filter Bar -->
+                <div class="search-filter-bar">
+                    <div class="search-input-wrap">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                        <input type="text" id="searchInput" placeholder="Search reports by filename, category, format...">
+                    </div>
+                    <div class="filter-pills" id="filterPills">
+                        <button class="filter-pill active" data-filter="all">All</button>
+                        <button class="filter-pill" data-filter="PDF">PDF</button>
+                        <button class="filter-pill" data-filter="CSV">CSV</button>
+                        <button class="filter-pill" data-filter="JSON">JSON</button>
+                        <button class="filter-pill" data-filter="Ready">Ready</button>
+                        <button class="filter-pill" data-filter="Processing">Processing</button>
+                    </div>
+                </div>
+                
+                <table class="data-table" id="reportsTable">
+                    <thead>
+                        <tr>
+                            <th data-sort="name">Report Name <span class="sort-indicator">↕</span></th>
+                            <th data-sort="category">Category <span class="sort-indicator">↕</span></th>
+                            <th data-sort="timestamp">Timestamp <span class="sort-indicator">↕</span></th>
+                            <th data-sort="format">Format <span class="sort-indicator">↕</span></th>
+                            <th data-sort="status">Status <span class="sort-indicator">↕</span></th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reportsTableBody">
+                        <!-- Populated dynamically via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </main>
+
+    </div>
+
+    <!-- Right-Side Drawer for Report Preview -->
+    <div class="drawer-backdrop" id="drawerBackdrop"></div>
+    <div class="report-drawer" id="reportDrawer">
+        <div class="drawer-header">
+            <span class="drawer-title" id="drawerTitle">Report Inspection</span>
+            <button class="drawer-close" id="drawerCloseBtn">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
+        </div>
+        <div class="drawer-body" id="drawerBody">
+            <!-- Dynamic Metadata Grid & Preview Content -->
+        </div>
+        <div class="drawer-footer">
+            <button class="btn-secondary" id="drawerCloseActionBtn">Close</button>
+            <button class="btn-primary" id="drawerDownloadBtn">
+                <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Download Report
+            </button>
+        </div>
+    </div>
+
+    <!-- Confirmation Modal for Delete -->
+    <div class="modal-backdrop" id="deleteModalBackdrop">
+        <div class="modal-box">
+            <h3 class="modal-title">Delete Report?</h3>
+            <p class="modal-desc" id="deleteModalDesc">Are you sure you want to delete this report from archive storage? This action cannot be undone.</p>
+            <div class="modal-actions">
+                <button class="btn-secondary" id="cancelDeleteBtn">Cancel</button>
+                <button class="btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
+    <!-- JavaScript Application Logic -->
+    <script>
+        // Default realistic dataset
+        const defaultReports = [
+            {
+                id: "REP-9041",
+                name: "BorderSight_Comprehensive_Audit_2026-09-05.pdf",
+                category: "Security Audit",
+                timestamp: "2026-09-05 23:59 UTC",
+                format: "PDF",
+                status: "Ready",
+                generatedBy: "System Automated Cron",
+                totalIncidents: 14,
+                criticalAlerts: 2,
+                aiDetections: 1280,
+                vehiclesDetected: 342,
+                personsDetected: 186,
+                threatScore: "Low (12/100)",
+                camerasAnalyzed: 26,
+                previewContent: "BORDER SIGHT AI - COMPREHENSIVE SECURITY AUDIT\nSector: Northern Border Perimeter (Sectors 1-4)\nDate: 2026-09-05\n\nExecutive Summary:\nAll primary sensors, radar modules, and thermal gimbals maintained stable connection with 99.8% uptime. Zero unauthorized boundary breaches recorded. Two low-altitude thermal anomalies investigated and classified as regional fauna (wild camel herds)."
+            },
+            {
+                id: "REP-9042",
+                name: "BorderSight_Daily_Incident_Report_2026-09-05.csv",
+                category: "Incident Log",
+                timestamp: "2026-09-05 12:00 UTC",
+                format: "CSV",
+                status: "Ready",
+                generatedBy: "Administrator",
+                totalIncidents: 8,
+                criticalAlerts: 1,
+                aiDetections: 640,
+                vehiclesDetected: 150,
+                personsDetected: 92,
+                threatScore: "Elevated (38/100)",
+                camerasAnalyzed: 26,
+                previewContent: "timestamp,camera_id,zone,event_type,confidence,status\n2026-09-05 04:12,CAM-12,Zone 2,Vehicle Incursion,94.2%,Resolved\n2026-09-05 08:33,CAM-04,Zone 1,Unauthorized Crossing,88.5%,Escalated\n2026-09-05 11:15,CAM-19,Zone 3,Thermal Anomaly,76.1%,Cleared"
+            },
+            {
+                id: "REP-9043",
+                name: "BorderSight_AI_Detection_Performance_2026-09-04.json",
+                category: "AI Performance",
+                timestamp: "2026-09-04 08:30 UTC",
+                format: "JSON",
+                status: "Ready",
+                generatedBy: "AI Supervisory Daemon",
+                totalIncidents: 3,
+                criticalAlerts: 0,
+                aiDetections: 2450,
+                vehiclesDetected: 610,
+                personsDetected: 310,
+                threatScore: "Minimal (04/100)",
+                camerasAnalyzed: 26,
+                previewContent: "{\n  \"model_version\": \"v4.8.2-edge\",\n  \"inference_latency_ms\": 14.2,\n  \"false_positive_rate_percent\": 0.42,\n  \"confidence_threshold\": 0.85,\n  \"neural_weights_hash\": \"sha256:8f9b2c...\"\n}"
+            },
+            {
+                id: "REP-9044",
+                name: "BorderSight_Telemetry_Archive_Aug.zip",
+                category: "Telemetry Archive",
+                timestamp: "2026-09-01 01:15 UTC",
+                format: "ZIP",
+                status: "Ready",
+                generatedBy: "System Automated Cron",
+                totalIncidents: 112,
+                criticalAlerts: 14,
+                aiDetections: 45200,
+                vehiclesDetected: 12400,
+                personsDetected: 6800,
+                threatScore: "Moderate (45/100)",
+                camerasAnalyzed: 26,
+                previewContent: "[ARCHIVE CONTAINER: BorderSight_Telemetry_Archive_Aug.zip]\nContains:\n- raw_radar_logs_aug.csv (142 MB)\n- eo_thermal_snapshots/ (1.2 GB)\n- ai_audit_trail.json (48 MB)\n- network_latency_metrics.csv"
+            }
+        ];
+
+        // State Management
+        let reportsData = JSON.parse(localStorage.getItem('bordersight_reports')) || defaultReports;
+        let activeFilter = 'all';
+        let searchQuery = '';
+        let currentSortColumn = 'timestamp';
+        let sortDirection = 'desc'; // 'asc' or 'desc'
+        let reportToDeleteId = null;
+        let isGenerating = false;
+
+        // DOM Elements
+        const sidebar = document.getElementById('sidebar');
+        const collapseBtn = document.getElementById('collapseBtn');
+        const navItems = document.querySelectorAll('.nav-item');
+        const generateBtn = document.getElementById('generateBtn');
+        const reportTypeSelect = document.getElementById('reportTypeSelect');
+        const reportRangeSelect = document.getElementById('reportRangeSelect');
+        const customRangeWrapper = document.getElementById('customRangeWrapper');
+        const customStartDate = document.getElementById('customStartDate');
+        const customEndDate = document.getElementById('customEndDate');
+        const searchInput = document.getElementById('searchInput');
+        const filterPills = document.querySelectorAll('.filter-pill');
+        const reportsTableBody = document.getElementById('reportsTableBody');
+        const tableHeaders = document.querySelectorAll('.data-table th[data-sort]');
+        
+        // Stats Elements
+        const statTotalReports = document.getElementById('statTotalReports');
+        const statTodayReports = document.getElementById('statTodayReports');
+        const statPendingReports = document.getElementById('statPendingReports');
+        const statStorageUsed = document.getElementById('statStorageUsed');
+
+        // Drawer Elements
+        const drawerBackdrop = document.getElementById('drawerBackdrop');
+        const reportDrawer = document.getElementById('reportDrawer');
+        const drawerCloseBtn = document.getElementById('drawerCloseBtn');
+        const drawerCloseActionBtn = document.getElementById('drawerCloseActionBtn');
+        const drawerDownloadBtn = document.getElementById('drawerDownloadBtn');
+        const drawerTitle = document.getElementById('drawerTitle');
+        const drawerBody = document.getElementById('drawerBody');
+
+        // Modal Elements
+        const deleteModalBackdrop = document.getElementById('deleteModalBackdrop');
+        const cancelDeleteBtn = document.getElementById('cancelDeleteBtn');
+        const confirmDeleteBtn = document.getElementById('confirmDeleteBtn');
+        const deleteModalDesc = document.getElementById('deleteModalDesc');
+
+        // Toast Container
+        const toastContainer = document.getElementById('toastContainer');
+
+        // Initialize App
+        function initApp() {
+            setupEventListeners();
+            renderReports();
+            updateStats();
+        }
+
+        // Event Listeners Setup
+        function setupEventListeners() {
+            // Sidebar collapse
+            collapseBtn.addEventListener('click', () => {
+                sidebar.classList.toggle('collapsed');
+            });
+
+            // Active nav highlight
+            const currentPath = window.location.pathname.split("/").pop() || 'index.html';
+            navItems.forEach(item => {
+                if (item.getAttribute('data-page') === currentPath) {
+                    item.classList.add('active');
+                }
+            });
+
+            // Range select change for custom date inputs
+            reportRangeSelect.addEventListener('change', (e) => {
+                if (e.target.value === 'Custom Range') {
+                    customRangeWrapper.classList.add('active');
+                    // Set default dates
+                    const today = new Date().toISOString().split('T')[0];
+                    customStartDate.value = today;
+                    customEndDate.value = today;
+                } else {
+                    customRangeWrapper.classList.remove('active');
+                }
+            });
+
+            // Generate button click
+            generateBtn.addEventListener('click', handleGenerateReport);
+
+            // Search input
+            searchInput.addEventListener('input', (e) => {
+                searchQuery = e.target.value.toLowerCase().trim();
+                renderReports();
+            });
+
+            // Filter pills
+            filterPills.forEach(pill => {
+                pill.addEventListener('click', (e) => {
+                    filterPills.forEach(p => p.classList.remove('active'));
+                    e.target.classList.add('active');
+                    activeFilter = e.target.getAttribute('data-filter');
+                    renderReports();
+                });
+            });
+
+            // Table headers sorting
+            tableHeaders.forEach(th => {
+                th.addEventListener('click', () => {
+                    const sortKey = th.getAttribute('data-sort');
+                    if (currentSortColumn === sortKey) {
+                        sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+                    } else {
+                        currentSortColumn = sortKey;
+                        sortDirection = 'asc';
+                    }
+                    renderReports();
+                });
+            });
+
+            // Drawer close
+            drawerCloseBtn.addEventListener('click', closeDrawer);
+            drawerCloseActionBtn.addEventListener('click', closeDrawer);
+            drawerBackdrop.addEventListener('click', closeDrawer);
+
+            // Modal close & confirm delete
+            cancelDeleteBtn.addEventListener('click', () => {
+                deleteModalBackdrop.classList.remove('open');
+                reportToDeleteId = null;
+            });
+            confirmDeleteBtn.addEventListener('click', executeDeleteReport);
+        }
+
+        // Save to localStorage
+        function persistReports() {
+            localStorage.setItem('bordersight_reports', JSON.stringify(reportsData));
+        }
+
+        // Notification Toast System
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            
+            let iconSvg = '';
+            if (type === 'success') iconSvg = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--success)" stroke-width="2.5" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>';
+            else if (type === 'error') iconSvg = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--critical)" stroke-width="2.5" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line></svg>';
+            else if (type === 'warning') iconSvg = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--warning)" stroke-width="2.5" fill="none"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>';
+            else iconSvg = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="var(--info)" stroke-width="2.5" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>';
+
+            toast.innerHTML = `${iconSvg} <span>${message}</span>`;
+            toastContainer.appendChild(toast);
+
+            setTimeout(() => toast.classList.add('show'), 10);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3500);
+        }
+
+        // Generate Report Handler
+        function handleGenerateReport() {
+            if (isGenerating) return;
+
+            const selectedType = reportTypeSelect.value;
+            const selectedRange = reportRangeSelect.value;
+
+            // Validate custom range if selected
+            if (selectedRange === 'Custom Range') {
+                const sDate = customStartDate.value;
+                const eDate = customEndDate.value;
+                if (!sDate || !eDate || sDate > eDate) {
+                    showToast('Invalid or reversed custom date range.', 'error');
+                    return;
+                }
+            }
+
+            isGenerating = true;
+            generateBtn.disabled = true;
+            generateBtn.textContent = 'GENERATING...';
+
+            showToast(`Initiating report generation: ${selectedType}`, 'info');
+
+            // Simulate generation delay
+            setTimeout(() => {
+                const now = new Date();
+                const dateStr = now.toISOString().split('T')[0];
+                const timeStr = now.toTimeString().split(' ')[0] + ' UTC';
+                const timestampFormatted = `${dateStr} ${timeStr}`;
+
+                // Format determination based on type
+                let format = 'PDF';
+                if (selectedType.includes('Incident') || selectedType.includes('Tracking')) format = 'CSV';
+                else if (selectedType.includes('AI') || selectedType.includes('Performance')) format = 'JSON';
+                else if (selectedType.includes('Health') || selectedType.includes('Summary')) format = 'PDF';
+
+                const sanitizedName = selectedType.toLowerCase().replace(/[^a-z0-9]/g, '_');
+                const filename = `BorderSight_${sanitizedName}_${dateStr}.${format.toLowerCase()}`;
+                const reportId = 'REP-' + Math.floor(1000 + Math.random() * 9000);
+
+                const newReport = {
+                    id: reportId,
+                    name: filename,
+                    category: selectedType,
+                    timestamp: timestampFormatted,
+                    format: format,
+                    status: 'Ready',
+                    generatedBy: 'Administrator',
+                    totalIncidents: Math.floor(5 + Math.random() * 20),
+                    criticalAlerts: Math.floor(Math.random() * 4),
+                    aiDetections: Math.floor(500 + Math.random() * 2000),
+                    vehiclesDetected: Math.floor(100 + Math.random() * 400),
+                    personsDetected: Math.floor(50 + Math.random() * 200),
+                    threatScore: ['Low (14/100)', 'Moderate (42/100)', 'Elevated (65/100)'][Math.floor(Math.random() * 3)],
+                    camerasAnalyzed: 26,
+                    previewContent: `BORDER SIGHT AI - ${selectedType.toUpperCase()}\nRange: ${selectedRange}\nTimestamp: ${timestampFormatted}\nGenerated By: Administrator (ID: AD-772)\n\n-- METRICS SUMMARY --\n- Total Detections Processed: 1,840\n- Sensor Array Health: 100% Operational\n- AI Confidence Index: 96.8%\n\nDetailed logs securely encrypted and signed with Ed25519 cryptographic hashes.`
+                };
+
+                reportsData.unshift(newReport);
+                persistReports();
+                renderReports();
+                updateStats();
+
+                isGenerating = false;
+                generateBtn.disabled = false;
+                generateBtn.innerHTML = '<svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg> Generate Report';
+
+                showToast('Report generated successfully', 'success');
+            }, 1800);
+        }
+
+        // Render Reports Table
+        function renderReports() {
+            // Filter
+            let filtered = reportsData.filter(rep => {
+                // Search query match
+                const matchSearch = searchQuery === '' || 
+                    rep.name.toLowerCase().includes(searchQuery) ||
+                    rep.category.toLowerCase().includes(searchQuery) ||
+                    rep.format.toLowerCase().includes(searchQuery) ||
+                    rep.status.toLowerCase().includes(searchQuery);
+
+                // Pill filter match
+                let matchPill = true;
+                if (activeFilter === 'PDF') matchPill = rep.format === 'PDF';
+                else if (activeFilter === 'CSV') matchPill = rep.format === 'CSV';
+                else if (activeFilter === 'JSON') matchPill = rep.format === 'JSON';
+                else if (activeFilter === 'Ready') matchPill = rep.status === 'Ready';
+                else if (activeFilter === 'Processing') matchPill = rep.status === 'Processing';
+
+                return matchSearch && matchPill;
+            });
+
+            // Sort
+            filtered.sort((a, b) => {
+                let valA = a[currentSortColumn] || '';
+                let valB = b[currentSortColumn] || '';
+                if (typeof valA === 'string') valA = valA.toLowerCase();
+                if (typeof valB === 'string') valB = valB.toLowerCase();
+
+                if (valA < valB) return sortDirection === 'asc' ? -1 : 1;
+                if (valA > valB) return sortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+
+            // Update sort indicators on headers
+            tableHeaders.forEach(th => {
+                const sortKey = th.getAttribute('data-sort');
+                const indicator = th.querySelector('.sort-indicator');
+                if (sortKey === currentSortColumn) {
+                    indicator.textContent = sortDirection === 'asc' ? '↑' : '↓';
+                } else {
+                    indicator.textContent = '↕';
+                }
+            });
+
+            // Populate table HTML
+            if (filtered.length === 0) {
+                reportsTableBody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--muted-text); padding: 30px;">No reports found matching criteria.</td></tr>`;
+                return;
+            }
+
+            reportsTableBody.innerHTML = filtered.map(rep => {
+                let statusBadgeClass = 'ready';
+                if (rep.status === 'Processing') statusBadgeClass = 'processing';
+                else if (rep.status === 'Generating') statusBadgeClass = 'generating';
+
+                return `
+                    <tr>
+                        <td>
+                            <a class="report-name-link" onclick="openReportDrawer('${rep.id}')">${rep.name}</a>
+                        </td>
+                        <td>${rep.category}</td>
+                        <td style="font-family: var(--font-family-mono); color: var(--secondary-text);">${rep.timestamp}</td>
+                        <td style="font-family: var(--font-family-mono); color: var(--muted-text);">${rep.format}</td>
+                        <td>
+                            <span class="status-badge ${statusBadgeClass}">
+                                <span style="width:6px; height:6px; background:currentColor; border-radius:50%;"></span> 
+                                ${rep.status}
+                            </span>
+                        </td>
+                        <td>
+                            <div class="action-cell">
+                                <button class="action-link" onclick="downloadReport('${rep.id}')">Download ➔</button>
+                                <button class="delete-btn" title="Delete Report" onclick="promptDeleteReport('${rep.id}')">
+                                    <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Update Statistics Panel
+        function updateStats() {
+            statTotalReports.textContent = reportsData.length;
+            // Count generated today (matching today's date string YYYY-MM-DD)
+            const todayPrefix = new Date().toISOString().split('T')[0];
+            const todayCount = reportsData.filter(r => r.timestamp.includes(todayPrefix)).length;
+            statTodayReports.textContent = String(todayCount).padStart(2, '0');
+            statPendingReports.textContent = String(reportsData.filter(r => r.status === 'Processing' || r.status === 'Generating').length).padStart(2, '0');
+            statStorageUsed.textContent = (reportsData.length * 0.3 + 1.8).toFixed(1) + ' GB';
+        }
+
+        // Download Report with Blob
+        function downloadReport(id) {
+            const report = reportsData.find(r => r.id === id);
+            if (!report) return;
+
+            showToast(`Download started: ${report.name}`, 'info');
+
+            let mimeType = 'text/plain';
+            if (report.format === 'PDF') mimeType = 'application/pdf';
+            else if (report.format === 'CSV') mimeType = 'text/csv';
+            else if (report.format === 'JSON') mimeType = 'application/json';
+            else if (report.format === 'ZIP') mimeType = 'application/zip';
+
+            const blobContent = report.previewContent || `BorderSight AI Secure Export - ${report.name}`;
+            const blob = new Blob([blobContent], { type: mimeType });
+            const url = URL.createObjectURL(blob);
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = report.name;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+
+        // Open Report Preview Drawer
+        function openReportDrawer(id) {
+            const report = reportsData.find(r => r.id === id);
+            if (!report) return;
+
+            drawerTitle.textContent = report.name;
+            drawerBody.innerHTML = `
+                <div class="drawer-meta-grid">
+                    <div class="meta-item">
+                        <span class="meta-label">Report ID</span>
+                        <span class="meta-val">${report.id}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Category</span>
+                        <span class="meta-val">${report.category}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Generated Date</span>
+                        <span class="meta-val">${report.timestamp}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Format</span>
+                        <span class="meta-val">${report.format}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Status</span>
+                        <span class="meta-val" style="color:var(--success);">${report.status}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Generated By</span>
+                        <span class="meta-val">${report.generatedBy}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Total Incidents</span>
+                        <span class="meta-val">${report.totalIncidents}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Critical Alerts</span>
+                        <span class="meta-val" style="color:var(--critical);">${report.criticalAlerts}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">AI Detections</span>
+                        <span class="meta-val">${report.aiDetections}</span>
+                    </div>
+                    <div class="meta-item">
+                        <span class="meta-label">Threat Score</span>
+                        <span class="meta-val" style="color:var(--accent);">${report.threatScore}</span>
+                    </div>
+                </div>
+
+                <div class="preview-section-box">
+                    <span class="preview-section-title">Preview Report Content</span>
+                    <div class="preview-text-content">${report.previewContent}</div>
+                </div>
+            `;
+
+            // Bind drawer download button
+            drawerDownloadBtn.onclick = () => downloadReport(report.id);
+
+            drawerBackdrop.classList.add('open');
+            reportDrawer.classList.add('open');
+        }
+
+        function closeDrawer() {
+            drawerBackdrop.classList.remove('open');
+            reportDrawer.classList.remove('open');
+        }
+
+        // Delete Report Confirmation Modal
+        function promptDeleteReport(id) {
+            const report = reportsData.find(r => r.id === id);
+            if (!report) return;
+            reportToDeleteId = id;
+            deleteModalDesc.textContent = `Are you sure you want to delete "${report.name}" from archive storage? This action cannot be undone.`;
+            deleteModalBackdrop.classList.add('open');
+        }
+
+        function executeDeleteReport() {
+            if (!reportToDeleteId) return;
+            
+            const index = reportsData.findIndex(r => r.id === reportToDeleteId);
+            if (index !== -1) {
+                const deletedName = reportsData[index].name;
+                reportsData.splice(index, 1);
+                persistReports();
+                renderReports();
+                updateStats();
+                showToast(`Report deleted: ${deletedName}`, 'warning');
+            }
+
+            deleteModalBackdrop.classList.remove('open');
+            reportToDeleteId = null;
+        }
+
+        // Live DateTime & Dynamic System Telemetry
+        function updateDatetime() {
+            const now = new Date();
+            const el = document.getElementById('liveDatetime');
+            if (el) {
+                el.textContent = now.toLocaleString('en-US',{year:'numeric',month:'short',day:'2-digit',hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:true}).replace(',',' ·');
+            }
+        }
+        updateDatetime();
+        setInterval(updateDatetime, 1000);
+
+        // Periodically randomize slight camera fluctuations for realistic live feel
+        setInterval(() => {
+            const camEl = document.getElementById('sysCamerasStatus');
+            if (camEl) {
+                // Keep cameras active between 24 and 26
+                const activeCams = 24 + Math.floor(Math.random() * 3);
+                camEl.textContent = `${activeCams}/26`;
+            }
+        }, 10000);
+
+        // Run Initialization on load
+        window.addEventListener('DOMContentLoaded', initApp);
+    </script>
+    <!-- Global Theme Manager -->
+    <script src="theme.js"></script>
+</body>
+</html>
