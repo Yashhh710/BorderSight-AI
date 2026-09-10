@@ -3,13 +3,15 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AI Detection – BorderSight AI</title>
-    <link rel="icon" type="image/png" href="https://img.icons8.com/?size=100&id=12007&format=png&color=000000">
+    <title>AI Monitoring Engine – BorderSight AI</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="theme.css">
     <!-- Real AI object-detection engine: TensorFlow.js + COCO-SSD (runs entirely in the browser) -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.20.0/dist/tf.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/ai-monitor.js"></script>
+    <script src="js/notifications.js"></script>
     <style>
         /* ─── EXISTING COLOR PALETTE (UNCHANGED) ─────────────────────────── */
         :root {
@@ -388,7 +390,7 @@
         }
         .threat-grid {
             display: grid;
-            grid-template-columns: repeat(6, minmax(140px, 1fr));
+            grid-template-columns: repeat(3, minmax(140px, 1fr));
             gap: 12px;
             padding: 16px;
         }
@@ -716,65 +718,62 @@
 
         <div class="sidebar-nav">
             <div class="nav-section">
+                <span class="nav-category">Command Center</span>
+                <a href="index.html" class="nav-item" data-page="index.html">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                    <span class="nav-text">Command Center</span>
+                </a>
+                    <a href="dashboard.html" class="nav-item" data-page="dashboard.html">
+                        <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><rect x="3" y="3" width="18" height="18" rx="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+                        <span class="nav-text">Dashboard</span>
+                    </a>
+            </div>
+
+            <div class="nav-section">
                 <span class="nav-category">Monitoring</span>
-                <a href="dashboard.html" class="nav-item" data-page="dashboard.html">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                    <span class="nav-text">Dashboard</span><span class="tooltip">Dashboard</span>
+                <a href="detection.html" class="nav-item active" data-page="detection.html">
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
+                    <span class="nav-text">AI Monitoring</span>
                 </a>
                 <a href="cameras.html" class="nav-item" data-page="cameras.html">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
-                    <span class="nav-text">Live Cameras</span><span class="tooltip">Live Cameras</span>
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M23 7l-7 5 7 5V7z"></path><rect x="1" y="5" width="15" height="14" rx="2" ry="2"></rect></svg>
+                    <span class="nav-text">Live Cameras</span>
                 </a>
+            </div>
+
+            <div class="nav-section">
+                <span class="nav-category">Security</span>
                 <a href="alerts.html" class="nav-item" data-page="alerts.html">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
-                    <span class="nav-text">Alerts</span><span class="badge">4</span><span class="tooltip">Alerts</span>
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path><path d="M13.73 21a2 2 0 0 1-3.46 0"></path></svg>
+                    <span class="nav-text">Alerts</span>
                 </a>
                 <a href="incidents.html" class="nav-item" data-page="incidents.html">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
-                    <span class="nav-text">Incidents</span><span class="tooltip">Incidents</span>
-                </a>
-            </div>
-            <div class="nav-section">
-                <span class="nav-category">AI Intelligence</span>
-                <a href="detection.html" class="nav-item" data-page="detection.html">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path><circle cx="12" cy="12" r="3"></circle></svg>
-                    <span class="nav-text">AI Detection</span><span class="tooltip">AI Detection</span>
-                </a>
-                <a href="tracking.html" class="nav-item" data-page="tracking.html">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline></svg>
-                    <span class="nav-text">Tracking</span><span class="tooltip">Tracking</span>
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                    <span class="nav-text">Incidents</span>
                 </a>
                 <a href="zones.html" class="nav-item" data-page="zones.html">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                    <span class="nav-text">Zones & Fences</span><span class="tooltip">Zones & Fences</span>
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+                    <span class="nav-text">Zones & Fences</span>
                 </a>
-            </div>
-            <div class="nav-section">
-                <span class="nav-category">Map</span>
                 <a href="map.html" class="nav-item" data-page="map.html">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
-                    <span class="nav-text">Map & Heatmap</span><span class="tooltip">Map & Heatmap</span>
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><polygon points="1 6 1 22 8 18 16 22 23 18 23 2 16 6 8 2 1 6"></polygon><line x1="8" y1="2" x2="8" y2="18"></line><line x1="16" y1="6" x2="16" y2="22"></line></svg>
+                    <span class="nav-text">Heatmap & Map</span>
                 </a>
             </div>
+
             <div class="nav-section">
-                <span class="nav-category">Analytics</span>
+                <span class="nav-category">Insights</span>
                 <a href="analytics.html" class="nav-item" data-page="analytics.html">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
-                    <span class="nav-text">Analytics</span><span class="tooltip">Analytics</span>
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><line x1="18" y1="20" x2="18" y2="10"></line><line x1="12" y1="20" x2="12" y2="4"></line><line x1="6" y1="20" x2="6" y2="14"></line></svg>
+                    <span class="nav-text">Analytics</span>
                 </a>
             </div>
-            <div class="nav-section">
-                <span class="nav-category">Reports</span>
-                <a href="reports.html" class="nav-item" data-page="reports.html">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                    <span class="nav-text">Reports</span><span class="tooltip">Reports</span>
-                </a>
-            </div>
+
             <div class="nav-section">
                 <span class="nav-category">System</span>
                 <a href="settings.html" class="nav-item" data-page="settings.html">
-                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                    <span class="nav-text">Settings</span><span class="tooltip">Settings</span>
+                    <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06-.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                    <span class="nav-text">Settings</span>
                 </a>
             </div>
         </div>
@@ -884,14 +883,6 @@
                     <div class="vc-tag">AI Latency: <span>42ms</span></div>
 
                     <div class="vc-btns">
-                        <!-- Fencing Zone Enable Button -->
-                        <button class="vc-btn" id="fencingBtn" title="Enable Fencing Zone">
-                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
-                        </button>
-                        <!-- Auto-Download Toggle -->
-                        <button class="vc-btn" id="autoDownloadBtn" title="Toggle Auto-Download (Currently ON)">
-                            <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        </button>
                         <!-- Pause -->
                         <button class="vc-btn" id="pauseBtn" title="Pause / Resume">
                             <svg viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" fill="none"><rect x="6" y="4" width="4" height="16"></rect><rect x="14" y="4" width="4" height="16"></rect></svg>
@@ -1073,7 +1064,7 @@
                     <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 8v4l3 3"></path><circle cx="12" cy="12" r="9"></circle></svg>
                     Threat Clips
                 </div>
-                <span class="panel-head-meta" style="color:var(--secondary-text);">12 incidents queued</span>
+                <span class="panel-head-meta" style="color:var(--secondary-text);">6 incidents queued</span>
             </div>
             <div class="threat-grid">
                 <div class="threat-card active" data-video="models/video/1st.mp4" data-name="Threat 01">
@@ -1140,72 +1131,6 @@
                     <div class="threat-content">
                         <div class="threat-name">Threat 06</div>
                         <div class="threat-meta"><span>CAM-15</span><strong>MED</strong></div>
-                    </div>
-                </div>
-                <div class="threat-card" data-video="models/video/7th.mp4" data-name="Threat 07">
-                    <div class="threat-thumb">
-                        <div class="video-skeleton"></div>
-                        <video muted loop playsinline preload="metadata" src="models/video/7th.mp4"></video>
-                        <span class="threat-badge">PLAY</span>
-                    </div>
-                    <div class="threat-content">
-                        <div class="threat-name">Threat 07</div>
-                        <div class="threat-meta"><span>CAM-03</span><strong>CRIT</strong></div>
-                    </div>
-                </div>
-                <div class="threat-card" data-video="models/video/8th.mp4" data-name="Threat 08">
-                    <div class="threat-thumb">
-                        <div class="video-skeleton"></div>
-                        <video muted loop playsinline preload="metadata" src="models/video/8th.mp4"></video>
-                        <span class="threat-badge">PLAY</span>
-                    </div>
-                    <div class="threat-content">
-                        <div class="threat-name">Threat 08</div>
-                        <div class="threat-meta"><span>CAM-07</span><strong>HIGH</strong></div>
-                    </div>
-                </div>
-                <div class="threat-card" data-video="models/video/9th.mp4" data-name="Threat 09">
-                    <div class="threat-thumb">
-                        <div class="video-skeleton"></div>
-                        <video muted loop playsinline preload="metadata" src="models/video/9th.mp4"></video>
-                        <span class="threat-badge">PLAY</span>
-                    </div>
-                    <div class="threat-content">
-                        <div class="threat-name">Threat 09</div>
-                        <div class="threat-meta"><span>CAM-09</span><strong>MED</strong></div>
-                    </div>
-                </div>
-                <div class="threat-card" data-video="models/video/10.mp4" data-name="Threat 10">
-                    <div class="threat-thumb">
-                        <div class="video-skeleton"></div>
-                        <video muted loop playsinline preload="metadata" src="models/video/10.mp4"></video>
-                        <span class="threat-badge">PLAY</span>
-                    </div>
-                    <div class="threat-content">
-                        <div class="threat-name">Threat 10</div>
-                        <div class="threat-meta"><span>CAM-12</span><strong>LOW</strong></div>
-                    </div>
-                </div>
-                <div class="threat-card" data-video="models/video/11.mp4" data-name="Threat 11">
-                    <div class="threat-thumb">
-                        <div class="video-skeleton"></div>
-                        <video muted loop playsinline preload="metadata" src="models/video/11.mp4"></video>
-                        <span class="threat-badge">PLAY</span>
-                    </div>
-                    <div class="threat-content">
-                        <div class="threat-name">Threat 11</div>
-                        <div class="threat-meta"><span>CAM-14</span><strong>HIGH</strong></div>
-                    </div>
-                </div>
-                <div class="threat-card" data-video="models/video/12.mp4" data-name="Threat 12">
-                    <div class="threat-thumb">
-                        <div class="video-skeleton"></div>
-                        <video muted loop playsinline preload="metadata" src="models/video/12.mp4"></video>
-                        <span class="threat-badge">PLAY</span>
-                    </div>
-                    <div class="threat-content">
-                        <div class="threat-name">Threat 12</div>
-                        <div class="threat-meta"><span>CAM-16</span><strong>MED</strong></div>
                     </div>
                 </div>
             </div>
@@ -1306,50 +1231,23 @@
                 </div>
             </div><!-- end events -->
 
-            <!-- 3. TRACKING & ANALYSIS -->
+            <!-- 3. EXPLAINABLE THREAT SCORING & ANALYSIS -->
             <div class="panel-card">
                 <div class="panel-head">
                     <div class="panel-head-title">
-                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><circle cx="12" cy="12" r="3"></circle></svg>
-                        Tracking &amp; Analysis
+                        <svg viewBox="0 0 24 24" width="13" height="13" stroke="currentColor" stroke-width="2" fill="none"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path></svg>
+                        Explainable Threat Scoring
                     </div>
-                    <a href="tracking.html" style="font-family: var(--font-family-mono);font-size:10px;color:var(--accent);text-decoration:none;">View Details</a>
+                    <span id="threatScoreBadge" style="font-family: var(--font-family-mono);font-size:10px;font-weight:700;color:var(--success);padding:2px 6px;background:rgba(34,197,94,0.1);border-radius:4px;border:1px solid rgba(34,197,94,0.3);">0/100 • LOW</span>
                 </div>
-                <div class="track-body">
-                    <!-- Entity thumbnail + meta -->
-                    <div class="track-entity">
-                        <div class="track-thumb">
-                            P-104
-                            <div class="track-thumb-badge">TRACKING</div>
-                        </div>
-                        <div class="track-meta">
-                            <div class="track-meta-row">
-                                <span class="track-meta-key">Type</span>
-                                <span class="track-meta-val">Person</span>
-                            </div>
-                            <div class="track-meta-row">
-                                <span class="track-meta-key">Threat Level</span>
-                                <span class="threat-med">MEDIUM</span>
-                            </div>
-                            <div class="track-meta-row">
-                                <span class="track-meta-key">Confidence</span>
-                                <span class="track-meta-val">98.4%</span>
-                            </div>
-                            <div class="track-meta-row">
-                                <span class="track-meta-key">Last Seen</span>
-                                <span class="track-meta-val" id="lastSeen">--:--:--</span>
-                            </div>
-                            <div class="track-meta-row">
-                                <span class="track-meta-key">Location</span>
-                                <span class="track-meta-val">CAM-04</span>
-                            </div>
-                        </div>
+                <div class="track-body" style="padding: 12px 16px;">
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--border-color);">
+                        <span style="font-size:11px;font-family:var(--font-family-mono);color:var(--secondary-text);">REAL-TIME RISK SCORE</span>
+                        <span id="threatScoreVal" style="font-family:var(--font-family-mono);font-size:15px;font-weight:800;color:var(--success);">0 / 100 (LOW)</span>
                     </div>
-
-                    <!-- Tracking path canvas -->
-                    <div class="track-path-wrap">
-                        <canvas id="trackCanvas"></canvas>
-                        <span class="track-path-label">Tracking Path</span>
+                    <div style="font-size:10px;font-family:var(--font-family-mono);color:var(--muted-text);margin-bottom:6px;letter-spacing:0.5px;text-transform:uppercase;">REASONS &amp; CONTRIBUTING FACTORS</div>
+                    <div id="threatReasonsList" style="display:flex;flex-direction:column;gap:6px;max-height:140px;overflow-y:auto;">
+                        <div style="font-size:11px;color:var(--muted-text);font-style:italic;">No active threat factors detected. Status Normal (0/100).</div>
                     </div>
                 </div>
             </div><!-- end tracking -->
@@ -1424,6 +1322,20 @@
     let lastDetectionTime = 0;
     let lastStatusText = 'CAM-04 • READY';
 
+    /* ── VIRTUAL FENCE & INTRUSION DETECTION STATE ─────────────── */
+    let lastIntrusionAlertTime = 0;
+    const INTRUSION_ALERT_COOLDOWN = 4000; // 4 seconds debounce
+    // Virtual restricted zone normalized bounds (20% left, 25% top, 60% width, 55% height)
+    const virtualZonePct = { x: 0.20, y: 0.25, w: 0.60, h: 0.55 };
+
+    /* ── PROTOTYPE LIGHTWEIGHT TRACKING STATE ───────────────────── */
+    let trackedTargets = [];
+    let nextPersonSeq = 1;
+    let nextVehicleSeq = 1;
+    const MAX_DISTANCE_THRESHOLD = 110; // Max centroid pixel movement between frames
+    const MAX_DISAPPEARED_FRAMES = 12;  // ~2.4 sec buffer before purging lost target
+    const MAX_TRAIL_LENGTH = 15;        // Max motion trail points
+
     function setCameraLabel(text) {
         if (cameraLabel) {
             cameraLabel.textContent = text;
@@ -1447,9 +1359,7 @@
         ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
     }
 
-    /* ── REAL AI OBJECT DETECTION (TensorFlow.js + COCO-SSD) ─────────
-       Runs an actual pretrained neural network in the browser on every
-       video frame and draws real bounding boxes for people/vehicles. */
+    /* ── REAL AI OBJECT DETECTION + VIRTUAL FENCE ENGINE ──────────── */
     async function loadModel() {
         if (!window.cocoSsd || !window.tf) {
             setCameraLabel('CAM-04 • MODEL UNAVAILABLE');
@@ -1475,7 +1385,6 @@
         try {
             const predictions = await model.detect(activeVideo);
             drawDetectionOverlay(predictions, activeVideo);
-            setCameraLabel('CAM-04 • ANALYZING VIDEO');
         } catch (error) {
             console.error('Detection failed:', error);
         }
@@ -1490,6 +1399,250 @@
         animationFrameId = requestAnimationFrame(tick);
     }
 
+    /* ── EXPLAINABLE THREAT / RISK SCORING ENGINE ─────────────────── */
+    function calculateThreatScore(activeTargets, personCount, vehicleCount, hasPersonIntrusion, hasVehicleIntrusion) {
+        let score = 0;
+        const reasons = [];
+
+        // 1. Person detected (+20)
+        if (personCount > 0) {
+            score += 20;
+            reasons.push({ text: 'Person detected in frame', points: 20 });
+        }
+
+        // 2. Restricted-zone intrusion (+40)
+        if (hasPersonIntrusion) {
+            score += 40;
+            reasons.push({ text: 'Restricted zone intrusion (Person)', points: 40 });
+        }
+
+        // 3. Vehicle inside restricted zone (+30)
+        if (hasVehicleIntrusion) {
+            score += 30;
+            reasons.push({ text: 'Vehicle inside restricted zone', points: 30 });
+        }
+
+        // 4. Loitering / extended presence (+10)
+        const isLoitering = activeTargets.some(t => t.trail && t.trail.length >= 15);
+        if (isLoitering) {
+            score += 10;
+            reasons.push({ text: 'Loitering / extended presence (>3s tracked)', points: 10 });
+        }
+
+        // 5. Night-time condition (+20)
+        const currentHour = new Date().getHours();
+        const isNight = (currentHour < 6 || currentHour >= 18);
+        if (isNight) {
+            score += 20;
+            reasons.push({ text: 'Night-time surveillance hours (18:00–06:00)', points: 20 });
+        }
+
+        // Cap score at 100
+        const finalScore = Math.min(100, score);
+
+        // Determine Level & Color
+        let level = 'LOW';
+        let color = '#22C55E'; // Green
+        if (finalScore >= 80) {
+            level = 'CRITICAL';
+            color = '#FF3B30'; // Red
+        } else if (finalScore >= 60) {
+            level = 'HIGH';
+            color = '#F97316'; // Orange
+        } else if (finalScore >= 30) {
+            level = 'MEDIUM';
+            color = '#FFB000'; // Amber
+        }
+
+        return { score: finalScore, level, color, reasons };
+    }
+
+    function updateThreatUI(threat) {
+        const threatScoreBadge = document.getElementById('threatScoreBadge');
+        const threatScoreVal = document.getElementById('threatScoreVal');
+        const threatReasonsList = document.getElementById('threatReasonsList');
+
+        if (threatScoreBadge) {
+            threatScoreBadge.textContent = `${threat.score}/100 • ${threat.level}`;
+            threatScoreBadge.style.color = threat.color;
+            threatScoreBadge.style.borderColor = threat.color;
+            threatScoreBadge.style.background = threat.color + '1A';
+        }
+
+        if (threatScoreVal) {
+            threatScoreVal.textContent = `${threat.score} / 100 (${threat.level})`;
+            threatScoreVal.style.color = threat.color;
+        }
+
+        if (threatReasonsList) {
+            if (!threat.reasons || threat.reasons.length === 0) {
+                threatReasonsList.innerHTML = `<div style="font-size:11px;color:var(--muted-text);font-style:italic;">No active threat factors detected. Status Normal (0/100).</div>`;
+            } else {
+                threatReasonsList.innerHTML = threat.reasons.map(r => `
+                    <div style="display:flex;align-items:center;justify-content:space-between;font-size:11px;padding:5px 8px;background:rgba(255,255,255,0.03);border-radius:4px;border-left:3px solid ${threat.color};">
+                        <span style="color:var(--primary-text);">• ${r.text}</span>
+                        <strong style="font-family:var(--font-family-mono);color:${threat.color};margin-left:8px;">+${r.points}</strong>
+                    </div>
+                `).join('');
+            }
+        }
+    }
+
+    function logIntrusionEvent(intruderId, intruderLabel, score, threatScore, threatLevel) {
+        const eventsLog = document.getElementById('eventsLog');
+        if (!eventsLog) return;
+
+        const timeStr = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+        const scorePct = (score * 100).toFixed(0) + '%';
+        const targetTag = intruderId ? `${intruderId} ${intruderLabel}` : intruderLabel;
+        const threatBadge = threatScore !== undefined ? ` [${threatLevel} - ${threatScore}/100]` : '';
+        
+        const eventDiv = document.createElement('div');
+        eventDiv.className = 'event-item';
+        eventDiv.innerHTML = `
+            <span class="event-time">${timeStr}</span>
+            <span class="event-desc"><strong>INTRUSION BREACH</strong> (${targetTag} ${scorePct})${threatBadge}</span>
+            <span class="event-cam red">CAM-04</span>
+        `;
+        eventsLog.insertBefore(eventDiv, eventsLog.firstChild);
+        
+        while (eventsLog.children.length > 15) {
+            eventsLog.removeChild(eventsLog.lastChild);
+        }
+    }
+
+    function triggerAutoSnapshot() {
+        try {
+            const wrap = document.getElementById('videoWrap');
+            const activeVideo = getVideoElement();
+            if (!wrap || !activeVideo) return null;
+            
+            const canvas = document.createElement('canvas');
+            canvas.width = wrap.offsetWidth;
+            canvas.height = wrap.offsetHeight;
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(activeVideo, 0, 0, canvas.width, canvas.height);
+            
+            if (detectionCanvas) {
+                ctx.drawImage(detectionCanvas, 0, 0, canvas.width, canvas.height);
+            }
+            
+            const dataUrl = canvas.toDataURL('image/png');
+
+            const link = document.createElement('a');
+            link.download = 'intrusion-breach-' + Date.now() + '.png';
+            link.href = dataUrl;
+            link.click();
+
+            return dataUrl;
+        } catch (e) {
+            console.warn('Auto snapshot skipped:', e);
+            return null;
+        }
+    }
+
+    function createAndStoreAlert(primaryIntruder, threatData, evidenceDataUrl) {
+        const now = new Date();
+        const alertNum = Math.floor(1000 + Math.random() * 9000);
+        const alertId = `ALT-2026-${alertNum}`;
+        const targetId = primaryIntruder ? primaryIntruder.id : 'P-01';
+        const targetLabel = primaryIntruder ? primaryIntruder.label : 'PERSON';
+        const confidenceStr = primaryIntruder ? (primaryIntruder.score * 100).toFixed(0) + '%' : '95%';
+        const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+        const dateStr = now.toLocaleString('en-US', { month: 'short', day: '2-digit', year: 'numeric', hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+
+        const snapshot = evidenceDataUrl || 'models/img/Unauthorized.png';
+
+        const alertObj = {
+            id: alertId,
+            title: `Restricted Zone Breach (${targetId})`,
+            category: threatData.score >= 60 ? 'critical' : 'warning',
+            tags: ['critical', 'ai', 'zone', 'intrusion'],
+            location: 'Sector 4 Restricted Zone',
+            camera: 'CAM-04 Border Post',
+            timeAgo: 'Just now',
+            timestamp: dateStr,
+            sortValue: Date.now(),
+            confidence: confidenceStr,
+            threatScore: `${threatData.score}/100`,
+            threatLevel: threatData.level,
+            targetId: targetId,
+            objectsDetected: `Target ${targetId} (${targetLabel})`,
+            behavior: `Target ${targetId} breached restricted zone perimeter. Risk score: ${threatData.score}/100 [${threatData.level}].`,
+            reasons: threatData.reasons ? threatData.reasons.map(r => `${r.text} (+${r.points})`) : [],
+            zoneStatus: 'BREACH DETECTED',
+            hasFeed: true,
+            evidenceSnapshot: snapshot,
+            images: [
+                snapshot,
+                'models/img/Unauthorized.png'
+            ],
+            timeline: [
+                { time: timeStr, event: 'Restricted Zone Breach Detected' },
+                { time: timeStr, event: `Target ${targetId} Tracked & Centroid Logged` },
+                { time: timeStr, event: `Explainable Risk Score Computed (${threatData.score}/100 - ${threatData.level})` },
+                { time: timeStr, event: 'Evidence Snapshot Auto-Captured' }
+            ]
+        };
+
+        try {
+            let existingAlerts = JSON.parse(sessionStorage.getItem('bordersight_live_alerts') || '[]');
+            existingAlerts.unshift(alertObj);
+            if (existingAlerts.length > 20) existingAlerts.pop();
+            sessionStorage.setItem('bordersight_live_alerts', JSON.stringify(existingAlerts));
+        } catch (e) {
+            console.warn('Session storage write failed:', e);
+        }
+
+        // Send real event data to FastAPI + MongoDB Atlas Backend
+        if (typeof createAlertApi === 'function') {
+            createAlertApi({
+                alertId: alertId,
+                cameraId: 'CAM-04',
+                targetId: targetId,
+                eventType: 'INTRUSION',
+                riskScore: threatData.score,
+                severity: threatData.score >= 60 ? 'CRITICAL' : 'WARNING',
+                reasons: threatData.reasons ? threatData.reasons.map(r => r.text) : [],
+                title: `Restricted Zone Breach (${targetId})`,
+                location: 'Sector 4 Restricted Zone',
+                confidence: confidenceStr,
+                zoneStatus: 'BREACH DETECTED',
+                hasFeed: true,
+                evidenceSnapshot: snapshot,
+                images: [snapshot, 'models/img/Unauthorized.png'],
+                timeline: alertObj.timeline
+            });
+        }
+
+        if (typeof createIncidentApi === 'function') {
+            createIncidentApi({
+                incidentId: `INC-${Math.floor(1000 + Math.random() * 9000)}`,
+                alertId: alertId,
+                cameraId: 'CAM-04',
+                targetId: targetId,
+                eventType: 'INTRUSION',
+                severity: threatData.score >= 60 ? 'CRITICAL' : 'HIGH',
+                riskScore: threatData.score,
+                title: `Restricted Zone Breach (${targetId})`,
+                location: 'Sector 4 Restricted Zone'
+            });
+        }
+
+        if (typeof createEvidenceApi === 'function') {
+            createEvidenceApi({
+                evidenceId: `EVD-${Date.now()}`,
+                alertId: alertId,
+                cameraId: 'CAM-04',
+                targetId: targetId,
+                fileName: `intrusion-breach-${targetId}-${Date.now()}.png`,
+                snapshotUrl: snapshot
+            });
+        }
+
+        return alertObj;
+    }
+
     function drawDetectionOverlay(predictions, video) {
         const ctx = detectionCanvas.getContext('2d');
         const rect = videoWrap.getBoundingClientRect();
@@ -1501,24 +1654,25 @@
         const vehicleStat = document.getElementById('vehicleStat');
         const suspiciousStat = document.getElementById('suspiciousStat');
 
-        if (!predictions || !predictions.length) {
-            if (personStat) personStat.textContent = '0';
-            if (vehicleStat) vehicleStat.textContent = '0';
-            if (suspiciousStat) suspiciousStat.textContent = '0';
-            return;
-        }
+        // Restricted Zone Pixel Dimensions
+        const zx = w * virtualZonePct.x;
+        const zy = h * virtualZonePct.y;
+        const zw = w * virtualZonePct.w;
+        const zh = h * virtualZonePct.h;
 
         const threshold = Number(confSlider.value) / 100;
         const vehicleClasses = ['car', 'truck', 'bus', 'motorcycle', 'bicycle'];
-        const relevant = predictions.filter(p => {
-            const label = p.class.toLowerCase();
-            return (label === 'person' || vehicleClasses.includes(label)) && p.score >= threshold;
-        });
 
-        // COCO-SSD returns boxes in native video pixel coordinates;
-        // scale them to the size the video is actually rendered at (object-fit: cover).
-        const vw = video.videoWidth || 1;
-        const vh = video.videoHeight || 1;
+        let relevant = [];
+        if (predictions && predictions.length) {
+            relevant = predictions.filter(p => {
+                const label = p.class.toLowerCase();
+                return (label === 'person' || vehicleClasses.includes(label)) && p.score >= threshold;
+            });
+        }
+
+        const vw = (video && video.videoWidth) ? video.videoWidth : 1;
+        const vh = (video && video.videoHeight) ? video.videoHeight : 1;
         const videoAspect = vw / vh;
         const wrapAspect = w / h;
         let scale, offsetX = 0, offsetY = 0;
@@ -1537,39 +1691,276 @@
 
         let personCount = 0;
         let vehicleCount = 0;
+        let intruderCount = 0;
+        let hasIntrusionInFrame = false;
+        let primaryIntruder = null;
 
-        relevant.forEach((pred) => {
+        // Process detections & calculate centroids and ground points
+        const processed = relevant.map((pred) => {
             const label = pred.class.toLowerCase();
+            const category = label === 'person' ? 'person' : 'vehicle';
             const [bx, by, bw, bh] = pred.bbox;
             const x = bx * scale + offsetX;
             const y = by * scale + offsetY;
             const boxWidth = bw * scale;
             const boxHeight = bh * scale;
-            const color = colors[label] || '#FFB000';
 
-            if (label === 'person') personCount += 1;
-            else vehicleCount += 1;
+            // Centroid & representative ground point
+            const cx = x + boxWidth / 2;
+            const cy = y + boxHeight / 2;
+            const px = x + boxWidth / 2;
+            const py = y + boxHeight;
 
-            ctx.strokeStyle = color;
+            // Check if ground point is inside restricted zone
+            const inZone = (px >= zx && px <= zx + zw && py >= zy && py <= zy + zh);
+            const isIntruder = (category === 'person' && inZone);
+
+            return { pred, label, category, x, y, boxWidth, boxHeight, cx, cy, px, py, inZone, isIntruder };
+        });
+
+        // Nearest-Centroid Tracking Match
+        trackedTargets.forEach(t => { t.matchedThisFrame = false; });
+
+        processed.forEach(det => {
+            let bestTarget = null;
+            let minDistance = Infinity;
+
+            for (let t of trackedTargets) {
+                if (t.matchedThisFrame) continue;
+                if (t.category !== det.category) continue;
+
+                const dx = det.cx - t.cx;
+                const dy = det.cy - t.cy;
+                const dist = Math.hypot(dx, dy);
+
+                if (dist < minDistance && dist <= MAX_DISTANCE_THRESHOLD) {
+                    minDistance = dist;
+                    bestTarget = t;
+                }
+            }
+
+            if (bestTarget) {
+                bestTarget.x = det.x;
+                bestTarget.y = det.y;
+                bestTarget.boxWidth = det.boxWidth;
+                bestTarget.boxHeight = det.boxHeight;
+                bestTarget.cx = det.cx;
+                bestTarget.cy = det.cy;
+                bestTarget.px = det.px;
+                bestTarget.py = det.py;
+                bestTarget.score = det.pred.score;
+                bestTarget.inZone = det.inZone;
+                bestTarget.isIntruder = det.isIntruder;
+                bestTarget.disappeared = 0;
+                bestTarget.matchedThisFrame = true;
+                bestTarget.trail.push({ x: det.cx, y: det.cy });
+                if (bestTarget.trail.length > MAX_TRAIL_LENGTH) {
+                    bestTarget.trail.shift();
+                }
+                det.targetId = bestTarget.id;
+            } else {
+                let id = '';
+                if (det.category === 'person') {
+                    id = 'P-' + String(nextPersonSeq++).padStart(2, '0');
+                } else {
+                    id = 'V-' + String(nextVehicleSeq++).padStart(2, '0');
+                }
+
+                const newTarget = {
+                    id,
+                    label: det.label,
+                    category: det.category,
+                    x: det.x,
+                    y: det.y,
+                    boxWidth: det.boxWidth,
+                    boxHeight: det.boxHeight,
+                    cx: det.cx,
+                    cy: det.cy,
+                    px: det.px,
+                    py: det.py,
+                    score: det.pred.score,
+                    inZone: det.inZone,
+                    isIntruder: det.isIntruder,
+                    disappeared: 0,
+                    matchedThisFrame: true,
+                    trail: [{ x: det.cx, y: det.cy }]
+                };
+                trackedTargets.push(newTarget);
+                det.targetId = id;
+            }
+        });
+
+        // Increment disappeared count for unmatched targets and purge old ones
+        trackedTargets.forEach(t => {
+            if (!t.matchedThisFrame) {
+                t.disappeared += 1;
+            }
+        });
+        trackedTargets = trackedTargets.filter(t => t.disappeared <= MAX_DISAPPEARED_FRAMES);
+
+        // Active targets visible in current frame or recently lost
+        const activeTargets = trackedTargets.filter(t => t.matchedThisFrame || t.disappeared < 3);
+        personCount = activeTargets.filter(t => t.category === 'person').length;
+        vehicleCount = activeTargets.filter(t => t.category === 'vehicle').length;
+        const intruderTargets = activeTargets.filter(t => t.isIntruder);
+        intruderCount = intruderTargets.length;
+
+        if (intruderTargets.length > 0) {
+            hasIntrusionInFrame = true;
+            intruderTargets.sort((a, b) => b.score - a.score);
+            primaryIntruder = { id: intruderTargets[0].id, label: 'PERSON', score: intruderTargets[0].score };
+        }
+
+        // Calculate Threat Score & Contributing Reasons
+        const hasVehicleIntrusion = activeTargets.some(t => t.category === 'vehicle' && t.inZone);
+        const threatData = calculateThreatScore(activeTargets, personCount, vehicleCount, hasIntrusionInFrame, hasVehicleIntrusion);
+        updateThreatUI(threatData);
+
+        // 1. DRAW RESTRICTED ZONE (VIRTUAL FENCE)
+        ctx.save();
+        if (hasIntrusionInFrame) {
+            ctx.fillStyle = 'rgba(255, 59, 48, 0.24)';
+            ctx.strokeStyle = '#FF3B30';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([8, 4]);
+        } else {
+            ctx.fillStyle = 'rgba(255, 176, 0, 0.07)';
+            ctx.strokeStyle = 'rgba(255, 176, 0, 0.6)';
             ctx.lineWidth = 2;
+            ctx.setLineDash([6, 4]);
+        }
+        ctx.fillRect(zx, zy, zw, zh);
+        ctx.strokeRect(zx, zy, zw, zh);
+        ctx.setLineDash([]);
+
+        // Zone Badge
+        const zoneText = hasIntrusionInFrame ? '🚨 RESTRICTED ZONE BREACH' : 'RESTRICTED ZONE (VIRTUAL FENCE)';
+        ctx.fillStyle = hasIntrusionInFrame ? '#FF3B30' : 'rgba(255, 176, 0, 0.85)';
+        ctx.font = '700 10px JetBrains Mono, monospace';
+        const ztW = ctx.measureText(zoneText).width;
+        ctx.fillRect(zx, Math.max(zy - 20, 4), ztW + 12, 20);
+        ctx.fillStyle = '#000000';
+        ctx.fillText(zoneText, zx + 6, Math.max(zy - 6, 17));
+        ctx.restore();
+
+        // Render Threat Score Badge on Canvas HUD (top right)
+        ctx.save();
+        const threatText = `THREAT SCORE: ${threatData.score}/100 [${threatData.level}]`;
+        ctx.font = '700 11px JetBrains Mono, monospace';
+        const ttW = ctx.measureText(threatText).width + 16;
+        const ttX = w - ttW - 14;
+        const ttY = 12;
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.82)';
+        ctx.fillRect(ttX, ttY, ttW, 22);
+        ctx.strokeStyle = threatData.color;
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(ttX, ttY, ttW, 22);
+        ctx.fillStyle = threatData.color;
+        ctx.fillText(threatText, ttX + 8, ttY + 15);
+        ctx.restore();
+
+        // 2. DRAW MOTION TRAILS FOR ACTIVE TRACKED TARGETS
+        activeTargets.forEach((t) => {
+            if (t.trail && t.trail.length > 1) {
+                let trailColor = colors[t.label] || '#FFB000';
+                if (t.isIntruder) trailColor = '#FF3B30';
+
+                ctx.save();
+                ctx.beginPath();
+                ctx.moveTo(t.trail[0].x, t.trail[0].y);
+                for (let i = 1; i < t.trail.length; i++) {
+                    ctx.lineTo(t.trail[i].x, t.trail[i].y);
+                }
+                ctx.strokeStyle = trailColor;
+                ctx.lineWidth = 2;
+                ctx.setLineDash([3, 3]);
+                ctx.globalAlpha = 0.7;
+                ctx.stroke();
+                ctx.restore();
+            }
+        });
+
+        // 3. DRAW DETECTED TRACKED TARGETS & GROUND CONTACT POINTS
+        activeTargets.forEach((t) => {
+            const { id, label, category, x, y, boxWidth, boxHeight, px, py, isIntruder, score } = t;
+            let color = colors[label] || '#FFB000';
+
+            if (isIntruder) {
+                color = '#FF3B30'; // Critical Red for Intruder
+            }
+
+            // Bounding box
+            ctx.strokeStyle = color;
+            ctx.lineWidth = isIntruder ? 3 : 2;
             ctx.fillStyle = color;
-            ctx.globalAlpha = 0.18;
+            ctx.globalAlpha = isIntruder ? 0.28 : 0.18;
             ctx.fillRect(x, y, boxWidth, boxHeight);
             ctx.globalAlpha = 1;
             ctx.strokeRect(x, y, boxWidth, boxHeight);
 
+            // Label tag with Target ID
             const displayName = label === 'person' ? 'PERSON' : label.toUpperCase();
-            const txt = `${displayName} ${(pred.score * 100).toFixed(0)}%`;
+            const prefix = isIntruder ? '🚨 ' : '';
+            const txt = `${prefix}${id} | ${displayName} ${(score * 100).toFixed(0)}%`;
             ctx.fillStyle = color;
             ctx.font = '600 11px Inter, sans-serif';
-            ctx.fillRect(x, Math.max(y - 18, 4), ctx.measureText(txt).width + 12, 18);
-            ctx.fillStyle = '#000';
+            const tagW = ctx.measureText(txt).width + 12;
+            ctx.fillRect(x, Math.max(y - 18, 4), tagW, 18);
+            ctx.fillStyle = '#000000';
             ctx.fillText(txt, x + 6, Math.max(y - 5, 16));
+
+            // Representative ground contact point (bottom-center of bounding box)
+            ctx.beginPath();
+            ctx.arc(px, py, isIntruder ? 5 : 3, 0, Math.PI * 2);
+            ctx.fillStyle = isIntruder ? '#FF3B30' : '#22C55E';
+            ctx.fill();
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 1;
+            ctx.stroke();
         });
 
+        // 4. INTRUSION HUD BANNER & DEBOUNCED EVENT TRIGGER
+        if (hasIntrusionInFrame) {
+            ctx.save();
+            const bannerW = 240;
+            const bannerH = 26;
+            const bannerX = (w - bannerW) / 2;
+            const bannerY = 10;
+            ctx.fillStyle = 'rgba(255, 59, 48, 0.92)';
+            ctx.fillRect(bannerX, bannerY, bannerW, bannerH);
+            ctx.strokeStyle = '#FFFFFF';
+            ctx.lineWidth = 1;
+            ctx.strokeRect(bannerX, bannerY, bannerW, bannerH);
+            ctx.fillStyle = '#FFFFFF';
+            ctx.font = '700 11px JetBrains Mono, monospace';
+            ctx.textAlign = 'center';
+            ctx.fillText('🚨 INTRUSION DETECTED', w / 2, bannerY + 17);
+            ctx.restore();
+
+            setCameraLabel('CAM-04 • 🚨 INTRUSION DETECTED!');
+
+            // Debounced Alert Trigger
+            const now = Date.now();
+            if (now - lastIntrusionAlertTime > INTRUSION_ALERT_COOLDOWN) {
+                lastIntrusionAlertTime = now;
+                const evidenceDataUrl = triggerAutoSnapshot();
+                const alertObj = createAndStoreAlert(primaryIntruder, threatData, evidenceDataUrl);
+                logIntrusionEvent(
+                    primaryIntruder ? primaryIntruder.id : '',
+                    primaryIntruder ? primaryIntruder.label : 'PERSON',
+                    primaryIntruder ? primaryIntruder.score : 0.95,
+                    threatData.score,
+                    threatData.level
+                );
+            }
+        } else if (model) {
+            setCameraLabel('CAM-04 • ANALYZING VIDEO');
+        }
+
+        // Stats Card Updates
         if (personStat) personStat.textContent = String(personCount);
         if (vehicleStat) vehicleStat.textContent = String(vehicleCount);
-        if (suspiciousStat) suspiciousStat.textContent = String(Math.max(0, relevant.length - (personCount + vehicleCount)));
+        if (suspiciousStat) suspiciousStat.textContent = String(intruderCount);
     }
 
     document.getElementById('pauseBtn').addEventListener('click', function () {
@@ -1753,324 +2144,8 @@
     updateTrackPath();
     loadModel();
     tick();
-
-    /* ─── FENCING ZONE ENABLE ──────────────────────── */
-    let fencingEnabled = false;
-    let autoDownloadEnabled = false; // AUTO-DOWNLOAD OFF BY DEFAULT
-    let trackedObjects = new Map(); // Track objects and their duration
-    let lastScreenshotTime = 0; // Track last periodic screenshot
-    const OBJECT_SHOW_THRESHOLD = 5500; // 5.5 seconds in milliseconds (5-6 seconds)
-    const PERIODIC_SCREENSHOT_INTERVAL = 10000; // 10 seconds in milliseconds
-    const fencingBtn = document.getElementById('fencingBtn');
-    const autoDownloadBtn = document.getElementById('autoDownloadBtn');
-
-    fencingBtn.addEventListener('click', function () {
-        fencingEnabled = !fencingEnabled;
-        if (fencingEnabled) {
-            this.style.borderColor = 'var(--accent)';
-            this.style.color = 'var(--accent)';
-            this.style.boxShadow = '0 0 10px rgba(255, 176, 0, 0.5)';
-            trackedObjects.clear();
-            console.log('🔒 FENCING ZONE: ENABLED - Tracking objects for 5-6 seconds');
-        } else {
-            this.style.borderColor = 'var(--border-color)';
-            this.style.color = 'var(--secondary-text)';
-            this.style.boxShadow = 'none';
-            console.log('🔓 FENCING ZONE: DISABLED');
-        }
-    });
-
-    // AUTO-DOWNLOAD TOGGLE
-    autoDownloadBtn.addEventListener('click', function () {
-        autoDownloadEnabled = !autoDownloadEnabled;
-        if (autoDownloadEnabled) {
-            this.style.borderColor = 'var(--accent)';
-            this.style.color = 'var(--accent)';
-            this.style.boxShadow = '0 0 10px rgba(255, 176, 0, 0.5)';
-            this.title = 'Toggle Auto-Download (Currently ON)';
-            console.log('✅ AUTO-DOWNLOAD: ON - Screenshots will be downloaded');
-        } else {
-            this.style.borderColor = 'var(--border-color)';
-            this.style.color = 'var(--secondary-text)';
-            this.style.boxShadow = 'none';
-            this.title = 'Toggle Auto-Download (Currently OFF)';
-            console.log('❌ AUTO-DOWNLOAD: OFF - Screenshots will NOT be downloaded');
-        }
-    });
-
-    // Set initial state for auto-download button (OFF by default)
-    autoDownloadBtn.style.borderColor = 'var(--border-color)';
-    autoDownloadBtn.style.color = 'var(--secondary-text)';
-    autoDownloadBtn.style.boxShadow = 'none';
-
-    // Generate filename with timestamp
-    function generateFilename() {
-        const now = new Date();
-        return `object_detection_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}-${String(now.getMinutes()).padStart(2, '0')}-${String(now.getSeconds()).padStart(2, '0')}.png`;
-    }
-
-    // Capture and download screenshot
-    function captureAndDownloadScreenshot() {
-        if (!autoDownloadEnabled) {
-            console.log('⚠️ Auto-download is OFF - Screenshot not downloaded');
-            return;
-        }
-        
-        const canvas = document.createElement('canvas');
-        const wrap = document.getElementById('videoWrap');
-        const activeVideo = getVideoElement();
-        canvas.width = wrap.offsetWidth;
-        canvas.height = wrap.offsetHeight;
-        const ctx = canvas.getContext('2d');
-        if (activeVideo && activeVideo.readyState >= 2) {
-            ctx.drawImage(activeVideo, 0, 0, canvas.width, canvas.height);
-        }
-        
-        const link = document.createElement('a');
-        link.download = generateFilename();
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-        
-        console.log('📸 Screenshot downloaded: ' + link.download);
-    }
-
-    // Periodic screenshot every 10 seconds
-    function takePeriodicScreenshot() {
-        const now = Date.now();
-        if (fencingEnabled && (now - lastScreenshotTime >= PERIODIC_SCREENSHOT_INTERVAL)) {
-            lastScreenshotTime = now;
-            if (autoDownloadEnabled) {
-                captureAndDownloadScreenshot();
-                console.log('⏱️ Periodic screenshot taken (10s interval)');
-            } else {
-                console.log('⏱️ Periodic screenshot time reached but auto-download is OFF');
-            }
-        }
-    }
-
-    // Draw fencing zone overlay on canvas
-    function drawFencingZone() {
-        if (!fencingEnabled || !detectionCanvas) return;
-        
-        const ctx = detectionCanvas.getContext('2d');
-        const rect = videoWrap.getBoundingClientRect();
-        const w = rect.width;
-        const h = rect.height;
-
-        // Draw multiple fence boundaries with glowing effect
-        
-        // Center rectangular zone (main area)
-        const marginX = w * 0.15;
-        const marginY = h * 0.15;
-        
-        ctx.strokeStyle = '#FFB000';
-        ctx.lineWidth = 3;
-        ctx.setLineDash([10, 5]);
-        ctx.globalAlpha = 0.8;
-        
-        // Outer fence
-        ctx.strokeRect(marginX, marginY, w - marginX * 2, h - marginY * 2);
-        
-        // Glow effect
-        ctx.shadowColor = 'rgba(255, 176, 0, 0.6)';
-        ctx.shadowBlur = 15;
-        ctx.strokeStyle = 'rgba(255, 176, 0, 0.5)';
-        ctx.lineWidth = 2;
-        ctx.strokeRect(marginX - 2, marginY - 2, w - marginX * 2 + 4, h - marginY * 2 + 4);
-        
-        ctx.shadowBlur = 0;
-        ctx.globalAlpha = 1;
-        ctx.setLineDash([]);
-        
-        // Add corner markers
-        const cornerSize = 20;
-        const corners = [
-            [marginX, marginY],
-            [w - marginX, marginY],
-            [marginX, h - marginY],
-            [w - marginX, h - marginY]
-        ];
-        
-        corners.forEach(([x, y]) => {
-            // Corner box
-            ctx.fillStyle = 'rgba(255, 176, 0, 0.3)';
-            ctx.fillRect(x - cornerSize/2, y - cornerSize/2, cornerSize, cornerSize);
-            
-            // Corner outline
-            ctx.strokeStyle = '#FFB000';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(x - cornerSize/2, y - cornerSize/2, cornerSize, cornerSize);
-            
-            // Center dot
-            ctx.fillStyle = '#FFB000';
-            ctx.beginPath();
-            ctx.arc(x, y, 3, 0, Math.PI * 2);
-            ctx.fill();
-        });
-        
-        // Add zone label
-        ctx.fillStyle = '#FFB000';
-        ctx.font = 'bold 14px Inter, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('🔒 FENCING ZONE ACTIVE', w / 2, marginY - 20);
-    }
-
-    // Track objects and highlight if shown for 2-3 seconds
-    function trackObjectsAndHighlight(predictions, video) {
-        if (!fencingEnabled || !predictions || predictions.length === 0) {
-            trackedObjects.clear();
-            return;
-        }
-
-        // Take periodic screenshot every 10 seconds
-        takePeriodicScreenshot();
-
-        const ctx = detectionCanvas.getContext('2d');
-        const rect = videoWrap.getBoundingClientRect();
-        const w = rect.width;
-        const h = rect.height;
-
-        const threshold = Number(confSlider.value) / 100;
-        const currentTime = Date.now();
-        const detectedObjects = predictions.filter(p => p.score >= threshold);
-
-        // Scale predictions to canvas coordinates
-        const vw = video.videoWidth || 1;
-        const vh = video.videoHeight || 1;
-        const videoAspect = vw / vh;
-        const wrapAspect = w / h;
-        let scale, offsetX = 0, offsetY = 0;
-        if (videoAspect > wrapAspect) {
-            scale = h / vh;
-            offsetX = (w - vw * scale) / 2;
-        } else {
-            scale = w / vw;
-            offsetY = (h - vh * scale) / 2;
-        }
-
-        // Track current objects
-        const currentObjectIds = new Set();
-
-        detectedObjects.forEach((pred, idx) => {
-            const objectId = `${pred.class}_${idx}`;
-            currentObjectIds.add(objectId);
-
-            const [bx, by, bw, bh] = pred.bbox;
-            const x = bx * scale + offsetX;
-            const y = by * scale + offsetY;
-            const boxWidth = bw * scale;
-            const boxHeight = bh * scale;
-
-            if (!trackedObjects.has(objectId)) {
-                // First time seeing this object
-                trackedObjects.set(objectId, {
-                    firstSeen: currentTime,
-                    lastSeen: currentTime,
-                    class: pred.class,
-                    bbox: pred.bbox,
-                    highlighted: false,
-                    screenshotTaken: false
-                });
-            } else {
-                const obj = trackedObjects.get(objectId);
-                obj.lastSeen = currentTime;
-                const duration = currentTime - obj.firstSeen;
-
-                // If object shown for 2-3 seconds, highlight it and download screenshot
-                if (duration >= OBJECT_SHOW_THRESHOLD && !obj.highlighted) {
-                    obj.highlighted = true;
-                    console.log(`🎯 Object detected for ${(duration/1000).toFixed(1)}s: ${pred.class}`);
-
-                    // Draw BRIGHT RED box for highlighted object
-                    ctx.strokeStyle = '#FF0000';
-                    ctx.lineWidth = 5;
-                    ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
-                    ctx.shadowBlur = 20;
-                    ctx.strokeRect(x, y, boxWidth, boxHeight);
-                    ctx.shadowBlur = 0;
-
-                    // Draw fill with transparency
-                    ctx.fillStyle = 'rgba(255, 0, 0, 0.15)';
-                    ctx.fillRect(x, y, boxWidth, boxHeight);
-
-                    // Label
-                    const label = `${pred.class.toUpperCase()} - ${(duration/1000).toFixed(1)}s`;
-                    ctx.fillStyle = '#FF0000';
-                    ctx.font = 'bold 13px Inter, sans-serif';
-                    const textWidth = ctx.measureText(label).width;
-                    ctx.fillRect(x, Math.max(y - 25, 4), textWidth + 16, 22);
-                    ctx.fillStyle = '#FFF';
-                    ctx.fillText(label, x + 8, Math.max(y - 8, 18));
-
-                    // Download screenshot
-                    if (!obj.screenshotTaken) {
-                        obj.screenshotTaken = true;
-                        captureAndDownloadScreenshot();
-                    }
-                } else if (duration >= OBJECT_SHOW_THRESHOLD && obj.highlighted) {
-                    // Keep drawing red box for already highlighted objects
-                    ctx.strokeStyle = '#FF0000';
-                    ctx.lineWidth = 5;
-                    ctx.shadowColor = 'rgba(255, 0, 0, 0.8)';
-                    ctx.shadowBlur = 20;
-                    ctx.strokeRect(x, y, boxWidth, boxHeight);
-                    ctx.shadowBlur = 0;
-
-                    // Draw fill with transparency
-                    ctx.fillStyle = 'rgba(255, 0, 0, 0.15)';
-                    ctx.fillRect(x, y, boxWidth, boxHeight);
-
-                    // Label
-                    const duration_str = ((currentTime - obj.firstSeen) / 1000).toFixed(1);
-                    const label = `${pred.class.toUpperCase()} - ${duration_str}s`;
-                    ctx.fillStyle = '#FF0000';
-                    ctx.font = 'bold 13px Inter, sans-serif';
-                    const textWidth = ctx.measureText(label).width;
-                    ctx.fillRect(x, Math.max(y - 25, 4), textWidth + 16, 22);
-                    ctx.fillStyle = '#FFF';
-                    ctx.fillText(label, x + 8, Math.max(y - 8, 18));
-                }
-            }
-        });
-
-        // Clean up objects no longer in scene
-        for (let [objectId, obj] of trackedObjects.entries()) {
-            if (!currentObjectIds.has(objectId)) {
-                trackedObjects.delete(objectId);
-            }
-        }
-    }
-
-    // Override detection overlay to include object tracking
-    const originalDrawDetectionOverlay2 = window.drawDetectionOverlay || function(){};
-    window.drawDetectionOverlay = function(predictions, video) {
-        originalDrawDetectionOverlay2(predictions, video);
-        
-        if (fencingEnabled) {
-            drawFencingZone();
-            trackObjectsAndHighlight(predictions, video);
-        }
-    };
-
-
 </script>
 <script src="theme.js"></script>
-
-<!-- Authentication Check -->
-<script>
-    // Check if user is logged in on page load
-    function checkAuth() {
-        const userRole = localStorage.getItem('borderSightUserRole');
-        const username = localStorage.getItem('borderSightUsername');
-        
-        if (!userRole || !username) {
-            // Not logged in, redirect to login
-            window.location.href = 'index.html';
-        }
-    }
-    
-    // Check authentication immediately when page loads
-    checkAuth();
-</script>
 </body>
 </html>
+\q@
