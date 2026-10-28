@@ -195,28 +195,23 @@ It includes:
 
 ---
 
-# 🧑‍💻 My Contribution
+## Screenshots:
 
-### Web Development & UI Implementation
+![alt text](image.png)
 
-My primary responsibility in the team was the **web development and UI implementation**.
+![alt text](image-1.png)
 
-I worked on the global structure of the BorderSight AI web platform, including:
+![alt text](image-2.png)
 
-- Global sidebar
-- Global header
-- Navigation system
-- Main dashboard template
-- Common page structure
-- Theme consistency
-- Multiple application pages
-- UI components
-- Page-to-page navigation
-- Responsive web interface
+![alt text](image-3.png)
 
-My main focus was to make the platform:
+![alt text](image-4.png)
 
-**Consistent → Interactive → Responsive → Maintainable → Easy to use**
+![alt text](image-7.png)
+
+![alt text](image-5.png)
+
+![alt text](image-6.png)
 
 ---
 
@@ -281,3 +276,4 @@ My main focus was to make the platform:
                  ┌─────────────┐
                  │  Analytics  │
                  └─────────────┘
+
